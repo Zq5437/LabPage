@@ -1,0 +1,25 @@
+{
+    "name": "lab-website-frontend",
+    "version": "1.0.0",
+    "description": "实验室网站前端",
+    "scripts": {
+        "dev": "vite",
+        "build": "vite build",
+        "preview": "vite preview"
+    },
+    "dependencies": {
+        "vue": "^3.3.4",
+        "vue-router": "^4.2.4",
+        "axios": "^1.4.0",
+        "pinia": "^2.1.6",
+        "@vueuse/core": "^10.3.0",
+        "dayjs": "^1.11.9",
+        "marked": "^5.1.2",
+        "swiper": "^10.2.0"
+    },
+    "devDependencies": {
+        "@vitejs/plugin-vue": "^4.3.4",
+        "vite": "^4.4.9",
+        "sass": "^1.66.1"
+    }
+}
