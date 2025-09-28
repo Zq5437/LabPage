@@ -44,14 +44,11 @@
           </div>
 
           <div class="intro-image">
-            <img
-              v-if="labInfo.banner_url"
-              :src="labInfo.banner_url"
-              alt="实验室"
-              @error="handleImageError"
-            />
+            <img v-if="labInfo.banner_url" :src="labInfo.banner_url" alt="实验室" @error="handleImageError" />
             <div v-else class="placeholder-image">
-              <el-icon><Office /></el-icon>
+              <el-icon>
+                <Office />
+              </el-icon>
             </div>
           </div>
         </div>
@@ -61,12 +58,8 @@
       <section class="timeline-section">
         <h2>发展历程</h2>
         <div class="timeline">
-          <div
-            v-for="(milestone, index) in milestones"
-            :key="index"
-            class="timeline-item"
-            :class="{ 'right': index % 2 === 1 }"
-          >
+          <div v-for="(milestone, index) in milestones" :key="index" class="timeline-item"
+            :class="{ 'right': index % 2 === 1 }">
             <div class="timeline-content">
               <div class="timeline-year">{{ milestone.year }}</div>
               <h3>{{ milestone.title }}</h3>
@@ -81,13 +74,11 @@
       <section class="research-areas-section" v-if="researchAreas.length > 0">
         <h2>主要研究领域</h2>
         <div class="areas-grid">
-          <div
-            v-for="area in researchAreas.slice(0, 6)"
-            :key="area.id"
-            class="area-card"
-          >
+          <div v-for="area in researchAreas.slice(0, 6)" :key="area.id" class="area-card">
             <div class="area-icon">
-              <el-icon><TrendCharts /></el-icon>
+              <el-icon>
+                <TrendCharts />
+              </el-icon>
             </div>
             <h3>{{ area.title }}</h3>
             <p>{{ area.description.substring(0, 100) }}...</p>
@@ -106,28 +97,36 @@
         <div class="culture-grid">
           <div class="culture-item">
             <div class="culture-icon">
-              <el-icon><Star /></el-icon>
+              <el-icon>
+                <Star />
+              </el-icon>
             </div>
             <h3>创新精神</h3>
             <p>鼓励创新思维，勇于探索未知领域，追求科技前沿突破</p>
           </div>
           <div class="culture-item">
             <div class="culture-icon">
-              <el-icon><Users /></el-icon>
+              <el-icon>
+                <Users />
+              </el-icon>
             </div>
             <h3>团队协作</h3>
             <p>重视团队合作，促进学术交流，共同攻克科研难题</p>
           </div>
           <div class="culture-item">
             <div class="culture-icon">
-              <el-icon><Trophy /></el-icon>
+              <el-icon>
+                <Trophy />
+              </el-icon>
             </div>
             <h3>追求卓越</h3>
             <p>以高标准要求自己，追求学术卓越和研究质量</p>
           </div>
           <div class="culture-item">
             <div class="culture-icon">
-              <el-icon><Education /></el-icon>
+              <el-icon>
+                <Education />
+              </el-icon>
             </div>
             <h3>学术传承</h3>
             <p>注重人才培养，传承学术精神，培育下一代研究者</p>
@@ -142,21 +141,27 @@
           <div class="facilities-text">
             <div class="facility-item">
               <h3>
-                <el-icon><Monitor /></el-icon>
+                <el-icon>
+                  <Monitor />
+                </el-icon>
                 先进设备
               </h3>
               <p>配备国际先进的科研设备和仪器，为高质量研究提供硬件保障</p>
             </div>
             <div class="facility-item">
               <h3>
-                <el-icon><Collection /></el-icon>
+                <el-icon>
+                  <Collection />
+                </el-icon>
                 实验环境
               </h3>
               <p>提供安全、舒适的实验环境，满足各类科研项目的实验需求</p>
             </div>
             <div class="facility-item">
               <h3>
-                <el-icon><Connection /></el-icon>
+                <el-icon>
+                  <Connection />
+                </el-icon>
                 网络设施
               </h3>
               <p>高速网络连接和云计算资源，支持大数据处理和远程协作</p>
@@ -228,7 +233,9 @@
         <div class="contact-grid">
           <div class="contact-item">
             <div class="contact-icon">
-              <el-icon><Location /></el-icon>
+              <el-icon>
+                <Location />
+              </el-icon>
             </div>
             <div class="contact-info">
               <h3>地址</h3>
@@ -237,7 +244,9 @@
           </div>
           <div class="contact-item">
             <div class="contact-icon">
-              <el-icon><Phone /></el-icon>
+              <el-icon>
+                <Phone />
+              </el-icon>
             </div>
             <div class="contact-info">
               <h3>电话</h3>
@@ -246,7 +255,9 @@
           </div>
           <div class="contact-item">
             <div class="contact-icon">
-              <el-icon><Message /></el-icon>
+              <el-icon>
+                <Message />
+              </el-icon>
             </div>
             <div class="contact-info">
               <h3>邮箱</h3>
@@ -255,7 +266,9 @@
           </div>
           <div class="contact-item">
             <div class="contact-icon">
-              <el-icon><Link /></el-icon>
+              <el-icon>
+                <Link />
+              </el-icon>
             </div>
             <div class="contact-info">
               <h3>网站</h3>
@@ -361,7 +374,7 @@ const loadResearchAreas = async () => {
         order: 'DESC'
       }
     })
-    
+
     if (response.data) {
       researchAreas.value = response.data.data || []
     }
@@ -374,7 +387,7 @@ const loadResearchAreas = async () => {
 const loadStats = async () => {
   try {
     loading.value = true
-    
+
     // 并行加载各项统计数据
     const [membersRes, projectsRes, publicationsRes] = await Promise.all([
       api.get('/members/list', { params: { limit: 1 } }),

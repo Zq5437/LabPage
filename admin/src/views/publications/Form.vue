@@ -8,144 +8,81 @@
         </div>
       </template>
 
-      <el-form
-        ref="formRef"
-        :model="form"
-        :rules="rules"
-        label-width="120px"
-        style="max-width: 800px"
-      >
+      <el-form ref="formRef" :model="form" :rules="rules" label-width="120px" style="max-width: 800px">
         <el-row :gutter="20">
           <el-col :span="24">
             <el-form-item label="论文标题" prop="title">
-              <el-input
-                v-model="form.title"
-                placeholder="请输入论文标题"
-                maxlength="200"
-                show-word-limit
-              />
+              <el-input v-model="form.title" placeholder="请输入论文标题" maxlength="200" show-word-limit />
             </el-form-item>
           </el-col>
 
           <el-col :span="12">
             <el-form-item label="作者" prop="authors">
-              <el-input
-                v-model="form.authors"
-                placeholder="作者姓名，多个作者用逗号分隔"
-                maxlength="500"
-              />
+              <el-input v-model="form.authors" placeholder="作者姓名，多个作者用逗号分隔" maxlength="500" />
             </el-form-item>
           </el-col>
 
           <el-col :span="12">
             <el-form-item label="期刊名称" prop="journal">
-              <el-input
-                v-model="form.journal"
-                placeholder="请输入期刊名称"
-                maxlength="200"
-              />
+              <el-input v-model="form.journal" placeholder="请输入期刊名称" maxlength="200" />
             </el-form-item>
           </el-col>
 
           <el-col :span="12">
             <el-form-item label="发布日期" prop="publish_date">
-              <el-date-picker
-                v-model="form.publish_date"
-                type="date"
-                placeholder="选择发布日期"
-                style="width: 100%"
-                format="YYYY-MM-DD"
-                value-format="YYYY-MM-DD"
-              />
+              <el-date-picker v-model="form.publish_date" type="date" placeholder="选择发布日期" style="width: 100%"
+                format="YYYY-MM-DD" value-format="YYYY-MM-DD" />
             </el-form-item>
           </el-col>
 
           <el-col :span="12">
             <el-form-item label="分类" prop="category">
-              <el-select
-                v-model="form.category"
-                placeholder="选择或输入分类"
-                filterable
-                allow-create
-                style="width: 100%"
-              >
-                <el-option
-                  v-for="category in categories"
-                  :key="category.category"
-                  :label="category.category"
-                  :value="category.category"
-                />
+              <el-select v-model="form.category" placeholder="选择或输入分类" filterable allow-create style="width: 100%">
+                <el-option v-for="category in categories" :key="category.category" :label="category.category"
+                  :value="category.category" />
               </el-select>
             </el-form-item>
           </el-col>
 
           <el-col :span="12">
             <el-form-item label="DOI">
-              <el-input
-                v-model="form.doi"
-                placeholder="请输入DOI"
-                maxlength="100"
-              />
+              <el-input v-model="form.doi" placeholder="请输入DOI" maxlength="100" />
             </el-form-item>
           </el-col>
 
           <el-col :span="6">
             <el-form-item label="引用数">
-              <el-input-number
-                v-model="form.citation_count"
-                :min="0"
-                style="width: 100%"
-              />
+              <el-input-number v-model="form.citation_count" :min="0" style="width: 100%" />
             </el-form-item>
           </el-col>
 
           <el-col :span="6">
             <el-form-item label="影响因子">
-              <el-input-number
-                v-model="form.impact_factor"
-                :min="0"
-                :precision="3"
-                style="width: 100%"
-              />
+              <el-input-number v-model="form.impact_factor" :min="0" :precision="3" style="width: 100%" />
             </el-form-item>
           </el-col>
 
           <el-col :span="24">
             <el-form-item label="摘要">
-              <el-input
-                v-model="form.abstract"
-                type="textarea"
-                :rows="4"
-                placeholder="请输入论文摘要"
-                maxlength="1000"
-                show-word-limit
-              />
+              <el-input v-model="form.abstract" type="textarea" :rows="4" placeholder="请输入论文摘要" maxlength="1000"
+                show-word-limit />
             </el-form-item>
           </el-col>
 
           <el-col :span="24">
             <el-form-item label="关键词">
-              <el-input
-                v-model="form.keywords"
-                placeholder="关键词，多个关键词用逗号分隔"
-                maxlength="200"
-              />
+              <el-input v-model="form.keywords" placeholder="关键词，多个关键词用逗号分隔" maxlength="200" />
             </el-form-item>
           </el-col>
 
           <el-col :span="12">
             <el-form-item label="PDF文件">
-              <el-upload
-                ref="uploadRef"
-                :auto-upload="false"
-                :limit="1"
-                accept=".pdf,.doc,.docx"
-                :on-change="handleFileChange"
-                :on-remove="handleFileRemove"
-                :file-list="fileList"
-              >
+              <el-upload ref="uploadRef" :auto-upload="false" :limit="1" accept=".pdf,.doc,.docx"
+                :on-change="handleFileChange" :on-remove="handleFileRemove" :file-list="fileList">
                 <el-button type="primary">
-                  <el-icon><Upload /></el-icon>
+                  <el-icon>
+                    <Upload />
+                  </el-icon>
                   选择文件
                 </el-button>
                 <template #tip>
@@ -289,7 +226,7 @@ const handleSubmit = async () => {
     submitting.value = true
 
     const submitData = { ...form }
-    
+
     if (isEdit.value) {
       await publicationsApi.update(route.params.id, submitData)
       ElMessage.success('论文更新成功')

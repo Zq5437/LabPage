@@ -3,91 +3,59 @@
     <!-- 搜索和操作栏 -->
     <div class="toolbar">
       <div class="toolbar-left">
-        <el-input
-          v-model="searchForm.search"
-          placeholder="搜索论文标题、作者、期刊..."
-          style="width: 300px"
-          clearable
-          @keyup.enter="handleSearch"
-        >
+        <el-input v-model="searchForm.search" placeholder="搜索论文标题、作者、期刊..." style="width: 300px" clearable
+          @keyup.enter="handleSearch">
           <template #prefix>
-            <el-icon><Search /></el-icon>
+            <el-icon>
+              <Search />
+            </el-icon>
           </template>
         </el-input>
-        
-        <el-select
-          v-model="searchForm.category"
-          placeholder="选择分类"
-          clearable
-          style="width: 150px"
-          @change="handleSearch"
-        >
-          <el-option
-            v-for="category in categories"
-            :key="category.category"
-            :label="category.category"
-            :value="category.category"
-          />
+
+        <el-select v-model="searchForm.category" placeholder="选择分类" clearable style="width: 150px"
+          @change="handleSearch">
+          <el-option v-for="category in categories" :key="category.category" :label="category.category"
+            :value="category.category" />
         </el-select>
 
-        <el-select
-          v-model="searchForm.year"
-          placeholder="选择年份"
-          clearable
-          style="width: 120px"
-          @change="handleSearch"
-        >
-          <el-option
-            v-for="year in years"
-            :key="year.year"
-            :label="year.year"
-            :value="year.year"
-          />
+        <el-select v-model="searchForm.year" placeholder="选择年份" clearable style="width: 120px" @change="handleSearch">
+          <el-option v-for="year in years" :key="year.year" :label="year.year" :value="year.year" />
         </el-select>
 
-        <el-select
-          v-model="searchForm.status"
-          placeholder="选择状态"
-          clearable
-          style="width: 120px"
-          @change="handleSearch"
-        >
+        <el-select v-model="searchForm.status" placeholder="选择状态" clearable style="width: 120px" @change="handleSearch">
           <el-option label="已发布" value="published" />
           <el-option label="草稿" value="draft" />
           <el-option label="已归档" value="archived" />
         </el-select>
 
         <el-button type="primary" @click="handleSearch">
-          <el-icon><Search /></el-icon>
+          <el-icon>
+            <Search />
+          </el-icon>
           搜索
         </el-button>
       </div>
 
       <div class="toolbar-right">
         <el-button type="primary" @click="handleCreate">
-          <el-icon><Plus /></el-icon>
+          <el-icon>
+            <Plus />
+          </el-icon>
           添加论文
         </el-button>
-        <el-button
-          type="danger"
-          :disabled="selectedIds.length === 0"
-          @click="handleBatchDelete"
-        >
-          <el-icon><Delete /></el-icon>
+        <el-button type="danger" :disabled="selectedIds.length === 0" @click="handleBatchDelete">
+          <el-icon>
+            <Delete />
+          </el-icon>
           批量删除 ({{ selectedIds.length }})
         </el-button>
       </div>
     </div>
 
     <!-- 论文列表 -->
-    <el-table
-      :data="publications"
-      v-loading="loading"
-      @selection-change="handleSelectionChange"
-      empty-text="暂无论文数据"
-    >
+    <el-table :data="publications" v-loading="loading" @selection-change="handleSelectionChange" empty-text="暂无论文数据">
       <el-table-column type="selection" width="55" />
-      
+
       <el-table-column prop="title" label="标题" min-width="200">
         <template #default="{ row }">
           <div class="title-cell">
@@ -115,10 +83,7 @@
 
       <el-table-column prop="status" label="状态" width="100">
         <template #default="{ row }">
-          <el-tag
-            :type="getStatusType(row.status)"
-            size="small"
-          >
+          <el-tag :type="getStatusType(row.status)" size="small">
             {{ getStatusText(row.status) }}
           </el-tag>
         </template>
@@ -131,7 +96,9 @@
           </el-button>
           <el-dropdown @command="(command) => handleStatusChange(row, command)">
             <el-button type="warning" size="small">
-              状态 <el-icon><ArrowDown /></el-icon>
+              状态 <el-icon>
+                <ArrowDown />
+              </el-icon>
             </el-button>
             <template #dropdown>
               <el-dropdown-menu>
@@ -150,15 +117,9 @@
 
     <!-- 分页 -->
     <div class="pagination-container">
-      <el-pagination
-        v-model:current-page="pagination.page"
-        v-model:page-size="pagination.limit"
-        :page-sizes="[10, 20, 50, 100]"
-        :total="pagination.total"
-        layout="total, sizes, prev, pager, next, jumper"
-        @size-change="loadPublications"
-        @current-change="loadPublications"
-      />
+      <el-pagination v-model:current-page="pagination.page" v-model:page-size="pagination.limit"
+        :page-sizes="[10, 20, 50, 100]" :total="pagination.total" layout="total, sizes, prev, pager, next, jumper"
+        @size-change="loadPublications" @current-change="loadPublications" />
     </div>
   </div>
 </template>
@@ -205,10 +166,10 @@ const loadPublications = async () => {
       limit: pagination.limit,
       ...searchForm
     }
-    
+
     const response = await publicationsApi.getAdminList(params)
     publications.value = response.data || []
-    
+
     if (response.pagination) {
       pagination.total = response.pagination.total
       pagination.page = response.pagination.page
@@ -401,12 +362,12 @@ onMounted(() => {
   .toolbar {
     flex-direction: column;
   }
-  
+
   .toolbar-left,
   .toolbar-right {
     flex-direction: column;
   }
-  
+
   .toolbar-left .el-input,
   .toolbar-left .el-select {
     width: 100% !important;

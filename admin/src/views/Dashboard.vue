@@ -10,18 +10,22 @@
           </div>
           <div class="welcome-actions">
             <el-button type="primary" @click="$router.push('/news/create')">
-              <el-icon><Plus /></el-icon>
+              <el-icon>
+                <Plus />
+              </el-icon>
               发布新闻
             </el-button>
             <el-button @click="$router.push('/members/create')">
-              <el-icon><UserFilled /></el-icon>
+              <el-icon>
+                <UserFilled />
+              </el-icon>
               添加成员
             </el-button>
           </div>
         </div>
       </el-card>
     </div>
-    
+
     <!-- 统计卡片 -->
     <div class="stats-section">
       <el-row :gutter="20">
@@ -38,7 +42,10 @@
                 <AnimatedNumber :value="stat.value" />
               </div>
               <div v-if="stat.trend" class="stats-trend" :class="stat.trend.type">
-                <el-icon><ArrowUp v-if="stat.trend.type === 'up'" /><ArrowDown v-else /></el-icon>
+                <el-icon>
+                  <ArrowUp v-if="stat.trend.type === 'up'" />
+                  <ArrowDown v-else />
+                </el-icon>
                 {{ stat.trend.text }}
               </div>
             </div>
@@ -46,7 +53,7 @@
         </el-col>
       </el-row>
     </div>
-    
+
     <!-- 图表区域 -->
     <div class="charts-section">
       <el-row :gutter="20">
@@ -65,7 +72,7 @@
             <VisitTrendChart :period="visitTrendPeriod" />
           </el-card>
         </el-col>
-        
+
         <!-- 内容分布 -->
         <el-col :xs="24" :lg="12">
           <el-card class="chart-card">
@@ -79,7 +86,7 @@
         </el-col>
       </el-row>
     </div>
-    
+
     <!-- 最新动态 -->
     <div class="activity-section">
       <el-row :gutter="20">
@@ -91,14 +98,16 @@
                 <span class="title">最新新闻</span>
                 <el-button type="text" @click="$router.push('/news')">
                   查看全部
-                  <el-icon><ArrowRight /></el-icon>
+                  <el-icon>
+                    <ArrowRight />
+                  </el-icon>
                 </el-button>
               </div>
             </template>
             <RecentNewsList />
           </el-card>
         </el-col>
-        
+
         <!-- 待办事项 -->
         <el-col :xs="24" :lg="12">
           <el-card class="activity-card">
@@ -106,7 +115,9 @@
               <div class="card-header">
                 <span class="title">待办事项</span>
                 <el-badge :value="todoCount" class="badge">
-                  <el-icon><Bell /></el-icon>
+                  <el-icon>
+                    <Bell />
+                  </el-icon>
                 </el-badge>
               </div>
             </template>
@@ -196,7 +207,7 @@ const loadStats = async () => {
     statsData.value[1].value = 45
     statsData.value[2].value = 23
     statsData.value[3].value = 8650
-    
+
     // 实际项目中可以这样调用：
     // const stats = await publicApi.getStatistics()
     // statsData.value.forEach(item => {
@@ -219,71 +230,71 @@ onMounted(() => {
 
 .welcome-section {
   margin-bottom: 20px;
-  
+
   .welcome-card {
     border-radius: 12px;
     background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
     border: none;
-    
+
     :deep(.el-card__body) {
       padding: 30px;
     }
   }
-  
+
   .welcome-content {
     display: flex;
     justify-content: space-between;
     align-items: center;
     color: #fff;
-    
+
     @media (max-width: 768px) {
       flex-direction: column;
       gap: 20px;
       text-align: center;
     }
-    
+
     .welcome-text {
       h2 {
         font-size: 24px;
         font-weight: 600;
         margin: 0 0 8px 0;
       }
-      
+
       p {
         font-size: 14px;
         margin: 0;
         opacity: 0.9;
       }
     }
-    
+
     .welcome-actions {
       display: flex;
       gap: 12px;
-      
+
       @media (max-width: 480px) {
         flex-direction: column;
         width: 100%;
-        
+
         .el-button {
           width: 100%;
         }
       }
-      
+
       .el-button {
         background: rgba(255, 255, 255, 0.2);
         border-color: rgba(255, 255, 255, 0.3);
         color: #fff;
         backdrop-filter: blur(10px);
-        
+
         &:hover {
           background: rgba(255, 255, 255, 0.3);
           border-color: rgba(255, 255, 255, 0.5);
         }
-        
+
         &.el-button--primary {
           background: #fff;
           color: #667eea;
-          
+
           &:hover {
             background: rgba(255, 255, 255, 0.9);
           }
@@ -295,7 +306,7 @@ onMounted(() => {
 
 .stats-section {
   margin-bottom: 20px;
-  
+
   .el-col {
     margin-bottom: 20px;
   }
@@ -303,10 +314,10 @@ onMounted(() => {
 
 .charts-section {
   margin-bottom: 20px;
-  
+
   .chart-card {
     height: 400px;
-    
+
     :deep(.el-card__body) {
       height: calc(100% - 57px);
       padding: 0;
@@ -317,7 +328,7 @@ onMounted(() => {
 .activity-section {
   .activity-card {
     height: 500px;
-    
+
     :deep(.el-card__body) {
       height: calc(100% - 57px);
       padding: 0;
@@ -329,13 +340,13 @@ onMounted(() => {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  
+
   .title {
     font-size: 16px;
     font-weight: 600;
     color: var(--admin-text-primary);
   }
-  
+
   .badge {
     :deep(.el-badge__content) {
       top: 8px;
@@ -349,7 +360,7 @@ onMounted(() => {
   .page-container {
     padding: 15px;
   }
-  
+
   .charts-section,
   .activity-section {
     .el-col {
