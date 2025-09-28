@@ -80,14 +80,14 @@ router.get('/', [
         }
 
         // 获取总数
-        const [countResult] = await db.query(
+        const countResult = await db.query(
             `SELECT COUNT(*) as total FROM projects ${whereClause}`,
             params
         );
         const total = countResult[0].total;
 
         // 获取项目列表
-        const [projects] = await db.query(
+        const projects = await db.query(
             `SELECT id, title, title_en, description, category, funding_agency, funding_amount,
               principal_investigator, participants, start_date, end_date, status, cover_image
        FROM projects ${whereClause} 
@@ -123,7 +123,7 @@ router.get('/:id', async (req, res) => {
     try {
         const projectId = req.params.id;
 
-        const [projects] = await db.query(
+        const projects = await db.query(
             'SELECT * FROM projects WHERE id = ?',
             [projectId]
         );
@@ -412,14 +412,14 @@ router.get('/admin/list', [
         }
 
         // 获取总数
-        const [countResult] = await db.query(
+        const countResult = await db.query(
             `SELECT COUNT(*) as total FROM projects ${whereClause}`,
             params
         );
         const total = countResult[0].total;
 
         // 获取项目列表
-        const [projects] = await db.query(
+        const projects = await db.query(
             `SELECT * FROM projects ${whereClause} 
        ORDER BY created_at DESC 
        LIMIT ${parseInt(limit)} OFFSET ${parseInt(offset)}`,
@@ -452,6 +452,311 @@ router.get('/admin/list', [
 
     } catch (error) {
         console.error('获取管理员项目列表错误:', error);
+        res.status(500).json({
+            success: false,
+            message: '服务器内部错误'
+        });
+    }
+});
+
+// 获取项目列表（管理员接口）
+router.get('/admin/list', [
+    authenticateToken,
+    requireAdmin,
+    query('page').optional().isInt({ min: 1 }).withMessage('页码必须是正整数'),
+    query('limit').optional().isInt({ min: 1, max: 100 }).withMessage('每页数量必须在1-100之间'),
+    query('category').optional().isIn(['national', 'provincial', 'institutional', 'enterprise', 'international']).withMessage('分类参数无效'),
+    query('status').optional().isIn(['ongoing', 'completed', 'suspended']).withMessage('状态参数无效')
+], async (req, res) => {
+    try {
+        const errors = validationResult(req);
+        if (!errors.isEmpty()) {
+            return res.status(400).json({
+                success: false,
+                message: '参数验证失败',
+                errors: errors.array()
+            });
+        }
+
+        const page = parseInt(req.query.page) || 1;
+        const limit = parseInt(req.query.limit) || 20;
+        const offset = (page - 1) * limit;
+        const category = req.query.category;
+        const status = req.query.status;
+        const search = req.query.search;
+        const sort = req.query.sort || 'created_at';
+        const order = req.query.order || 'DESC';
+
+        let whereClause = 'WHERE 1=1';
+        let params = [];
+
+        if (category) {
+            whereClause += ' AND category = ?';
+            params.push(category);
+        }
+        if (status) {
+            whereClause += ' AND status = ?';
+            params.push(status);
+        }
+        if (search) {
+            whereClause += ' AND (title LIKE ? OR title_en LIKE ? OR description LIKE ?)';
+            params.push(`%${search}%`, `%${search}%`, `%${search}%`);
+        }
+
+        // 获取总数
+        const countResult = await db.query(
+            `SELECT COUNT(*) as total FROM projects ${whereClause}`,
+            params
+        );
+        const total = countResult[0].total;
+
+        // 获取项目列表
+        const projects = await db.query(
+            `SELECT * FROM projects ${whereClause} 
+       ORDER BY ${sort} ${order}
+       LIMIT ${parseInt(limit)} OFFSET ${parseInt(offset)}`,
+            [...params]
+        );
+
+        res.json({
+            success: true,
+            data: {
+                projects,
+                pagination: {
+                    page,
+                    limit,
+                    total,
+                    totalPages: Math.ceil(total / limit)
+                }
+            }
+        });
+
+    } catch (error) {
+        console.error('获取管理员项目列表错误:', error);
+        res.status(500).json({
+            success: false,
+            message: '服务器内部错误'
+        });
+    }
+});
+
+// 上传项目封面（管理员接口）
+router.post('/upload-cover', [
+    authenticateToken,
+    requireAdmin,
+    upload.single('cover_image')
+], async (req, res) => {
+    try {
+        if (!req.file) {
+            return res.status(400).json({
+                success: false,
+                message: '请选择要上传的封面图片'
+            });
+        }
+
+        const coverUrl = `/uploads/projects/${req.file.filename}`;
+
+        res.json({
+            success: true,
+            message: '封面上传成功',
+            data: {
+                cover_url: coverUrl
+            }
+        });
+
+    } catch (error) {
+        console.error('上传封面错误:', error);
+        res.status(500).json({
+            success: false,
+            message: '服务器内部错误'
+        });
+    }
+});
+
+// 创建项目（管理员接口）
+router.post('/admin', [
+    authenticateToken,
+    requireAdmin,
+    upload.single('cover_image'),
+    body('title').notEmpty().withMessage('项目标题不能为空'),
+    body('category').isIn(['national', 'provincial', 'institutional', 'enterprise', 'international']).withMessage('项目类别无效'),
+    body('status').optional().isIn(['ongoing', 'completed', 'suspended']).withMessage('项目状态无效')
+], async (req, res) => {
+    try {
+        const errors = validationResult(req);
+        if (!errors.isEmpty()) {
+            return res.status(400).json({
+                success: false,
+                message: '输入验证失败',
+                errors: errors.array()
+            });
+        }
+
+        const {
+            title, title_en, description, category, funding_agency, funding_amount,
+            principal_investigator, participants, start_date, end_date, status = 'ongoing'
+        } = req.body;
+
+        const cover_image = req.file ? `/uploads/projects/${req.file.filename}` : null;
+
+        const result = await db.query(
+            `INSERT INTO projects (
+                title, title_en, description, category, funding_agency, funding_amount,
+                principal_investigator, participants, start_date, end_date, status, cover_image
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+            [
+                title, title_en, description, category, funding_agency, funding_amount,
+                principal_investigator, participants, start_date, end_date, status, cover_image
+            ]
+        );
+
+        res.json({
+            success: true,
+            message: '项目创建成功',
+            data: {
+                id: result.insertId,
+                title,
+                category,
+                status
+            }
+        });
+
+    } catch (error) {
+        console.error('创建项目错误:', error);
+        res.status(500).json({
+            success: false,
+            message: '服务器内部错误'
+        });
+    }
+});
+
+// 更新项目（管理员接口）
+router.put('/admin/:id', [
+    authenticateToken,
+    requireAdmin,
+    upload.single('cover_image'),
+    body('title').optional().notEmpty().withMessage('项目标题不能为空'),
+    body('category').optional().isIn(['national', 'provincial', 'institutional', 'enterprise', 'international']).withMessage('项目类别无效'),
+    body('status').optional().isIn(['ongoing', 'completed', 'suspended']).withMessage('项目状态无效')
+], async (req, res) => {
+    try {
+        const errors = validationResult(req);
+        if (!errors.isEmpty()) {
+            return res.status(400).json({
+                success: false,
+                message: '输入验证失败',
+                errors: errors.array()
+            });
+        }
+
+        const projectId = req.params.id;
+
+        // 检查项目是否存在
+        const existingProject = await db.query('SELECT * FROM projects WHERE id = ?', [projectId]);
+        if (existingProject.length === 0) {
+            return res.status(404).json({
+                success: false,
+                message: '项目不存在'
+            });
+        }
+
+        const {
+            title, title_en, description, category, funding_agency, funding_amount,
+            principal_investigator, participants, start_date, end_date, status
+        } = req.body;
+
+        let cover_image = existingProject[0].cover_image;
+
+        // 如果上传了新图片
+        if (req.file) {
+            cover_image = `/uploads/projects/${req.file.filename}`;
+        }
+
+        await db.query(
+            `UPDATE projects SET 
+             title = ?, title_en = ?, description = ?, category = ?, 
+             funding_agency = ?, funding_amount = ?, principal_investigator = ?, 
+             participants = ?, start_date = ?, end_date = ?, status = ?, 
+             cover_image = ?, updated_at = NOW() 
+             WHERE id = ?`,
+            [
+                title, title_en, description, category, funding_agency, funding_amount,
+                principal_investigator, participants, start_date, end_date, status,
+                cover_image, projectId
+            ]
+        );
+
+        res.json({
+            success: true,
+            message: '项目更新成功'
+        });
+
+    } catch (error) {
+        console.error('更新项目错误:', error);
+        res.status(500).json({
+            success: false,
+            message: '服务器内部错误'
+        });
+    }
+});
+
+// 删除项目（管理员接口）
+router.delete('/admin/:id', [
+    authenticateToken,
+    requireAdmin
+], async (req, res) => {
+    try {
+        const projectId = req.params.id;
+
+        // 检查项目是否存在
+        const project = await db.query('SELECT * FROM projects WHERE id = ?', [projectId]);
+        if (project.length === 0) {
+            return res.status(404).json({
+                success: false,
+                message: '项目不存在'
+            });
+        }
+
+        // 删除项目
+        await db.query('DELETE FROM projects WHERE id = ?', [projectId]);
+
+        res.json({
+            success: true,
+            message: '项目删除成功'
+        });
+
+    } catch (error) {
+        console.error('删除项目错误:', error);
+        res.status(500).json({
+            success: false,
+            message: '服务器内部错误'
+        });
+    }
+});
+
+// 获取项目详情（管理员接口）
+router.get('/admin/:id', [
+    authenticateToken,
+    requireAdmin
+], async (req, res) => {
+    try {
+        const projectId = req.params.id;
+        const project = await db.query('SELECT * FROM projects WHERE id = ?', [projectId]);
+
+        if (project.length === 0) {
+            return res.status(404).json({
+                success: false,
+                message: '项目不存在'
+            });
+        }
+
+        res.json({
+            success: true,
+            data: project[0]
+        });
+
+    } catch (error) {
+        console.error('获取项目详情错误:', error);
         res.status(500).json({
             success: false,
             message: '服务器内部错误'

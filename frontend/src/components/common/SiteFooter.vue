@@ -21,7 +21,7 @@
             </div>
           </div>
         </div>
-        
+
         <!-- 快速链接 -->
         <div class="footer-section">
           <h3 class="section-title">快速链接</h3>
@@ -34,17 +34,17 @@
             <li><router-link to="/news">新闻动态</router-link></li>
           </ul>
         </div>
-        
+
         <!-- 研究方向 -->
         <div class="footer-section">
           <h3 class="section-title">研究方向</h3>
           <ul class="link-list">
-            <li v-for="area in researchAreas.slice(0, 6)" :key="area.id">
+            <li v-for="area in (researchAreas || []).slice(0, 6)" :key="area.id">
               <router-link to="/research">{{ area.name }}</router-link>
             </li>
           </ul>
         </div>
-        
+
         <!-- 更多信息 -->
         <div class="footer-section">
           <h3 class="section-title">更多信息</h3>
@@ -58,7 +58,7 @@
           </ul>
         </div>
       </div>
-      
+
       <!-- 版权信息 -->
       <div class="footer-bottom">
         <div class="copyright">
@@ -83,14 +83,14 @@ export default {
   name: 'SiteFooter',
   setup() {
     const siteStore = useSiteStore()
-    
+
     const labInfo = computed(() => siteStore.labInfo)
     const siteTitle = computed(() => siteStore.siteTitle)
     const contactEmail = computed(() => siteStore.contactEmail)
     const contactPhone = computed(() => siteStore.contactPhone)
     const researchAreas = computed(() => siteStore.researchAreas)
     const currentYear = new Date().getFullYear()
-    
+
     return {
       labInfo,
       siteTitle,
@@ -116,7 +116,7 @@ export default {
   grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
   gap: 40px;
   margin-bottom: 40px;
-  
+
   @media (max-width: 768px) {
     grid-template-columns: 1fr;
     gap: 30px;
@@ -132,7 +132,7 @@ export default {
     margin-bottom: 20px;
     line-height: 1.3;
   }
-  
+
   .section-desc {
     color: #b3b3b3;
     line-height: 1.6;
@@ -146,11 +146,11 @@ export default {
     align-items: center;
     margin-bottom: 12px;
     color: #b3b3b3;
-    
+
     @media (max-width: 768px) {
       justify-content: center;
     }
-    
+
     .icon-email::before,
     .icon-phone::before,
     .icon-location::before {
@@ -161,23 +161,23 @@ export default {
       background-size: contain;
       flex-shrink: 0;
     }
-    
+
     .icon-email::before {
       background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='%23b3b3b3' viewBox='0 0 24 24'%3E%3Cpath d='M20 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z'/%3E%3C/svg%3E");
     }
-    
+
     .icon-phone::before {
       background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='%23b3b3b3' viewBox='0 0 24 24'%3E%3Cpath d='M6.62 10.79c1.44 2.83 3.76 5.14 6.59 6.59l2.2-2.2c.27-.27.67-.36 1.02-.24 1.12.37 2.33.57 3.57.57.55 0 1 .45 1 1V20c0 .55-.45 1-1 1-9.39 0-17-7.61-17-17 0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1 0 1.25.2 2.45.57 3.57.11.35.03.74-.25 1.02l-2.2 2.2z'/%3E%3C/svg%3E");
     }
-    
+
     .icon-location::before {
       background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='%23b3b3b3' viewBox='0 0 24 24'%3E%3Cpath d='M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z'/%3E%3C/svg%3E");
     }
-    
+
     a {
       color: inherit;
       transition: color 0.3s ease;
-      
+
       &:hover {
         color: var(--primary-color);
       }
@@ -188,12 +188,12 @@ export default {
 .link-list {
   li {
     margin-bottom: 8px;
-    
+
     a {
       color: #b3b3b3;
       font-size: 14px;
       transition: color 0.3s ease;
-      
+
       &:hover {
         color: var(--primary-color);
       }
@@ -207,7 +207,7 @@ export default {
   align-items: center;
   padding-top: 20px;
   border-top: 1px solid #333;
-  
+
   @media (max-width: 768px) {
     flex-direction: column;
     gap: 15px;
@@ -228,17 +228,17 @@ export default {
   display: flex;
   align-items: center;
   gap: 8px;
-  
+
   a {
     color: #999;
     font-size: 13px;
     transition: color 0.3s ease;
-    
+
     &:hover {
       color: var(--primary-color);
     }
   }
-  
+
   .divider {
     color: #666;
     font-size: 13px;

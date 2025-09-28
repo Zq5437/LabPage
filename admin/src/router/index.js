@@ -80,27 +80,7 @@ const routes = [
                 meta: {
                     title: '项目管理',
                     icon: 'Folder'
-                },
-                children: [
-                    {
-                        path: '',
-                        name: 'ProjectsList',
-                        component: () => import('@/views/projects/List.vue'),
-                        meta: { title: '项目列表' }
-                    },
-                    {
-                        path: 'create',
-                        name: 'ProjectsCreate',
-                        component: () => import('@/views/projects/Form.vue'),
-                        meta: { title: '创建项目' }
-                    },
-                    {
-                        path: 'edit/:id',
-                        name: 'ProjectsEdit',
-                        component: () => import('@/views/projects/Form.vue'),
-                        meta: { title: '编辑项目' }
-                    }
-                ]
+                }
             },
             {
                 path: 'publications',
