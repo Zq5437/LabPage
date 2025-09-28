@@ -90,8 +90,8 @@ router.get('/publications', async (req, res) => {
         const [publications] = await db.query(
             `SELECT * FROM publications ${whereClause} 
        ORDER BY is_featured DESC, year DESC, id DESC 
-       LIMIT ? OFFSET ?`,
-            [...params, limit, offset]
+       LIMIT ${parseInt(limit)} OFFSET ${parseInt(offset)}`,
+            [...params]
         );
 
         res.json({

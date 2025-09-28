@@ -29,7 +29,7 @@ api.interceptors.response.use(
     response => {
         const { data } = response
         if (data.success) {
-            return data.data
+            return data  // 返回完整的响应数据，包含data和pagination
         } else {
             return Promise.reject(new Error(data.message || '请求失败'))
         }

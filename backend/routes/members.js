@@ -333,8 +333,8 @@ router.get('/admin/list', [
         const [members] = await db.query(
             `SELECT * FROM members ${whereClause} 
        ORDER BY sort_order DESC, created_at DESC 
-       LIMIT ? OFFSET ?`,
-            [...params, limit, offset]
+       LIMIT ${parseInt(limit)} OFFSET ${parseInt(offset)}`,
+            [...params]
         );
 
         res.json({

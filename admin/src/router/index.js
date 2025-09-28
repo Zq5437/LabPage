@@ -129,7 +129,27 @@ const routes = [
                 meta: {
                     title: '论文管理',
                     icon: 'Reading'
-                }
+                },
+                children: [
+                    {
+                        path: '',
+                        name: 'PublicationsList',
+                        component: () => import('@/views/publications/List.vue'),
+                        meta: { title: '论文列表' }
+                    },
+                    {
+                        path: 'create',
+                        name: 'PublicationsCreate',
+                        component: () => import('@/views/publications/Form.vue'),
+                        meta: { title: '创建论文' }
+                    },
+                    {
+                        path: 'edit/:id',
+                        name: 'PublicationsEdit',
+                        component: () => import('@/views/publications/Form.vue'),
+                        meta: { title: '编辑论文' }
+                    }
+                ]
             },
             {
                 path: 'research-areas',

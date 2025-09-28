@@ -92,8 +92,8 @@ router.get('/', [
               principal_investigator, participants, start_date, end_date, status, cover_image
        FROM projects ${whereClause} 
        ORDER BY start_date DESC 
-       LIMIT ? OFFSET ?`,
-            [...params, limit, offset]
+       LIMIT ${parseInt(limit)} OFFSET ${parseInt(offset)}`,
+            [...params]
         );
 
         res.json({
@@ -422,8 +422,8 @@ router.get('/admin/list', [
         const [projects] = await db.query(
             `SELECT * FROM projects ${whereClause} 
        ORDER BY created_at DESC 
-       LIMIT ? OFFSET ?`,
-            [...params, limit, offset]
+       LIMIT ${parseInt(limit)} OFFSET ${parseInt(offset)}`,
+            [...params]
         );
 
         // 解析JSON字段

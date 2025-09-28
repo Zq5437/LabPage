@@ -83,8 +83,8 @@ router.get('/', [
             `SELECT id, title, summary, author, cover_image, category, is_top, views, publish_time, created_at 
        FROM news ${whereClause} 
        ORDER BY is_top DESC, publish_time DESC 
-       LIMIT ? OFFSET ?`,
-            [...params, limit, offset]
+       LIMIT ${parseInt(limit)} OFFSET ${parseInt(offset)}`,
+            [...params]
         );
 
         res.json({
@@ -349,8 +349,8 @@ router.get('/admin/list', [
         const [news] = await db.query(
             `SELECT * FROM news ${whereClause} 
        ORDER BY is_top DESC, created_at DESC 
-       LIMIT ? OFFSET ?`,
-            [...params, limit, offset]
+       LIMIT ${parseInt(limit)} OFFSET ${parseInt(offset)}`,
+            [...params]
         );
 
         res.json({

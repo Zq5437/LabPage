@@ -31,7 +31,7 @@ api.interceptors.response.use(
     response => {
         const { data } = response
         if (data.success) {
-            return data.data
+            return data  // 返回完整的响应数据，包含data和pagination
         } else {
             ElMessage.error(data.message || '请求失败')
             return Promise.reject(new Error(data.message || '请求失败'))
@@ -216,6 +216,189 @@ export const projectsApi = {
 
     // 删除项目
     delete: (id) => api.delete(`/projects/${id}`)
+}
+
+// 论文管理API
+export const publicationsApi = {
+    // 获取论文列表（管理端）
+    getAdminList: (params) => api.get('/publications/admin/list', { params }),
+
+    // 获取论文详情
+    getDetail: (id) => api.get(`/publications/${id}`),
+
+    // 创建论文
+    create: (data) => {
+        const formData = new FormData()
+        Object.keys(data).forEach(key => {
+            if (data[key] !== null && data[key] !== undefined) {
+                formData.append(key, data[key])
+            }
+        })
+        return api.post('/publications/admin/create', formData, {
+            headers: { 'Content-Type': 'multipart/form-data' }
+        })
+    },
+
+    // 更新论文
+    update: (id, data) => {
+        const formData = new FormData()
+        Object.keys(data).forEach(key => {
+            if (data[key] !== null && data[key] !== undefined) {
+                formData.append(key, data[key])
+            }
+        })
+        return api.put(`/publications/admin/update/${id}`, formData, {
+            headers: { 'Content-Type': 'multipart/form-data' }
+        })
+    },
+
+    // 删除论文
+    delete: (id) => api.delete(`/publications/admin/delete/${id}`),
+
+    // 批量删除论文
+    batchDelete: (ids) => api.delete('/publications/admin/batch-delete', { data: { ids } }),
+
+    // 更新论文状态
+    updateStatus: (id, status) => api.patch(`/publications/admin/status/${id}`, { status }),
+
+    // 获取分类列表
+    getCategories: () => api.get('/publications/admin/categories'),
+
+    // 获取年份列表
+    getYears: () => api.get('/publications/admin/years')
+}
+
+// 设备管理API
+export const equipmentApi = {
+    // 获取设备列表（管理端）
+    getAdminList: (params) => api.get('/equipment/admin/list', { params }),
+
+    // 获取设备详情
+    getDetail: (id) => api.get(`/equipment/${id}`),
+
+    // 创建设备
+    create: (data) => {
+        const formData = new FormData()
+        Object.keys(data).forEach(key => {
+            if (data[key] !== null && data[key] !== undefined) {
+                formData.append(key, data[key])
+            }
+        })
+        return api.post('/equipment/admin/create', formData, {
+            headers: { 'Content-Type': 'multipart/form-data' }
+        })
+    },
+
+    // 更新设备
+    update: (id, data) => {
+        const formData = new FormData()
+        Object.keys(data).forEach(key => {
+            if (data[key] !== null && data[key] !== undefined) {
+                formData.append(key, data[key])
+            }
+        })
+        return api.put(`/equipment/admin/update/${id}`, formData, {
+            headers: { 'Content-Type': 'multipart/form-data' }
+        })
+    },
+
+    // 删除设备
+    delete: (id) => api.delete(`/equipment/admin/delete/${id}`)
+}
+
+// 研究方向管理API
+export const researchAreasApi = {
+    // 获取研究方向列表（管理端）
+    getAdminList: (params) => api.get('/research-areas/admin/list', { params }),
+
+    // 获取研究方向详情
+    getDetail: (id) => api.get(`/research-areas/${id}`),
+
+    // 创建研究方向
+    create: (data) => {
+        const formData = new FormData()
+        Object.keys(data).forEach(key => {
+            if (data[key] !== null && data[key] !== undefined) {
+                formData.append(key, data[key])
+            }
+        })
+        return api.post('/research-areas/admin/create', formData, {
+            headers: { 'Content-Type': 'multipart/form-data' }
+        })
+    },
+
+    // 更新研究方向
+    update: (id, data) => {
+        const formData = new FormData()
+        Object.keys(data).forEach(key => {
+            if (data[key] !== null && data[key] !== undefined) {
+                formData.append(key, data[key])
+            }
+        })
+        return api.put(`/research-areas/admin/update/${id}`, formData, {
+            headers: { 'Content-Type': 'multipart/form-data' }
+        })
+    },
+
+    // 删除研究方向
+    delete: (id) => api.delete(`/research-areas/admin/delete/${id}`)
+}
+
+// 招生信息管理API
+export const recruitmentApi = {
+    // 获取招生信息列表（管理端）
+    getAdminList: (params) => api.get('/recruitment/admin/list', { params }),
+
+    // 获取招生信息详情
+    getDetail: (id) => api.get(`/recruitment/${id}`),
+
+    // 创建招生信息
+    create: (data) => {
+        const formData = new FormData()
+        Object.keys(data).forEach(key => {
+            if (data[key] !== null && data[key] !== undefined) {
+                formData.append(key, data[key])
+            }
+        })
+        return api.post('/recruitment/admin/create', formData, {
+            headers: { 'Content-Type': 'multipart/form-data' }
+        })
+    },
+
+    // 更新招生信息
+    update: (id, data) => {
+        const formData = new FormData()
+        Object.keys(data).forEach(key => {
+            if (data[key] !== null && data[key] !== undefined) {
+                formData.append(key, data[key])
+            }
+        })
+        return api.put(`/recruitment/admin/update/${id}`, formData, {
+            headers: { 'Content-Type': 'multipart/form-data' }
+        })
+    },
+
+    // 删除招生信息
+    delete: (id) => api.delete(`/recruitment/admin/delete/${id}`)
+}
+
+// 实验室信息管理API
+export const labInfoApi = {
+    // 获取实验室信息
+    getInfo: () => api.get('/lab-info/admin/info'),
+
+    // 更新实验室信息
+    update: (data) => {
+        const formData = new FormData()
+        Object.keys(data).forEach(key => {
+            if (data[key] !== null && data[key] !== undefined) {
+                formData.append(key, data[key])
+            }
+        })
+        return api.put('/lab-info/admin/update', formData, {
+            headers: { 'Content-Type': 'multipart/form-data' }
+        })
+    }
 }
 
 // 公共API

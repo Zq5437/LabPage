@@ -13,6 +13,11 @@ const authRoutes = require('./routes/auth');
 const newsRoutes = require('./routes/news');
 const membersRoutes = require('./routes/members');
 const projectsRoutes = require('./routes/projects');
+const publicationsRoutes = require('./routes/publications');
+const equipmentRoutes = require('./routes/equipment');
+const researchAreasRoutes = require('./routes/research-areas');
+const recruitmentRoutes = require('./routes/recruitment');
+const labInfoRoutes = require('./routes/lab-info');
 const publicRoutes = require('./routes/public');
 
 const app = express();
@@ -49,6 +54,11 @@ app.use('/api/auth', authRoutes);
 app.use('/api/news', newsRoutes);
 app.use('/api/members', membersRoutes);
 app.use('/api/projects', projectsRoutes);
+app.use('/api/publications', publicationsRoutes);
+app.use('/api/equipment', equipmentRoutes);
+app.use('/api/research-areas', researchAreasRoutes);
+app.use('/api/recruitment', recruitmentRoutes);
+app.use('/api/lab-info', labInfoRoutes);
 app.use('/api/public', publicRoutes);
 
 // 健康检查

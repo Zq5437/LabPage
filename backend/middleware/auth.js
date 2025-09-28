@@ -18,12 +18,12 @@ const authenticateToken = async (req, res, next) => {
         const decoded = jwt.verify(token, config.jwt.secret);
 
         // 验证用户是否还存在且状态正常
-        const [users] = await db.query(
+        const users = await db.query(
             'SELECT id, username, email, name, role, status FROM admins WHERE id = ? AND status = "active"',
             [decoded.userId]
         );
 
-        if (users.length === 0) {
+        if (!users || users.length === 0) {
             return res.status(401).json({
                 success: false,
                 message: '用户不存在或已被禁用'
@@ -79,7 +79,9 @@ const requireAdmin = requireRole(['admin', 'super_admin']);
 
 module.exports = {
     authenticateToken,
+    verifyToken: authenticateToken,  // 别名
     requireRole,
     requireSuperAdmin,
-    requireAdmin
+    requireAdmin,
+    verifyAdmin: requireAdmin  // 别名
 };

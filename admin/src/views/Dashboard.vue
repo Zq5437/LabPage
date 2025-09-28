@@ -119,7 +119,7 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted, markRaw } from 'vue'
 import { useAuthStore } from '@/stores/auth'
 import { publicApi } from '@/utils/api'
 import dayjs from 'dayjs'
@@ -157,7 +157,7 @@ const statsData = ref([
     key: 'news',
     title: '新闻动态',
     value: 0,
-    icon: Document,
+    icon: markRaw(Document),
     type: 'primary',
     trend: { type: 'up', text: '较上月 +12%' }
   },
@@ -165,7 +165,7 @@ const statsData = ref([
     key: 'members',
     title: '实验室成员',
     value: 0,
-    icon: User,
+    icon: markRaw(User),
     type: 'success',
     trend: { type: 'up', text: '较上月 +3' }
   },
@@ -173,7 +173,7 @@ const statsData = ref([
     key: 'projects',
     title: '研究项目',
     value: 0,
-    icon: Folder,
+    icon: markRaw(Folder),
     type: 'warning',
     trend: { type: 'up', text: '较上月 +2' }
   },
@@ -181,7 +181,7 @@ const statsData = ref([
     key: 'visits',
     title: '总访问量',
     value: 0,
-    icon: TrendCharts,
+    icon: markRaw(TrendCharts),
     type: 'info',
     trend: { type: 'up', text: '较昨日 +156' }
   }
