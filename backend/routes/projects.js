@@ -547,14 +547,19 @@ router.post('/upload-cover', [
     upload.single('cover_image')
 ], async (req, res) => {
     try {
+        console.log('收到封面上传请求');
+        console.log('Request file:', req.file);
+        console.log('Request body:', req.body);
+
         if (!req.file) {
             return res.status(400).json({
                 success: false,
-                message: '请选择要上传的封面图片'
+                message: '请选择要上传的封面图片文件'
             });
         }
 
         const coverUrl = `/uploads/projects/${req.file.filename}`;
+        console.log('生成的封面URL:', coverUrl);
 
         res.json({
             success: true,
@@ -568,7 +573,7 @@ router.post('/upload-cover', [
         console.error('上传封面错误:', error);
         res.status(500).json({
             success: false,
-            message: '服务器内部错误'
+            message: '服务器内部错误: ' + error.message
         });
     }
 });
@@ -594,10 +599,18 @@ router.post('/admin', [
 
         const {
             title, title_en, description, category, funding_agency, funding_amount,
-            principal_investigator, participants, start_date, end_date, status = 'ongoing'
+            principal_investigator, participants, start_date, end_date, status = 'ongoing',
+            cover_image
         } = req.body;
 
-        const cover_image = req.file ? `/uploads/projects/${req.file.filename}` : null;
+        // 使用提交的封面图片URL，如果上传了新文件则优先使用新文件
+        let finalCoverImage = cover_image || null;
+        if (req.file) {
+            finalCoverImage = `/uploads/projects/${req.file.filename}`;
+        }
+
+        console.log('创建项目 - 收到的封面URL:', cover_image);
+        console.log('最终使用的封面URL:', finalCoverImage);
 
         const result = await db.query(
             `INSERT INTO projects (
@@ -606,7 +619,7 @@ router.post('/admin', [
             ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
             [
                 title, title_en, description, category, funding_agency, funding_amount,
-                principal_investigator, participants, start_date, end_date, status, cover_image
+                principal_investigator, participants, start_date, end_date, status, finalCoverImage
             ]
         );
 
@@ -662,15 +675,19 @@ router.put('/admin/:id', [
 
         const {
             title, title_en, description, category, funding_agency, funding_amount,
-            principal_investigator, participants, start_date, end_date, status
+            principal_investigator, participants, start_date, end_date, status, cover_image
         } = req.body;
 
-        let cover_image = existingProject[0].cover_image;
+        // 使用提交的封面图片URL，如果没有则保持原有的
+        let finalCoverImage = cover_image !== undefined ? cover_image : existingProject[0].cover_image;
 
-        // 如果上传了新图片
+        // 如果上传了新图片文件，优先使用新上传的
         if (req.file) {
-            cover_image = `/uploads/projects/${req.file.filename}`;
+            finalCoverImage = `/uploads/projects/${req.file.filename}`;
         }
+
+        console.log('更新项目 - 收到的封面URL:', cover_image);
+        console.log('最终使用的封面URL:', finalCoverImage);
 
         await db.query(
             `UPDATE projects SET 
@@ -682,7 +699,7 @@ router.put('/admin/:id', [
             [
                 title, title_en, description, category, funding_agency, funding_amount,
                 principal_investigator, participants, start_date, end_date, status,
-                cover_image, projectId
+                finalCoverImage, projectId
             ]
         );
 

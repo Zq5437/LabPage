@@ -201,12 +201,15 @@
         <el-form-item label="项目封面">
           <el-upload class="cover-uploader" :action="uploadUrl" :headers="uploadHeaders" :show-file-list="false"
             name="cover_image" :before-upload="beforeCoverUpload" :on-success="handleCoverSuccess"
-            :on-error="handleUploadError">
+            :on-error="handleUploadError" accept="image/*">
             <img v-if="formData.cover_image" :src="formData.cover_image" class="cover-image" />
             <el-icon v-else class="cover-uploader-icon">
               <Plus />
             </el-icon>
           </el-upload>
+          <div class="upload-tip">
+            支持 JPG、PNG、GIF 格式，大小不超过 2MB
+          </div>
         </el-form-item>
       </el-form>
 
@@ -403,6 +406,9 @@ const saveProject = async () => {
       if (submitData[key] === '') submitData[key] = null
     })
 
+    console.log('保存项目数据:', submitData)
+    console.log('封面图片URL:', submitData.cover_image)
+
     if (editingProject.value) {
       await api.put(`/projects/admin/${editingProject.value.id}`, submitData)
       ElMessage.success('更新项目成功')
@@ -447,29 +453,36 @@ const deleteProject = async (project) => {
 
 // 上传处理
 const beforeCoverUpload = (file) => {
-  const isJPG = file.type === 'image/jpeg' || file.type === 'image/png' || file.type === 'image/gif'
+  console.log('准备上传文件:', file)
+  const isImage = file.type.startsWith('image/')
   const isLt2M = file.size / 1024 / 1024 < 2
 
-  if (!isJPG) {
-    ElMessage.error('封面只能是 JPG/PNG/GIF 格式!')
+  if (!isImage) {
+    ElMessage.error('只能上传图片文件!')
     return false
   }
   if (!isLt2M) {
-    ElMessage.error('封面大小不能超过 2MB!')
+    ElMessage.error('文件大小不能超过 2MB!')
     return false
   }
+
+  ElMessage.info('正在上传封面图片...')
   return true
 }
 
 const handleCoverSuccess = (response) => {
-  if (response.success) {
+  console.log('上传成功响应:', response)
+  if (response && response.success) {
     formData.cover_image = response.data.cover_url
     ElMessage.success('封面上传成功')
+  } else {
+    ElMessage.error('上传响应格式错误')
   }
 }
 
-const handleUploadError = () => {
-  ElMessage.error('封面上传失败')
+const handleUploadError = (error) => {
+  console.error('上传失败:', error)
+  ElMessage.error('封面上传失败: ' + (error.message || '未知错误'))
 }
 
 // 生命周期
@@ -618,5 +631,11 @@ const formatCurrency = (amount) => {
 
 .cover-uploader :deep(.el-upload:hover) {
   border-color: #409eff;
+}
+
+.upload-tip {
+  margin-top: 5px;
+  font-size: 12px;
+  color: #999;
 }
 </style>
