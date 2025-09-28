@@ -72,14 +72,14 @@ router.get('/', [
         }
 
         // 获取总数
-        const [countResult] = await db.query(
+        const countResult = await db.query(
             `SELECT COUNT(*) as total FROM news ${whereClause}`,
             params
         );
         const total = countResult[0].total;
 
         // 获取新闻列表
-        const [news] = await db.query(
+        const news = await db.query(
             `SELECT id, title, summary, author, cover_image, category, is_top, views, publish_time, created_at 
        FROM news ${whereClause} 
        ORDER BY is_top DESC, publish_time DESC 
@@ -115,7 +115,7 @@ router.get('/:id', async (req, res) => {
         const newsId = req.params.id;
 
         // 获取新闻详情
-        const [news] = await db.query(
+        const news = await db.query(
             'SELECT * FROM news WHERE id = ? AND status = "published"',
             [newsId]
         );
@@ -147,8 +147,114 @@ router.get('/:id', async (req, res) => {
     }
 });
 
+// 增加新闻浏览量（公开接口）
+router.post('/:id/view', async (req, res) => {
+    try {
+        const newsId = req.params.id;
+
+        // 增加浏览次数
+        await db.query(
+            'UPDATE news SET views = views + 1 WHERE id = ? AND status = "published"',
+            [newsId]
+        );
+
+        res.json({
+            success: true,
+            message: '浏览量已更新'
+        });
+
+    } catch (error) {
+        console.error('更新浏览量错误:', error);
+        res.status(500).json({
+            success: false,
+            message: '服务器内部错误'
+        });
+    }
+});
+
+// 获取新闻列表（管理员接口）
+router.get('/admin/list', [
+    authenticateToken,
+    requireAdmin,
+    query('page').optional().isInt({ min: 1 }).withMessage('页码必须是正整数'),
+    query('limit').optional().isInt({ min: 1, max: 100 }).withMessage('每页数量必须在1-100之间'),
+    query('category').optional().isIn(['news', 'announcement', 'achievement', 'activity']).withMessage('分类参数无效'),
+    query('status').optional().isIn(['draft', 'published', 'archived']).withMessage('状态参数无效')
+], async (req, res) => {
+    try {
+        const errors = validationResult(req);
+        if (!errors.isEmpty()) {
+            return res.status(400).json({
+                success: false,
+                message: '参数验证失败',
+                errors: errors.array()
+            });
+        }
+
+        const page = parseInt(req.query.page) || 1;
+        const limit = parseInt(req.query.limit) || 20;
+        const offset = (page - 1) * limit;
+        const category = req.query.category;
+        const status = req.query.status;
+        const search = req.query.search;
+        const sort = req.query.sort || 'created_at';
+        const order = req.query.order || 'DESC';
+
+        let whereClause = 'WHERE 1=1';
+        let params = [];
+
+        if (category) {
+            whereClause += ' AND category = ?';
+            params.push(category);
+        }
+        if (status) {
+            whereClause += ' AND status = ?';
+            params.push(status);
+        }
+        if (search) {
+            whereClause += ' AND (title LIKE ? OR summary LIKE ? OR content LIKE ?)';
+            params.push(`%${search}%`, `%${search}%`, `%${search}%`);
+        }
+
+        // 获取总数
+        const countResult = await db.query(
+            `SELECT COUNT(*) as total FROM news ${whereClause}`,
+            params
+        );
+        const total = countResult[0].total;
+
+        // 获取新闻列表
+        const news = await db.query(
+            `SELECT * FROM news ${whereClause} 
+       ORDER BY ${sort} ${order}
+       LIMIT ${parseInt(limit)} OFFSET ${parseInt(offset)}`,
+            [...params]
+        );
+
+        res.json({
+            success: true,
+            data: {
+                news,
+                pagination: {
+                    page,
+                    limit,
+                    total,
+                    totalPages: Math.ceil(total / limit)
+                }
+            }
+        });
+
+    } catch (error) {
+        console.error('获取管理员新闻列表错误:', error);
+        res.status(500).json({
+            success: false,
+            message: '服务器内部错误'
+        });
+    }
+});
+
 // 创建新闻（管理员接口）
-router.post('/', [
+router.post('/admin', [
     authenticateToken,
     requireAdmin,
     upload.single('cover_image'),
@@ -171,10 +277,13 @@ router.post('/', [
         const cover_image = req.file ? `/uploads/news/${req.file.filename}` : null;
         const publish_time = status === 'published' ? new Date() : null;
 
+        // 确保is_top为布尔值
+        const isTop = is_top ? 1 : 0;
+
         const result = await db.query(
             `INSERT INTO news (title, summary, content, author, cover_image, category, status, is_top, publish_time) 
        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-            [title, summary, content, author, cover_image, category, status, is_top, publish_time]
+            [title, summary, content, author, cover_image, category, status, isTop, publish_time]
         );
 
         res.json({
@@ -197,8 +306,41 @@ router.post('/', [
     }
 });
 
+// 上传封面图片（管理员接口）
+router.post('/upload-cover', [
+    authenticateToken,
+    requireAdmin,
+    upload.single('cover_image')
+], async (req, res) => {
+    try {
+        if (!req.file) {
+            return res.status(400).json({
+                success: false,
+                message: '请选择要上传的封面图片'
+            });
+        }
+
+        const coverUrl = `/uploads/news/${req.file.filename}`;
+
+        res.json({
+            success: true,
+            message: '封面上传成功',
+            data: {
+                cover_url: coverUrl
+            }
+        });
+
+    } catch (error) {
+        console.error('上传封面错误:', error);
+        res.status(500).json({
+            success: false,
+            message: '服务器内部错误'
+        });
+    }
+});
+
 // 更新新闻（管理员接口）
-router.put('/:id', [
+router.put('/admin/:id', [
     authenticateToken,
     requireAdmin,
     upload.single('cover_image'),
@@ -218,28 +360,40 @@ router.put('/:id', [
         }
 
         const newsId = req.params.id;
-        const updates = { ...req.body };
+
+        // 检查新闻是否存在
+        const existingNews = await db.query('SELECT * FROM news WHERE id = ?', [newsId]);
+        if (existingNews.length === 0) {
+            return res.status(404).json({
+                success: false,
+                message: '新闻不存在'
+            });
+        }
+
+        const { title, summary, content, author, category, status, is_top } = req.body;
+        let cover_image = existingNews[0].cover_image;
+        let publish_time = existingNews[0].publish_time;
 
         // 如果上传了新图片
         if (req.file) {
-            updates.cover_image = `/uploads/news/${req.file.filename}`;
+            cover_image = `/uploads/news/${req.file.filename}`;
         }
 
         // 如果状态改为发布且之前未发布，设置发布时间
-        if (updates.status === 'published') {
-            const [currentNews] = await db.query('SELECT status FROM news WHERE id = ?', [newsId]);
-            if (currentNews.length > 0 && currentNews[0].status !== 'published') {
-                updates.publish_time = new Date();
-            }
+        if (status === 'published' && existingNews[0].status !== 'published') {
+            publish_time = new Date();
         }
 
-        // 构建更新SQL
-        const updateFields = Object.keys(updates).map(key => `${key} = ?`).join(', ');
-        const updateValues = Object.values(updates);
+        // 确保is_top为布尔值
+        const isTop = is_top ? 1 : 0;
 
         await db.query(
-            `UPDATE news SET ${updateFields}, updated_at = NOW() WHERE id = ?`,
-            [...updateValues, newsId]
+            `UPDATE news SET 
+             title = ?, summary = ?, content = ?, author = ?, 
+             category = ?, status = ?, is_top = ?, cover_image = ?, 
+             publish_time = ?, updated_at = NOW() 
+             WHERE id = ?`,
+            [title, summary, content, author, category, status, isTop, cover_image, publish_time, newsId]
         );
 
         res.json({
@@ -257,13 +411,15 @@ router.put('/:id', [
 });
 
 // 删除新闻（管理员接口）
-router.delete('/:id', [authenticateToken, requireAdmin], async (req, res) => {
+router.delete('/admin/:id', [
+    authenticateToken,
+    requireAdmin
+], async (req, res) => {
     try {
         const newsId = req.params.id;
 
-        // 获取新闻信息以删除关联文件
-        const [news] = await db.query('SELECT cover_image FROM news WHERE id = ?', [newsId]);
-
+        // 检查新闻是否存在
+        const news = await db.query('SELECT * FROM news WHERE id = ?', [newsId]);
         if (news.length === 0) {
             return res.status(404).json({
                 success: false,
@@ -271,16 +427,8 @@ router.delete('/:id', [authenticateToken, requireAdmin], async (req, res) => {
             });
         }
 
-        // 删除数据库记录
+        // 删除新闻
         await db.query('DELETE FROM news WHERE id = ?', [newsId]);
-
-        // 删除关联的图片文件
-        if (news[0].cover_image) {
-            const imagePath = path.join(__dirname, '../', news[0].cover_image);
-            if (fs.existsSync(imagePath)) {
-                fs.unlinkSync(imagePath);
-            }
-        }
 
         res.json({
             success: true,
@@ -296,78 +444,29 @@ router.delete('/:id', [authenticateToken, requireAdmin], async (req, res) => {
     }
 });
 
-// 获取管理员新闻列表（包含所有状态）
-router.get('/admin/list', [
+// 获取新闻详情（管理员接口）
+router.get('/admin/:id', [
     authenticateToken,
-    requireAdmin,
-    query('page').optional().isInt({ min: 1 }).withMessage('页码必须是正整数'),
-    query('limit').optional().isInt({ min: 1, max: 100 }).withMessage('每页数量必须在1-100之间'),
-    query('category').optional().isIn(['news', 'announcement', 'achievement', 'activity']).withMessage('分类参数无效'),
-    query('status').optional().isIn(['draft', 'published', 'archived']).withMessage('状态参数无效')
+    requireAdmin
 ], async (req, res) => {
     try {
-        const errors = validationResult(req);
-        if (!errors.isEmpty()) {
-            return res.status(400).json({
+        const newsId = req.params.id;
+        const news = await db.query('SELECT * FROM news WHERE id = ?', [newsId]);
+
+        if (news.length === 0) {
+            return res.status(404).json({
                 success: false,
-                message: '参数验证失败',
-                errors: errors.array()
+                message: '新闻不存在'
             });
         }
 
-        const page = parseInt(req.query.page) || 1;
-        const limit = parseInt(req.query.limit) || 10;
-        const offset = (page - 1) * limit;
-        const category = req.query.category;
-        const status = req.query.status;
-
-        let whereClause = '';
-        let params = [];
-
-        const conditions = [];
-        if (category) {
-            conditions.push('category = ?');
-            params.push(category);
-        }
-        if (status) {
-            conditions.push('status = ?');
-            params.push(status);
-        }
-
-        if (conditions.length > 0) {
-            whereClause = 'WHERE ' + conditions.join(' AND ');
-        }
-
-        // 获取总数
-        const [countResult] = await db.query(
-            `SELECT COUNT(*) as total FROM news ${whereClause}`,
-            params
-        );
-        const total = countResult[0].total;
-
-        // 获取新闻列表
-        const [news] = await db.query(
-            `SELECT * FROM news ${whereClause} 
-       ORDER BY is_top DESC, created_at DESC 
-       LIMIT ${parseInt(limit)} OFFSET ${parseInt(offset)}`,
-            [...params]
-        );
-
         res.json({
             success: true,
-            data: {
-                news,
-                pagination: {
-                    page,
-                    limit,
-                    total,
-                    totalPages: Math.ceil(total / limit)
-                }
-            }
+            data: news[0]
         });
 
     } catch (error) {
-        console.error('获取管理员新闻列表错误:', error);
+        console.error('获取新闻详情错误:', error);
         res.status(500).json({
             success: false,
             message: '服务器内部错误'

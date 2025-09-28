@@ -71,27 +71,7 @@ const routes = [
                 meta: {
                     title: '成员管理',
                     icon: 'User'
-                },
-                children: [
-                    {
-                        path: '',
-                        name: 'MembersList',
-                        component: () => import('@/views/members/List.vue'),
-                        meta: { title: '成员列表' }
-                    },
-                    {
-                        path: 'create',
-                        name: 'MembersCreate',
-                        component: () => import('@/views/members/Form.vue'),
-                        meta: { title: '添加成员' }
-                    },
-                    {
-                        path: 'edit/:id',
-                        name: 'MembersEdit',
-                        component: () => import('@/views/members/Form.vue'),
-                        meta: { title: '编辑成员' }
-                    }
-                ]
+                }
             },
             {
                 path: 'projects',

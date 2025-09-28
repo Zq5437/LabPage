@@ -66,7 +66,7 @@ router.get('/', [
             params.push(category);
         }
 
-        const [members] = await db.query(
+        const members = await db.query(
             `SELECT id, name, name_en, title, category, email, avatar, bio, research_interests, 
               homepage, google_scholar, orcid, join_date, graduation_date, sort_order
        FROM members ${whereClause} 
@@ -105,7 +105,7 @@ router.get('/:id', async (req, res) => {
     try {
         const memberId = req.params.id;
 
-        const [members] = await db.query(
+        const members = await db.query(
             'SELECT * FROM members WHERE id = ? AND status IN ("active", "alumni")',
             [memberId]
         );
@@ -124,6 +124,39 @@ router.get('/:id', async (req, res) => {
 
     } catch (error) {
         console.error('获取成员详情错误:', error);
+        res.status(500).json({
+            success: false,
+            message: '服务器内部错误'
+        });
+    }
+});
+
+// 上传头像（管理员接口）
+router.post('/upload-avatar', [
+    authenticateToken,
+    requireAdmin,
+    upload.single('avatar')
+], async (req, res) => {
+    try {
+        if (!req.file) {
+            return res.status(400).json({
+                success: false,
+                message: '请选择要上传的头像文件'
+            });
+        }
+
+        const avatarUrl = `/uploads/avatars/${req.file.filename}`;
+
+        res.json({
+            success: true,
+            message: '头像上传成功',
+            data: {
+                avatar_url: avatarUrl
+            }
+        });
+
+    } catch (error) {
+        console.error('上传头像错误:', error);
         res.status(500).json({
             success: false,
             message: '服务器内部错误'
@@ -323,14 +356,14 @@ router.get('/admin/list', [
         }
 
         // 获取总数
-        const [countResult] = await db.query(
+        const countResult = await db.query(
             `SELECT COUNT(*) as total FROM members ${whereClause}`,
             params
         );
         const total = countResult[0].total;
 
         // 获取成员列表
-        const [members] = await db.query(
+        const members = await db.query(
             `SELECT * FROM members ${whereClause} 
        ORDER BY sort_order DESC, created_at DESC 
        LIMIT ${parseInt(limit)} OFFSET ${parseInt(offset)}`,
