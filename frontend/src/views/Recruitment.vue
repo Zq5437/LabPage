@@ -11,18 +11,11 @@
     <div class="container">
       <!-- 快速导航 -->
       <div class="quick-nav">
-        <el-button
-          v-for="type in recruitmentTypes"
-          :key="type.value"
-          :type="selectedType === type.value ? 'primary' : 'default'"
-          @click="filterByType(type.value)"
-        >
+        <el-button v-for="type in recruitmentTypes" :key="type.value"
+          :type="selectedType === type.value ? 'primary' : 'default'" @click="filterByType(type.value)">
           {{ type.label }}
         </el-button>
-        <el-button
-          :type="selectedType === '' ? 'primary' : 'default'"
-          @click="filterByType('')"
-        >
+        <el-button :type="selectedType === '' ? 'primary' : 'default'" @click="filterByType('')">
           全部
         </el-button>
       </div>
@@ -45,11 +38,7 @@
 
       <!-- 招生信息列表 -->
       <div class="recruitment-list" v-loading="loading">
-        <div
-          v-for="recruitment in filteredRecruitments"
-          :key="recruitment.id"
-          class="recruitment-card"
-        >
+        <div v-for="recruitment in filteredRecruitments" :key="recruitment.id" class="recruitment-card">
           <div class="card-header">
             <div class="header-left">
               <h3 class="position-title">{{ recruitment.title }}</h3>
@@ -66,10 +55,7 @@
               </div>
             </div>
             <div class="header-right">
-              <el-tag
-                :type="getStatusColor(recruitment.status)"
-                effect="dark"
-              >
+              <el-tag :type="getStatusColor(recruitment.status)" effect="dark">
                 {{ getStatusText(recruitment.status) }}
               </el-tag>
             </div>
@@ -116,11 +102,7 @@
             <el-button @click="viewDetails(recruitment)">
               查看详情
             </el-button>
-            <el-button
-              type="primary"
-              :disabled="recruitment.status !== 'active'"
-              @click="applyPosition(recruitment)"
-            >
+            <el-button type="primary" :disabled="recruitment.status !== 'active'" @click="applyPosition(recruitment)">
               {{ recruitment.status === 'active' ? '申请职位' : '已截止' }}
             </el-button>
           </div>
@@ -128,9 +110,7 @@
 
         <!-- 空状态 -->
         <div v-if="!loading && filteredRecruitments.length === 0" class="empty-state">
-          <el-empty 
-            :description="selectedType ? '该类型暂无招生信息' : '暂无招生信息'" 
-          />
+          <el-empty :description="selectedType ? '该类型暂无招生信息' : '暂无招生信息'" />
         </div>
       </div>
 
@@ -153,21 +133,27 @@
         <h2>联系我们</h2>
         <div class="contact-info">
           <div class="contact-item">
-            <el-icon><Phone /></el-icon>
+            <el-icon>
+              <Phone />
+            </el-icon>
             <div>
               <h4>电话咨询</h4>
               <p>+86 xxx-xxxx-xxxx</p>
             </div>
           </div>
           <div class="contact-item">
-            <el-icon><Message /></el-icon>
+            <el-icon>
+              <Message />
+            </el-icon>
             <div>
               <h4>邮件咨询</h4>
               <p>recruitment@lab.edu.cn</p>
             </div>
           </div>
           <div class="contact-item">
-            <el-icon><Location /></el-icon>
+            <el-icon>
+              <Location />
+            </el-icon>
             <div>
               <h4>地址</h4>
               <p>请查看联系我们页面获取详细地址</p>
@@ -178,12 +164,7 @@
     </div>
 
     <!-- 详情对话框 -->
-    <el-dialog
-      v-model="detailVisible"
-      :title="selectedRecruitment?.title"
-      width="800px"
-      destroy-on-close
-    >
+    <el-dialog v-model="detailVisible" :title="selectedRecruitment?.title" width="800px" destroy-on-close>
       <div v-if="selectedRecruitment" class="recruitment-detail">
         <div class="detail-header">
           <div class="position-info">
@@ -192,10 +173,7 @@
               <el-tag :type="getTypeColor(selectedRecruitment.type)">
                 {{ getTypeName(selectedRecruitment.type) }}
               </el-tag>
-              <el-tag
-                :type="getStatusColor(selectedRecruitment.status)"
-                effect="dark"
-              >
+              <el-tag :type="getStatusColor(selectedRecruitment.status)" effect="dark">
                 {{ getStatusText(selectedRecruitment.status) }}
               </el-tag>
             </div>
@@ -257,11 +235,8 @@
 
       <template #footer>
         <el-button @click="detailVisible = false">关闭</el-button>
-        <el-button
-          type="primary"
-          :disabled="selectedRecruitment?.status !== 'active'"
-          @click="applyPosition(selectedRecruitment)"
-        >
+        <el-button type="primary" :disabled="selectedRecruitment?.status !== 'open'"
+          @click="applyPosition(selectedRecruitment)">
           申请职位
         </el-button>
       </template>
@@ -286,9 +261,8 @@ const selectedRecruitment = ref(null)
 
 // 招生类型
 const recruitmentTypes = [
-  { label: '博士研究生', value: 'phd' },
   { label: '硕士研究生', value: 'master' },
-  { label: '本科生', value: 'undergraduate' },
+  { label: '博士研究生', value: 'phd' },
   { label: '博士后', value: 'postdoc' },
   { label: '访问学者', value: 'visiting' }
 ]
@@ -330,7 +304,7 @@ const filteredRecruitments = computed(() => {
 })
 
 const availablePositions = computed(() => {
-  return recruitments.value.filter(r => r.status === 'active').length
+  return recruitments.value.filter(r => r.status === 'open').length
 })
 
 const uniqueTypes = computed(() => {
@@ -348,9 +322,11 @@ const loadRecruitments = async () => {
         order: 'DESC'
       }
     })
-    
+
     if (response.data) {
-      recruitments.value = response.data.data || []
+      recruitments.value = response.data || []
+      console.log('招聘信息加载成功:', recruitments.value.length, '条记录')
+      console.log('招聘信息数据:', recruitments.value)
     }
   } catch (error) {
     console.error('加载招生信息失败:', error)
@@ -404,7 +380,7 @@ const applyPosition = async (recruitment) => {
 
     const emailLink = `mailto:recruitment@lab.edu.cn?subject=${subject}&body=${body}`
     window.open(emailLink, '_self')
-    
+
     detailVisible.value = false
     ElMessage.success('邮件客户端已打开，请完善申请内容后发送')
   } catch (error) {
@@ -415,9 +391,8 @@ const applyPosition = async (recruitment) => {
 // 获取类型名称
 const getTypeName = (type) => {
   const typeMap = {
-    'phd': '博士研究生',
     'master': '硕士研究生',
-    'undergraduate': '本科生',
+    'phd': '博士研究生',
     'postdoc': '博士后',
     'visiting': '访问学者'
   }
@@ -427,9 +402,8 @@ const getTypeName = (type) => {
 // 获取类型颜色
 const getTypeColor = (type) => {
   const colorMap = {
-    'phd': 'danger',
     'master': 'warning',
-    'undergraduate': 'success',
+    'phd': 'danger',
     'postdoc': 'info',
     'visiting': 'primary'
   }
@@ -439,9 +413,9 @@ const getTypeColor = (type) => {
 // 获取状态文本
 const getStatusText = (status) => {
   const statusMap = {
-    'active': '招生中',
-    'paused': '暂停',
-    'closed': '已结束'
+    'open': '招生中',
+    'closed': '已结束',
+    'filled': '已满员'
   }
   return statusMap[status] || status
 }
@@ -449,9 +423,9 @@ const getStatusText = (status) => {
 // 获取状态颜色
 const getStatusColor = (status) => {
   const colorMap = {
-    'active': 'success',
-    'paused': 'warning',
-    'closed': 'info'
+    'open': 'success',
+    'closed': 'info',
+    'filled': 'warning'
   }
   return colorMap[status] || 'default'
 }

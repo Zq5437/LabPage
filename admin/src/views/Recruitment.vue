@@ -3,63 +3,48 @@
     <!-- 搜索和操作栏 -->
     <div class="toolbar">
       <div class="toolbar-left">
-        <el-input
-          v-model="searchForm.search"
-          placeholder="搜索招生标题、描述..."
-          style="width: 300px"
-          clearable
-          @keyup.enter="handleSearch"
-        >
+        <el-input v-model="searchForm.search" placeholder="搜索招生标题、描述..." style="width: 300px" clearable
+          @keyup.enter="handleSearch">
           <template #prefix>
-            <el-icon><Search /></el-icon>
+            <el-icon>
+              <Search />
+            </el-icon>
           </template>
         </el-input>
-        
-        <el-select
-          v-model="searchForm.type"
-          placeholder="选择类型"
-          clearable
-          style="width: 150px"
-          @change="handleSearch"
-        >
-          <el-option label="硕士研究生" value="硕士研究生" />
-          <el-option label="博士研究生" value="博士研究生" />
-          <el-option label="博士后" value="博士后" />
-          <el-option label="访问学者" value="访问学者" />
-          <el-option label="实习生" value="实习生" />
+
+        <el-select v-model="searchForm.type" placeholder="选择类型" clearable style="width: 150px" @change="handleSearch">
+          <el-option label="硕士研究生" value="master" />
+          <el-option label="博士研究生" value="phd" />
+          <el-option label="博士后" value="postdoc" />
+          <el-option label="访问学者" value="visiting" />
         </el-select>
 
-        <el-select
-          v-model="searchForm.status"
-          placeholder="选择状态"
-          clearable
-          style="width: 120px"
-          @change="handleSearch"
-        >
-          <el-option label="正在招生" value="active" />
-          <el-option label="已暂停" value="inactive" />
+        <el-select v-model="searchForm.status" placeholder="选择状态" clearable style="width: 120px" @change="handleSearch">
+          <el-option label="正在招生" value="open" />
+          <el-option label="已结束" value="closed" />
+          <el-option label="已满员" value="filled" />
         </el-select>
 
         <el-button type="primary" @click="handleSearch">
-          <el-icon><Search /></el-icon>
+          <el-icon>
+            <Search />
+          </el-icon>
           搜索
         </el-button>
       </div>
 
       <div class="toolbar-right">
         <el-button type="primary" @click="handleCreate">
-          <el-icon><Plus /></el-icon>
+          <el-icon>
+            <Plus />
+          </el-icon>
           发布招生信息
         </el-button>
       </div>
     </div>
 
     <!-- 招生信息列表 -->
-    <el-table
-      :data="recruitment"
-      v-loading="loading"
-      empty-text="暂无招生信息"
-    >
+    <el-table :data="recruitment" v-loading="loading" empty-text="暂无招生信息">
       <el-table-column prop="title" label="招生标题" min-width="200" />
 
       <el-table-column prop="type" label="招生类型" width="120">
@@ -86,10 +71,7 @@
 
       <el-table-column prop="status" label="状态" width="100">
         <template #default="{ row }">
-          <el-tag
-            :type="getStatusType(row.status)"
-            size="small"
-          >
+          <el-tag :type="getStatusType(row.status)" size="small">
             {{ getStatusText(row.status) }}
           </el-tag>
         </template>
@@ -115,142 +97,89 @@
 
     <!-- 分页 -->
     <div class="pagination-container">
-      <el-pagination
-        v-model:current-page="pagination.page"
-        v-model:page-size="pagination.limit"
-        :page-sizes="[10, 20, 50]"
-        :total="pagination.total"
-        layout="total, sizes, prev, pager, next, jumper"
-        @size-change="loadRecruitment"
-        @current-change="loadRecruitment"
-      />
+      <el-pagination v-model:current-page="pagination.page" v-model:page-size="pagination.limit"
+        :page-sizes="[10, 20, 50]" :total="pagination.total" layout="total, sizes, prev, pager, next, jumper"
+        @size-change="loadRecruitment" @current-change="loadRecruitment" />
     </div>
 
     <!-- 添加/编辑招生信息对话框 -->
-    <el-dialog
-      v-model="dialogVisible"
-      :title="dialogTitle"
-      width="900px"
-      destroy-on-close
-    >
-      <el-form
-        ref="formRef"
-        :model="form"
-        :rules="rules"
-        label-width="100px"
-      >
+    <el-dialog v-model="dialogVisible" :title="dialogTitle" width="900px" destroy-on-close>
+      <el-form ref="formRef" :model="form" :rules="rules" label-width="100px">
         <el-row :gutter="20">
           <el-col :span="12">
             <el-form-item label="招生标题" prop="title">
-              <el-input
-                v-model="form.title"
-                placeholder="请输入招生标题"
-                maxlength="100"
-              />
+              <el-input v-model="form.title" placeholder="请输入招生标题" maxlength="100" />
             </el-form-item>
           </el-col>
 
           <el-col :span="12">
             <el-form-item label="招生类型" prop="type">
-              <el-select
-                v-model="form.type"
-                placeholder="选择招生类型"
-                style="width: 100%"
-                filterable
-                allow-create
-              >
-                <el-option label="硕士研究生" value="硕士研究生" />
-                <el-option label="博士研究生" value="博士研究生" />
-                <el-option label="博士后" value="博士后" />
-                <el-option label="访问学者" value="访问学者" />
-                <el-option label="实习生" value="实习生" />
+              <el-select v-model="form.type" placeholder="选择招生类型" style="width: 100%" filterable allow-create>
+                <el-option label="硕士研究生" value="master" />
+                <el-option label="博士研究生" value="phd" />
+                <el-option label="博士后" value="postdoc" />
+                <el-option label="访问学者" value="visiting" />
               </el-select>
+            </el-form-item>
+          </el-col>
+
+          <el-col :span="12">
+            <el-form-item label="招生名额" prop="positions">
+              <el-input-number v-model="form.positions" :min="1" :max="100" style="width: 100%" />
+            </el-form-item>
+          </el-col>
+
+          <el-col :span="12">
+            <el-form-item label="是否置顶">
+              <el-switch v-model="form.is_featured" active-text="置顶" inactive-text="普通" />
             </el-form-item>
           </el-col>
 
           <el-col :span="24">
             <el-form-item label="招生描述" prop="description">
-              <el-input
-                v-model="form.description"
-                type="textarea"
-                :rows="4"
-                placeholder="请输入详细的招生描述"
-                maxlength="2000"
-                show-word-limit
-              />
+              <el-input v-model="form.description" type="textarea" :rows="4" placeholder="请输入详细的招生描述" maxlength="2000"
+                show-word-limit />
             </el-form-item>
           </el-col>
 
           <el-col :span="24">
             <el-form-item label="招生要求">
-              <el-input
-                v-model="form.requirements"
-                type="textarea"
-                :rows="4"
-                placeholder="请输入招生要求和条件"
-                maxlength="2000"
-                show-word-limit
-              />
+              <el-input v-model="form.requirements" type="textarea" :rows="4" placeholder="请输入招生要求和条件" maxlength="2000"
+                show-word-limit />
             </el-form-item>
           </el-col>
 
-          <el-col :span="24">
-            <el-form-item label="待遇福利">
-              <el-input
-                v-model="form.benefits"
-                type="textarea"
-                :rows="3"
-                placeholder="请输入待遇福利信息"
-                maxlength="1000"
-              />
-            </el-form-item>
-          </el-col>
 
           <el-col :span="12">
             <el-form-item label="联系信息" prop="contact_info">
-              <el-input
-                v-model="form.contact_info"
-                type="textarea"
-                :rows="3"
-                placeholder="请输入联系方式（邮箱、电话等）"
-                maxlength="500"
-              />
+              <el-input v-model="form.contact_info" type="textarea" :rows="3" placeholder="请输入联系方式（邮箱、电话等）"
+                maxlength="500" />
             </el-form-item>
           </el-col>
 
           <el-col :span="12">
             <el-form-item label="截止日期">
-              <el-date-picker
-                v-model="form.deadline"
-                type="date"
-                placeholder="选择申请截止日期"
-                style="width: 100%"
-                format="YYYY-MM-DD"
-                value-format="YYYY-MM-DD"
-              />
+              <el-date-picker v-model="form.deadline" type="date" placeholder="选择申请截止日期" style="width: 100%"
+                format="YYYY-MM-DD" value-format="YYYY-MM-DD" />
             </el-form-item>
 
             <el-form-item label="状态">
               <el-radio-group v-model="form.status">
-                <el-radio label="active">正在招生</el-radio>
-                <el-radio label="inactive">已暂停</el-radio>
+                <el-radio label="open">正在招生</el-radio>
+                <el-radio label="closed">已结束</el-radio>
+                <el-radio label="filled">已满员</el-radio>
               </el-radio-group>
             </el-form-item>
           </el-col>
 
           <el-col :span="24">
             <el-form-item label="附件">
-              <el-upload
-                ref="uploadRef"
-                :auto-upload="false"
-                :limit="1"
-                accept=".pdf,.doc,.docx,image/*"
-                :on-change="handleFileChange"
-                :on-remove="handleFileRemove"
-                :file-list="fileList"
-              >
+              <el-upload ref="uploadRef" :auto-upload="false" :limit="1" accept=".pdf,.doc,.docx,image/*"
+                :on-change="handleFileChange" :on-remove="handleFileRemove" :file-list="fileList">
                 <el-button type="primary">
-                  <el-icon><Upload /></el-icon>
+                  <el-icon>
+                    <Upload />
+                  </el-icon>
                   选择文件
                 </el-button>
                 <template #tip>
@@ -311,12 +240,13 @@ const pagination = reactive({
 const form = reactive({
   title: '',
   type: '',
+  positions: 1,
   description: '',
   requirements: '',
-  benefits: '',
   contact_info: '',
   deadline: '',
-  status: 'active',
+  status: 'open',
+  is_featured: false,
   attachment: null
 })
 
@@ -350,10 +280,10 @@ const loadRecruitment = async () => {
       limit: pagination.limit,
       ...searchForm
     }
-    
-    const response = await recruitmentApi.getAdminList(params)
+
+    const response = await recruitmentApi.getList(params)
     recruitment.value = response.data || []
-    
+
     if (response.pagination) {
       pagination.total = response.pagination.total
       pagination.page = response.pagination.page
@@ -385,7 +315,7 @@ const handleCreate = () => {
 const handleEdit = (row) => {
   dialogMode.value = 'edit'
   currentId.value = row.id
-  
+
   // 填充表单数据
   Object.keys(form).forEach(key => {
     if (key in row) {
@@ -452,7 +382,7 @@ const handleSubmit = async () => {
     submitting.value = true
 
     const submitData = { ...form }
-    
+
     if (dialogMode.value === 'create') {
       await recruitmentApi.create(submitData)
       ElMessage.success('招生信息创建成功')
@@ -489,8 +419,9 @@ const resetForm = () => {
 // 获取状态类型
 const getStatusType = (status) => {
   const statusMap = {
-    active: 'success',
-    inactive: 'danger'
+    open: 'success',
+    closed: 'info',
+    filled: 'warning'
   }
   return statusMap[status] || 'info'
 }
@@ -498,8 +429,9 @@ const getStatusType = (status) => {
 // 获取状态文本
 const getStatusText = (status) => {
   const statusMap = {
-    active: '正在招生',
-    inactive: '已暂停'
+    open: '正在招生',
+    closed: '已结束',
+    filled: '已满员'
   }
   return statusMap[status] || status
 }
@@ -560,12 +492,12 @@ onMounted(() => {
   .toolbar {
     flex-direction: column;
   }
-  
+
   .toolbar-left,
   .toolbar-right {
     flex-direction: column;
   }
-  
+
   .toolbar-left .el-input,
   .toolbar-left .el-select {
     width: 100% !important;

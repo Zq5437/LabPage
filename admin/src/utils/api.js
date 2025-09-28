@@ -344,43 +344,6 @@ export const researchAreasApi = {
     delete: (id) => api.delete(`/research-areas/admin/delete/${id}`)
 }
 
-// 招生信息管理API
-export const recruitmentApi = {
-    // 获取招生信息列表（管理端）
-    getAdminList: (params) => api.get('/recruitment/admin/list', { params }),
-
-    // 获取招生信息详情
-    getDetail: (id) => api.get(`/recruitment/${id}`),
-
-    // 创建招生信息
-    create: (data) => {
-        const formData = new FormData()
-        Object.keys(data).forEach(key => {
-            if (data[key] !== null && data[key] !== undefined) {
-                formData.append(key, data[key])
-            }
-        })
-        return api.post('/recruitment/admin/create', formData, {
-            headers: { 'Content-Type': 'multipart/form-data' }
-        })
-    },
-
-    // 更新招生信息
-    update: (id, data) => {
-        const formData = new FormData()
-        Object.keys(data).forEach(key => {
-            if (data[key] !== null && data[key] !== undefined) {
-                formData.append(key, data[key])
-            }
-        })
-        return api.put(`/recruitment/admin/update/${id}`, formData, {
-            headers: { 'Content-Type': 'multipart/form-data' }
-        })
-    },
-
-    // 删除招生信息
-    delete: (id) => api.delete(`/recruitment/admin/delete/${id}`)
-}
 
 // 实验室信息管理API
 export const labInfoApi = {
@@ -454,6 +417,44 @@ export const uploadApi = {
             headers: { 'Content-Type': 'multipart/form-data' }
         })
     }
+}
+
+// 招聘信息管理API
+export const recruitmentApi = {
+    // 获取招聘信息列表（管理端）
+    getList: (params) => api.get('/recruitment/admin/list', { params }),
+
+    // 获取招聘信息详情
+    getDetail: (id) => api.get(`/recruitment/admin/${id}`),
+
+    // 创建招聘信息
+    create: (data) => {
+        const formData = new FormData()
+        Object.keys(data).forEach(key => {
+            if (data[key] !== null && data[key] !== undefined) {
+                formData.append(key, data[key])
+            }
+        })
+        return api.post('/recruitment/admin', formData, {
+            headers: { 'Content-Type': 'multipart/form-data' }
+        })
+    },
+
+    // 更新招聘信息
+    update: (id, data) => {
+        const formData = new FormData()
+        Object.keys(data).forEach(key => {
+            if (data[key] !== null && data[key] !== undefined) {
+                formData.append(key, data[key])
+            }
+        })
+        return api.put(`/recruitment/admin/${id}`, formData, {
+            headers: { 'Content-Type': 'multipart/form-data' }
+        })
+    },
+
+    // 删除招聘信息
+    delete: (id) => api.delete(`/recruitment/admin/${id}`)
 }
 
 export default api
