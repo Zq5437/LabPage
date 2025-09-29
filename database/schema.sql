@@ -208,6 +208,23 @@ CREATE TABLE IF NOT EXISTS site_statistics (
     INDEX idx_visit_time (visit_time)
 ) COMMENT='访问统计表';
 
+-- 联系留言表
+CREATE TABLE IF NOT EXISTS contact_messages (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    name VARCHAR(100) NOT NULL COMMENT '联系人姓名',
+    email VARCHAR(100) NOT NULL COMMENT '联系人邮箱',
+    phone VARCHAR(20) COMMENT '联系人电话',
+    subject ENUM('academic', 'project', 'admission', 'equipment', 'other') NOT NULL COMMENT '联系主题',
+    message TEXT NOT NULL COMMENT '留言内容',
+    status ENUM('unread', 'read', 'replied') DEFAULT 'unread' COMMENT '处理状态',
+    admin_reply TEXT COMMENT '管理员回复',
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    INDEX idx_status (status),
+    INDEX idx_subject (subject),
+    INDEX idx_created_at (created_at)
+) COMMENT='联系留言表';
+
 -- 插入默认管理员账户 (用户名: admin, 密码: admin123)
 INSERT INTO admins (username, password, email, name, role) VALUES 
 ('admin', '$2a$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'admin@lab.com', '系统管理员', 'super_admin');

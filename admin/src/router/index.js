@@ -137,6 +137,15 @@ const routes = [
                 }
             },
             {
+                path: 'contact-messages',
+                name: 'ContactMessages',
+                component: () => import('@/views/ContactMessages.vue'),
+                meta: {
+                    title: '联系留言',
+                    icon: 'ChatDotRound'
+                }
+            },
+            {
                 path: 'settings',
                 name: 'Settings',
                 component: () => import('@/views/Settings.vue'),

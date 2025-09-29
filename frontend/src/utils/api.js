@@ -114,4 +114,12 @@ export const projectsApi = {
     getDetail: (id) => api.get(`/projects/${id}`)
 }
 
+export const contactApi = {
+    // 提交联系表单
+    submit: (data) => api.post('/contact/submit', data),
+
+    // 获取实验室信息（用于联系页面）
+    getLabInfo: () => api.get('/lab-info')
+}
+
 export default api
