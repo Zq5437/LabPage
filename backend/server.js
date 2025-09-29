@@ -18,6 +18,7 @@ const equipmentRoutes = require('./routes/equipment');
 const researchAreasRoutes = require('./routes/research-areas');
 const recruitmentRoutes = require('./routes/recruitment');
 const labInfoRoutes = require('./routes/lab-info');
+const contactRoutes = require('./routes/contact');
 const publicRoutes = require('./routes/public');
 
 const app = express();
@@ -59,6 +60,7 @@ app.use('/api/equipment', equipmentRoutes);
 app.use('/api/research-areas', researchAreasRoutes);
 app.use('/api/recruitment', recruitmentRoutes);
 app.use('/api/lab-info', labInfoRoutes);
+app.use('/api/contact', contactRoutes);
 app.use('/api/public', publicRoutes);
 
 // 健康检查
