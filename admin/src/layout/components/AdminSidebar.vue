@@ -106,6 +106,14 @@
           <template #title>联系留言</template>
         </el-menu-item>
 
+        <!-- 访问统计 -->
+        <el-menu-item index="/analytics">
+          <el-icon>
+            <PieChart />
+          </el-icon>
+          <template #title>访问统计</template>
+        </el-menu-item>
+
         <!-- 系统管理 -->
         <el-sub-menu index="system" v-if="isSuperAdmin">
           <template #title>
@@ -150,7 +158,7 @@ import { useAuthStore } from '@/stores/auth'
 import {
   Monitor, DataAnalysis, OfficeBuilding, Document, Notebook,
   User, Folder, Reading, TrendCharts, Compass, UserFilled,
-  Setting, Tools, Avatar, ChatDotRound
+  Setting, Tools, Avatar, ChatDotRound, PieChart
 } from '@element-plus/icons-vue'
 
 defineProps({

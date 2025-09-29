@@ -146,6 +146,15 @@ const routes = [
                 }
             },
             {
+                path: 'analytics',
+                name: 'Analytics',
+                component: () => import('@/views/Analytics.vue'),
+                meta: {
+                    title: '访问统计',
+                    icon: 'PieChart'
+                }
+            },
+            {
                 path: 'settings',
                 name: 'Settings',
                 component: () => import('@/views/Settings.vue'),

@@ -262,18 +262,22 @@ router.post('/visit-log', [
 router.get('/admin/statistics', [authenticateToken, requireAdmin], async (req, res) => {
     try {
         const days = parseInt(req.query.days) || 30;
+        console.log('获取访问统计请求，days:', days);
 
         // 获取总访问量
-        const [totalVisits] = await db.query('SELECT COUNT(*) as total FROM site_statistics');
+        const totalVisitsResult = await db.query('SELECT COUNT(*) as total FROM site_statistics');
+        console.log('总访问量查询结果:', totalVisitsResult);
+        const totalVisits = totalVisitsResult.length > 0 ? totalVisitsResult[0].total : 0;
 
         // 获取最近N天的访问量
-        const [recentVisits] = await db.query(
+        const recentVisitsResult = await db.query(
             'SELECT COUNT(*) as total FROM site_statistics WHERE visit_time >= DATE_SUB(NOW(), INTERVAL ? DAY)',
             [days]
         );
+        const recentVisits = recentVisitsResult.length > 0 ? recentVisitsResult[0].total : 0;
 
         // 获取页面访问排行
-        const [pageStats] = await db.query(
+        const pageStats = await db.query(
             `SELECT page_url, COUNT(*) as visits 
        FROM site_statistics 
        WHERE visit_time >= DATE_SUB(NOW(), INTERVAL ? DAY)
@@ -284,7 +288,7 @@ router.get('/admin/statistics', [authenticateToken, requireAdmin], async (req, r
         );
 
         // 获取每日访问趋势
-        const [dailyStats] = await db.query(
+        const dailyStats = await db.query(
             `SELECT DATE(visit_time) as date, COUNT(*) as visits 
        FROM site_statistics 
        WHERE visit_time >= DATE_SUB(NOW(), INTERVAL ? DAY)
@@ -296,10 +300,10 @@ router.get('/admin/statistics', [authenticateToken, requireAdmin], async (req, r
         res.json({
             success: true,
             data: {
-                totalVisits: totalVisits[0].total,
-                recentVisits: recentVisits[0].total,
-                pageStats,
-                dailyStats
+                totalVisits: totalVisits || 0,
+                recentVisits: recentVisits || 0,
+                pageStats: pageStats || [],
+                dailyStats: dailyStats || []
             }
         });
 

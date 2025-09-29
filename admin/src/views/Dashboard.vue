@@ -201,20 +201,31 @@ const statsData = ref([
 // 加载统计数据
 const loadStats = async () => {
   try {
-    // 这里可以调用具体的统计接口
-    // 暂时使用模拟数据
+    // 加载访问统计数据
+    const analyticsResponse = await publicApi.getStatistics({ days: 30 })
+    const analyticsData = analyticsResponse.data || {}
+
+    // 模拟其他统计数据（实际项目中应该有对应的API）
+    statsData.value[0].value = 128  // 新闻数量
+    statsData.value[1].value = 45   // 成员数量  
+    statsData.value[2].value = 23   // 项目数量
+    statsData.value[3].value = analyticsData.totalVisits || 0  // 总访问量
+
+    // 更新访问量趋势文本
+    const recentVisits = analyticsData.recentVisits || 0
+    const averageDaily = Math.round(recentVisits / 30)
+    statsData.value[3].trend = {
+      type: 'up',
+      text: `日均 ${averageDaily} 次访问`
+    }
+
+  } catch (error) {
+    console.error('加载统计数据失败:', error)
+    // 出错时使用默认值
     statsData.value[0].value = 128
     statsData.value[1].value = 45
     statsData.value[2].value = 23
-    statsData.value[3].value = 8650
-
-    // 实际项目中可以这样调用：
-    // const stats = await publicApi.getStatistics()
-    // statsData.value.forEach(item => {
-    //   item.value = stats[item.key] || 0
-    // })
-  } catch (error) {
-    console.error('加载统计数据失败:', error)
+    statsData.value[3].value = 0
   }
 }
 

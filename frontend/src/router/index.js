@@ -1,4 +1,5 @@
 import { createRouter, createWebHistory } from 'vue-router'
+import { debouncedLogVisit, getCurrentPagePath } from '@/utils/analytics'
 
 const routes = [
     {
@@ -99,7 +100,7 @@ const router = createRouter({
     }
 })
 
-// 路由守卫 - 设置页面标题
+// 路由守卫 - 设置页面标题和记录访问统计
 router.beforeEach((to, from, next) => {
     // 设置页面标题
     const baseTitle = '智能计算实验室'
@@ -110,6 +111,18 @@ router.beforeEach((to, from, next) => {
     }
 
     next()
+})
+
+// 路由后置守卫 - 记录访问统计
+router.afterEach((to, from) => {
+    // 记录页面访问统计
+    const currentPath = getCurrentPagePath()
+    const referer = from.fullPath || ''
+
+    // 延迟记录，确保页面已加载
+    setTimeout(() => {
+        debouncedLogVisit(currentPath, referer)
+    }, 500)
 })
 
 export default router
