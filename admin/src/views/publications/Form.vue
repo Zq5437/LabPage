@@ -1,84 +1,145 @@
 <template>
-  <div class="publication-form">
-    <el-card>
-      <template #header>
-        <div class="card-header">
-          <h3>{{ isEdit ? '编辑论文' : '添加论文' }}</h3>
-          <el-button @click="$router.back()">返回</el-button>
+  <div class="publication-form-container">
+    <!-- 页面标题 -->
+    <div class="page-header">
+      <div class="header-left">
+        <el-button @click="goBack" type="text">
+          <el-icon>
+            <ArrowLeft />
+          </el-icon>
+          返回列表
+        </el-button>
+        <h2>{{ isEdit ? '编辑论文' : '添加论文' }}</h2>
+      </div>
+      <div class="header-right">
+        <el-button @click="handleSave" type="primary" :loading="saving">
+          <el-icon>
+            <Check />
+          </el-icon>
+          保存
+        </el-button>
+      </div>
+    </div>
+
+    <!-- 表单内容 -->
+    <el-card class="form-card">
+      <el-form ref="formRef" :model="form" :rules="rules" label-width="120px" label-position="left">
+        <!-- 基本信息 -->
+        <div class="form-section">
+          <h3>基本信息</h3>
+
+          <el-form-item label="论文标题" prop="title" required>
+            <el-input v-model="form.title" placeholder="请输入论文标题" maxlength="500" show-word-limit type="textarea"
+              :rows="3" />
+          </el-form-item>
+
+          <el-form-item label="作者" prop="authors" required>
+            <el-input v-model="form.authors" placeholder="请输入作者，多个作者用逗号分隔" maxlength="1000" show-word-limit />
+          </el-form-item>
+
+          <el-row :gutter="20">
+            <el-col :span="12">
+              <el-form-item label="期刊/会议" prop="journal">
+                <el-input v-model="form.journal" placeholder="请输入期刊或会议名称" maxlength="200" />
+              </el-form-item>
+            </el-col>
+            <el-col :span="12">
+              <el-form-item label="论文类型" prop="type" required>
+                <el-select v-model="form.type" placeholder="请选择论文类型" style="width: 100%">
+                  <el-option label="期刊论文" value="journal" />
+                  <el-option label="会议论文" value="conference" />
+                  <el-option label="专著章节" value="book_chapter" />
+                  <el-option label="专利" value="patent" />
+                  <el-option label="学位论文" value="thesis" />
+                </el-select>
+              </el-form-item>
+            </el-col>
+          </el-row>
+
+          <el-row :gutter="20">
+            <el-col :span="8">
+              <el-form-item label="发表年份" prop="year" required>
+                <el-date-picker v-model="form.year" type="year" placeholder="选择年份" style="width: 100%"
+                  value-format="YYYY" />
+              </el-form-item>
+            </el-col>
+            <el-col :span="8">
+              <el-form-item label="卷号" prop="volume">
+                <el-input v-model="form.volume" placeholder="请输入卷号" maxlength="50" />
+              </el-form-item>
+            </el-col>
+            <el-col :span="8">
+              <el-form-item label="期号" prop="issue">
+                <el-input v-model="form.issue" placeholder="请输入期号" maxlength="50" />
+              </el-form-item>
+            </el-col>
+          </el-row>
+
+          <el-row :gutter="20">
+            <el-col :span="12">
+              <el-form-item label="页码" prop="pages">
+                <el-input v-model="form.pages" placeholder="例如：1-10 或 123-145" maxlength="50" />
+              </el-form-item>
+            </el-col>
+            <el-col :span="12">
+              <el-form-item label="DOI" prop="doi">
+                <el-input v-model="form.doi" placeholder="数字对象标识符" maxlength="100" />
+              </el-form-item>
+            </el-col>
+          </el-row>
+
+          <el-form-item label="论文链接" prop="url">
+            <el-input v-model="form.url" placeholder="论文在线链接地址" maxlength="500" />
+          </el-form-item>
         </div>
-      </template>
 
-      <el-form ref="formRef" :model="form" :rules="rules" label-width="120px" style="max-width: 800px">
-        <el-row :gutter="20">
-          <el-col :span="24">
-            <el-form-item label="论文标题" prop="title">
-              <el-input v-model="form.title" placeholder="请输入论文标题" maxlength="200" show-word-limit />
-            </el-form-item>
-          </el-col>
+        <!-- 详细信息 -->
+        <div class="form-section">
+          <h3>详细信息</h3>
 
-          <el-col :span="12">
-            <el-form-item label="作者" prop="authors">
-              <el-input v-model="form.authors" placeholder="作者姓名，多个作者用逗号分隔" maxlength="500" />
-            </el-form-item>
-          </el-col>
+          <el-form-item label="摘要" prop="abstract">
+            <el-input v-model="form.abstract" type="textarea" :rows="6" placeholder="请输入论文摘要" maxlength="2000"
+              show-word-limit />
+          </el-form-item>
 
-          <el-col :span="12">
-            <el-form-item label="期刊名称" prop="journal">
-              <el-input v-model="form.journal" placeholder="请输入期刊名称" maxlength="200" />
-            </el-form-item>
-          </el-col>
+          <el-form-item label="关键词" prop="keywords">
+            <el-input v-model="form.keywords" placeholder="请输入关键词，多个关键词用逗号分隔" maxlength="500" show-word-limit />
+            <div class="form-tip">
+              多个关键词请用英文逗号分隔，例如：机器学习,深度学习,神经网络
+            </div>
+          </el-form-item>
 
-          <el-col :span="12">
-            <el-form-item label="发布日期" prop="publish_date">
-              <el-date-picker v-model="form.publish_date" type="date" placeholder="选择发布日期" style="width: 100%"
-                format="YYYY-MM-DD" value-format="YYYY-MM-DD" />
-            </el-form-item>
-          </el-col>
+          <el-row :gutter="20">
+            <el-col :span="12">
+              <el-form-item label="影响因子" prop="impact_factor">
+                <el-input-number v-model="form.impact_factor" :precision="3" :step="0.001" :min="0" :max="100"
+                  placeholder="影响因子" style="width: 100%" />
+              </el-form-item>
+            </el-col>
+            <el-col :span="12">
+              <el-form-item label="引用次数" prop="citations">
+                <el-input-number v-model="form.citations" :min="0" :max="10000" placeholder="引用次数"
+                  style="width: 100%" />
+              </el-form-item>
+            </el-col>
+          </el-row>
 
-          <el-col :span="12">
-            <el-form-item label="分类" prop="category">
-              <el-select v-model="form.category" placeholder="选择或输入分类" filterable allow-create style="width: 100%">
-                <el-option v-for="category in categories" :key="category.category" :label="category.category"
-                  :value="category.category" />
-              </el-select>
-            </el-form-item>
-          </el-col>
+          <el-form-item label="重点论文">
+            <el-switch v-model="form.is_featured" active-text="是" inactive-text="否" />
+            <div class="form-tip">
+              重点论文将在前端页面中突出显示
+            </div>
+          </el-form-item>
+        </div>
 
-          <el-col :span="12">
-            <el-form-item label="DOI">
-              <el-input v-model="form.doi" placeholder="请输入DOI" maxlength="100" />
-            </el-form-item>
-          </el-col>
+        <!-- 文件上传 -->
+        <div class="form-section">
+          <h3>PDF文件</h3>
 
-          <el-col :span="6">
-            <el-form-item label="引用数">
-              <el-input-number v-model="form.citation_count" :min="0" style="width: 100%" />
-            </el-form-item>
-          </el-col>
-
-          <el-col :span="6">
-            <el-form-item label="影响因子">
-              <el-input-number v-model="form.impact_factor" :min="0" :precision="3" style="width: 100%" />
-            </el-form-item>
-          </el-col>
-
-          <el-col :span="24">
-            <el-form-item label="摘要">
-              <el-input v-model="form.abstract" type="textarea" :rows="4" placeholder="请输入论文摘要" maxlength="1000"
-                show-word-limit />
-            </el-form-item>
-          </el-col>
-
-          <el-col :span="24">
-            <el-form-item label="关键词">
-              <el-input v-model="form.keywords" placeholder="关键词，多个关键词用逗号分隔" maxlength="200" />
-            </el-form-item>
-          </el-col>
-
-          <el-col :span="12">
-            <el-form-item label="PDF文件">
-              <el-upload ref="uploadRef" :auto-upload="false" :limit="1" accept=".pdf,.doc,.docx"
-                :on-change="handleFileChange" :on-remove="handleFileRemove" :file-list="fileList">
+          <el-form-item label="PDF文件" prop="pdf_file">
+            <div class="upload-section">
+              <el-upload ref="uploadRef" :auto-upload="false" :show-file-list="true" :limit="1" accept=".pdf,.doc,.docx"
+                :on-change="handleFileChange" :on-remove="handleFileRemove" :before-upload="beforeUpload">
                 <el-button type="primary">
                   <el-icon>
                     <Upload />
@@ -86,201 +147,363 @@
                   选择文件
                 </el-button>
                 <template #tip>
-                  <div class="el-upload__tip">
-                    只能上传PDF、DOC、DOCX文件，且不超过10MB
+                  <div class="upload-tip">
+                    只能上传PDF、DOC、DOCX格式文件，且不超过10MB
                   </div>
                 </template>
               </el-upload>
-            </el-form-item>
-          </el-col>
 
-          <el-col :span="12">
-            <el-form-item label="状态" prop="status">
-              <el-radio-group v-model="form.status">
-                <el-radio label="published">已发布</el-radio>
-                <el-radio label="draft">草稿</el-radio>
-                <el-radio label="archived">已归档</el-radio>
-              </el-radio-group>
-            </el-form-item>
-          </el-col>
-        </el-row>
-
-        <el-form-item>
-          <el-button type="primary" @click="handleSubmit" :loading="submitting">
-            {{ isEdit ? '更新' : '创建' }}
-          </el-button>
-          <el-button @click="handleReset">重置</el-button>
-          <el-button @click="$router.back()">取消</el-button>
-        </el-form-item>
+              <!-- 当前文件显示 -->
+              <div v-if="currentPdfFile && !uploadFile" class="current-file">
+                <div class="file-info">
+                  <el-icon>
+                    <Document />
+                  </el-icon>
+                  <span>当前文件：{{ currentPdfFile }}</span>
+                  <el-button type="text" @click="viewCurrentPDF">预览</el-button>
+                  <el-button type="text" @click="removeCurrentPDF">删除</el-button>
+                </div>
+              </div>
+            </div>
+          </el-form-item>
+        </div>
       </el-form>
     </el-card>
   </div>
 </template>
 
 <script setup>
-import { ref, reactive, computed, onMounted } from 'vue'
-import { useRoute, useRouter } from 'vue-router'
-import { ElMessage } from 'element-plus'
-import { publicationsApi } from '@/utils/api'
-import { Upload } from '@element-plus/icons-vue'
+import { ref, reactive, onMounted, nextTick } from 'vue'
+import { useRouter, useRoute } from 'vue-router'
+import { ElMessage, ElMessageBox } from 'element-plus'
+import { ArrowLeft, Check, Upload, Document } from '@element-plus/icons-vue'
+import api from '@/utils/api'
 
-const route = useRoute()
 const router = useRouter()
-
-// 表单引用
-const formRef = ref()
-const uploadRef = ref()
-
-// 是否为编辑模式
-const isEdit = computed(() => !!route.params.id)
+const route = useRoute()
 
 // 响应式数据
-const submitting = ref(false)
-const categories = ref([])
-const fileList = ref([])
+const formRef = ref()
+const uploadRef = ref()
+const saving = ref(false)
+const isEdit = ref(false)
+const publicationId = ref(null)
+const uploadFile = ref(null)
+const currentPdfFile = ref('')
 
 // 表单数据
 const form = reactive({
   title: '',
   authors: '',
   journal: '',
-  publish_date: '',
-  category: '',
+  volume: '',
+  issue: '',
+  pages: '',
+  year: '',
   doi: '',
+  url: '',
   abstract: '',
   keywords: '',
-  citation_count: 0,
-  impact_factor: 0,
-  status: 'published',
-  pdf: null
+  type: 'journal',
+  impact_factor: null,
+  citations: 0,
+  is_featured: false
 })
 
 // 表单验证规则
 const rules = {
   title: [
-    { required: true, message: '请输入论文标题', trigger: 'blur' }
+    { required: true, message: '请输入论文标题', trigger: 'blur' },
+    { max: 500, message: '标题长度不能超过500个字符', trigger: 'blur' }
   ],
   authors: [
-    { required: true, message: '请输入作者', trigger: 'blur' }
+    { required: true, message: '请输入作者', trigger: 'blur' },
+    { max: 1000, message: '作者长度不能超过1000个字符', trigger: 'blur' }
+  ],
+  year: [
+    { required: true, message: '请选择发表年份', trigger: 'change' }
+  ],
+  type: [
+    { required: true, message: '请选择论文类型', trigger: 'change' }
   ],
   journal: [
-    { required: true, message: '请输入期刊名称', trigger: 'blur' }
+    { max: 200, message: '期刊名称长度不能超过200个字符', trigger: 'blur' }
   ],
-  publish_date: [
-    { required: true, message: '请选择发布日期', trigger: 'change' }
+  doi: [
+    { max: 100, message: 'DOI长度不能超过100个字符', trigger: 'blur' }
   ],
-  category: [
-    { required: true, message: '请选择分类', trigger: 'change' }
+  url: [
+    { max: 500, message: 'URL长度不能超过500个字符', trigger: 'blur' },
+    { type: 'url', message: '请输入正确的URL格式', trigger: 'blur' }
   ]
 }
 
-// 文件上传处理
-const handleFileChange = (file) => {
-  form.pdf = file.raw
+// 返回列表
+const goBack = () => {
+  router.push('/publications')
 }
 
-const handleFileRemove = () => {
-  form.pdf = null
-}
-
-// 加载分类列表
-const loadCategories = async () => {
+// 加载论文数据（编辑模式）
+const loadPublication = async (id) => {
   try {
-    const data = await publicationsApi.getCategories()
-    categories.value = data || []
+    const resp = await api.get(`/publications/${id}`)
+    if (resp.success && resp.code === 200) {
+      const data = resp.data
+      if (data) {
+        Object.keys(form).forEach(key => {
+          if (data[key] !== undefined) {
+            form[key] = data[key]
+          }
+        })
+
+        // 处理PDF文件信息
+        if (data.pdf_path) {
+          currentPdfFile.value = data.pdf_path.split('/').pop()
+        }
+      }
+    }
   } catch (error) {
-    console.error('加载分类失败:', error)
+    console.error('加载论文数据失败:', error)
+    ElMessage.error('加载论文数据失败')
+    goBack()
   }
 }
 
-// 加载论文详情（编辑模式）
-const loadPublicationDetail = async () => {
-  if (!isEdit.value) return
+// 文件选择处理
+const handleFileChange = (file) => {
+  uploadFile.value = file
+}
 
+// 文件移除处理
+const handleFileRemove = () => {
+  uploadFile.value = null
+}
+
+// 文件上传前验证
+const beforeUpload = (file) => {
+  const isValidType = ['application/pdf', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'].includes(file.type)
+  const isLt10M = file.size / 1024 / 1024 < 10
+
+  if (!isValidType) {
+    ElMessage.error('只能上传PDF、DOC、DOCX格式的文件!')
+    return false
+  }
+  if (!isLt10M) {
+    ElMessage.error('上传文件大小不能超过10MB!')
+    return false
+  }
+  return true
+}
+
+// 查看当前PDF
+const viewCurrentPDF = () => {
+  if (currentPdfFile.value) {
+    const url = `/uploads/publications/${currentPdfFile.value}`
+    window.open(url, '_blank')
+  }
+}
+
+// 删除当前PDF
+const removeCurrentPDF = async () => {
   try {
-    const data = await publicationsApi.getDetail(route.params.id)
+    await ElMessageBox.confirm('确定要删除当前PDF文件吗？', '删除确认', {
+      confirmButtonText: '确定',
+      cancelButtonText: '取消',
+      type: 'warning'
+    })
+    currentPdfFile.value = ''
+  } catch (error) {
+    // 用户取消
+  }
+}
+
+// 保存表单
+const handleSave = async () => {
+  try {
+    // 表单验证
+    await formRef.value.validate()
+
+    saving.value = true
+
+    // 创建FormData对象
+    const formData = new FormData()
+
+    // 添加表单字段
     Object.keys(form).forEach(key => {
-      if (key in data) {
-        form[key] = data[key]
+      if (form[key] !== null && form[key] !== '') {
+        formData.append(key, form[key])
       }
     })
 
-    // 处理现有PDF文件
-    if (data.pdf_url) {
-      fileList.value = [{
-        name: '当前PDF文件',
-        url: data.pdf_url
-      }]
+    // 添加文件
+    if (uploadFile.value) {
+      formData.append('pdf_file', uploadFile.value.raw)
     }
-  } catch (error) {
-    console.error('加载论文详情失败:', error)
-    ElMessage.error('加载论文详情失败')
-    router.back()
-  }
-}
 
-// 提交表单
-const handleSubmit = async () => {
-  try {
-    await formRef.value.validate()
-    submitting.value = true
-
-    const submitData = { ...form }
-
+    // 发送请求
+    let resp
     if (isEdit.value) {
-      await publicationsApi.update(route.params.id, submitData)
-      ElMessage.success('论文更新成功')
+      resp = await api.put(`/publications/admin/update/${publicationId.value}`, formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data'
+        }
+      })
     } else {
-      await publicationsApi.create(submitData)
-      ElMessage.success('论文创建成功')
+      resp = await api.post('/publications/admin/create', formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data'
+        }
+      })
     }
 
-    router.push('/publications')
-  } catch (error) {
-    console.error('提交失败:', error)
-  } finally {
-    submitting.value = false
-  }
-}
+    if (resp.success && resp.code === 200) {
+      ElMessage.success(resp.message || (isEdit.value ? '更新成功' : '创建成功'))
+      goBack()
+    }
 
-// 重置表单
-const handleReset = () => {
-  formRef.value.resetFields()
-  fileList.value = []
-  form.pdf = null
+  } catch (error) {
+    if (error.message && error.message.includes('validation')) {
+      // 表单验证错误，不显示消息
+      return
+    }
+    console.error('保存失败:', error)
+    ElMessage.error('保存失败')
+  } finally {
+    saving.value = false
+  }
 }
 
 // 初始化
 onMounted(() => {
-  loadCategories()
-  if (isEdit.value) {
-    loadPublicationDetail()
+  const id = route.params.id
+  if (id) {
+    isEdit.value = true
+    publicationId.value = id
+    loadPublication(id)
   }
 })
 </script>
 
 <style scoped>
-.publication-form {
+.publication-form-container {
   padding: 20px;
 }
 
-.card-header {
+.page-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  margin-bottom: 20px;
 }
 
-.card-header h3 {
+.header-left {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.header-left h2 {
   margin: 0;
+  color: #303133;
+  font-size: 24px;
 }
 
-:deep(.el-upload-list) {
-  margin-top: 10px;
+.form-card {
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
 
-:deep(.el-upload__tip) {
-  margin-top: 5px;
+.form-section {
+  margin-bottom: 30px;
+  padding-bottom: 20px;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.form-section:last-child {
+  border-bottom: none;
+  margin-bottom: 0;
+}
+
+.form-section h3 {
+  margin: 0 0 20px 0;
+  color: #303133;
+  font-size: 18px;
+  font-weight: 600;
+}
+
+.form-tip {
   font-size: 12px;
-  color: var(--el-text-color-secondary);
+  color: #909399;
+  margin-top: 5px;
+  line-height: 1.4;
+}
+
+.upload-section {
+  width: 100%;
+}
+
+.upload-tip {
+  font-size: 12px;
+  color: #909399;
+  margin-top: 8px;
+}
+
+.current-file {
+  margin-top: 15px;
+  padding: 12px;
+  background: #f5f7fa;
+  border-radius: 4px;
+  border: 1px solid #e4e7ed;
+}
+
+.file-info {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.file-info span {
+  flex: 1;
+  color: #606266;
+}
+
+:deep(.el-form-item__label) {
+  font-weight: 500;
+  color: #606266;
+}
+
+:deep(.el-textarea__inner) {
+  resize: vertical;
+}
+
+:deep(.el-upload-dragger) {
+  width: 100%;
+}
+
+@media (max-width: 768px) {
+  .page-header {
+    flex-direction: column;
+    gap: 15px;
+    align-items: flex-start;
+  }
+
+  .header-left {
+    width: 100%;
+  }
+
+  .header-right {
+    width: 100%;
+  }
+
+  .header-right .el-button {
+    width: 100%;
+  }
+
+  :deep(.el-form-item) {
+    margin-bottom: 20px;
+  }
+
+  :deep(.el-col) {
+    margin-bottom: 10px;
+  }
 }
 </style>

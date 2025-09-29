@@ -1,535 +1,615 @@
 const express = require('express');
 const router = express.Router();
+const db = require('../database/connection');
+const { authenticateToken } = require('../middleware/auth');
 const multer = require('multer');
 const path = require('path');
 const fs = require('fs');
 
-const db = require('../database/connection');
-const { verifyToken, verifyAdmin } = require('../middleware/auth');
-
-// 文件上传配置
+// 配置文件上传
 const storage = multer.diskStorage({
-    destination: (req, file, cb) => {
+    destination: function (req, file, cb) {
         const uploadPath = path.join(__dirname, '../uploads/publications');
         if (!fs.existsSync(uploadPath)) {
             fs.mkdirSync(uploadPath, { recursive: true });
         }
         cb(null, uploadPath);
     },
-    filename: (req, file, cb) => {
+    filename: function (req, file, cb) {
         const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
-        cb(null, file.fieldname + '-' + uniqueSuffix + path.extname(file.originalname));
+        cb(null, 'publication-' + uniqueSuffix + path.extname(file.originalname));
     }
 });
 
 const upload = multer({
     storage: storage,
     limits: {
-        fileSize: 10 * 1024 * 1024 // 10MB
-    },
-    fileFilter: (req, file, cb) => {
-        const allowedTypes = /pdf|doc|docx/;
-        const extname = allowedTypes.test(path.extname(file.originalname).toLowerCase());
-        const mimetype = allowedTypes.test(file.mimetype);
-
-        if (mimetype && extname) {
-            return cb(null, true);
-        } else {
-            cb(new Error('只允许上传 PDF、DOC、DOCX 格式的文件！'));
-        }
+        fileSize: 10 * 1024 * 1024 // 10MB限制
     }
 });
 
-// 获取论文列表 (公开)
+// 获取论文列表（公开接口）
 router.get('/list', async (req, res) => {
     try {
         const {
             page = 1,
             limit = 10,
-            category,
-            year,
-            search,
-            sort = 'created_at',
+            search = '',
+            category = '',
+            year = '',
+            sort = 'year',
             order = 'DESC'
         } = req.query;
 
-        const offset = (page - 1) * limit;
-        let whereClause = 'WHERE status = "published"';
+        const pageNum = parseInt(page, 10) || 1;
+        const limitNum = parseInt(limit, 10) || 10;
+        const offset = (pageNum - 1) * limitNum;
+        let whereClause = '1=1';
         const params = [];
+
+        // 搜索条件
+        if (search) {
+            whereClause += ` AND (title LIKE ? OR authors LIKE ? OR journal LIKE ? OR keywords LIKE ?)`;
+            const searchTerm = `%${search}%`;
+            params.push(searchTerm, searchTerm, searchTerm, searchTerm);
+        }
 
         // 分类筛选
         if (category) {
-            whereClause += ' AND category = ?';
+            whereClause += ` AND type = ?`;
             params.push(category);
         }
 
         // 年份筛选
         if (year) {
-            whereClause += ' AND YEAR(publish_date) = ?';
+            whereClause += ` AND year = ?`;
             params.push(year);
         }
 
-        // 搜索功能
-        if (search) {
-            whereClause += ' AND (title LIKE ? OR authors LIKE ? OR journal LIKE ? OR keywords LIKE ?)';
-            const searchTerm = `%${search}%`;
-            params.push(searchTerm, searchTerm, searchTerm, searchTerm);
+        // 构建排序
+        const validSorts = ['year', 'citations', 'impact_factor', 'created_at', 'publish_date'];
+        const validOrders = ['ASC', 'DESC'];
+        let sortField = validSorts.includes(sort) ? sort : 'year';
+        // 将publish_date映射为year字段
+        if (sortField === 'publish_date') {
+            sortField = 'year';
         }
+        const sortOrder = validOrders.includes(order.toUpperCase()) ? order.toUpperCase() : 'DESC';
 
-        // 获取总数
-        const countResult = await db.query(
-            `SELECT COUNT(*) as total FROM publications ${whereClause}`,
-            params
-        );
+        // 查询总数
+        const countQuery = `SELECT COUNT(*) as total FROM publications WHERE ${whereClause}`;
+        const countResult = await db.query(countQuery, params);
+        const total = countResult[0].total;
 
-        const total = countResult && countResult[0] && countResult[0].total ? countResult[0].total : 0;
+        // 查询数据（将 LIMIT/OFFSET 以安全整数直接写入SQL，避免占位符导致错误）
+        const dataQuery = `
+      SELECT id, title, authors, journal, volume, issue, pages, year, 
+             year as publish_date, doi, url, pdf_path, abstract, keywords, 
+             type, impact_factor, citations as citation_count, is_featured,
+             created_at, updated_at
+      FROM publications 
+      WHERE ${whereClause}
+      ORDER BY ${sortField} ${sortOrder}
+      LIMIT ${limitNum} OFFSET ${offset}
+    `;
 
-        // 获取论文列表
-        const publications = await db.query(
-            `SELECT id, title, authors, journal, publish_date, category, 
-                    doi, pdf_url, abstract, keywords, citation_count, impact_factor,
-                    created_at, updated_at 
-             FROM publications ${whereClause} 
-             ORDER BY ${sort} ${order} 
-             LIMIT ${parseInt(limit)} OFFSET ${parseInt(offset)}`,
-            [...params]
-        );
+        const publications = await db.query(dataQuery, params);
+
+        // 处理PDF路径
+        publications.forEach(pub => {
+            if (pub.pdf_path) {
+                pub.pdf_url = `/uploads/publications/${path.basename(pub.pdf_path)}`;
+            }
+        });
 
         res.json({
             success: true,
-            data: publications || [],
+            code: 200,
+            message: 'success',
+            data: publications,
             pagination: {
-                page: parseInt(page),
-                limit: parseInt(limit),
+                page: pageNum,
+                limit: limitNum,
                 total: total,
-                pages: Math.ceil(total / limit)
+                pages: Math.ceil(total / limitNum)
             }
         });
+
     } catch (error) {
-        console.error('获取论文列表错误:', error);
+        console.error('获取论文列表失败:', error);
         res.status(500).json({
             success: false,
-            message: '获取论文列表失败'
+            code: 500,
+            message: '获取论文列表失败',
+            error: error.message
         });
     }
 });
 
-// 获取单个论文详情 (公开)
+// 获取论文统计信息（公开接口）
+router.get('/stats/categories', async (req, res) => {
+    try {
+        const query = `
+      SELECT type as category, COUNT(*) as count 
+      FROM publications 
+      GROUP BY type 
+      ORDER BY count DESC
+    `;
+
+        const result = await db.query(query);
+
+        res.json({
+            success: true,
+            code: 200,
+            message: 'success',
+            data: result
+        });
+    } catch (error) {
+        console.error('获取分类统计失败:', error);
+        res.status(500).json({
+            success: false,
+            code: 500,
+            message: '获取分类统计失败',
+            error: error.message
+        });
+    }
+});
+
+// 获取论文年份统计（公开接口）
+router.get('/stats/years', async (req, res) => {
+    try {
+        const query = `
+      SELECT year, COUNT(*) as count 
+      FROM publications 
+      GROUP BY year 
+      ORDER BY year DESC
+    `;
+
+        const result = await db.query(query);
+
+        res.json({
+            success: true,
+            code: 200,
+            message: 'success',
+            data: result
+        });
+    } catch (error) {
+        console.error('获取年份统计失败:', error);
+        res.status(500).json({
+            success: false,
+            code: 500,
+            message: '获取年份统计失败',
+            error: error.message
+        });
+    }
+});
+
+// 获取论文详情（公开接口）
 router.get('/:id', async (req, res) => {
     try {
-        const publicationId = req.params.id;
+        const { id } = req.params;
 
-        const publications = await db.query(
-            'SELECT * FROM publications WHERE id = ? AND status = "published"',
-            [publicationId]
-        );
+        const query = `
+      SELECT id, title, authors, journal, volume, issue, pages, year, doi, url, 
+             pdf_path, abstract, keywords, type, impact_factor, citations, is_featured,
+             created_at, updated_at
+      FROM publications 
+      WHERE id = ?
+    `;
 
-        if (!publications || publications.length === 0) {
+        const result = await db.query(query, [id]);
+
+        if (result.length === 0) {
             return res.status(404).json({
                 success: false,
+                code: 404,
                 message: '论文不存在'
             });
         }
 
+        const publication = result[0];
+
+        // 处理PDF路径
+        if (publication.pdf_path) {
+            publication.pdf_url = `/uploads/publications/${path.basename(publication.pdf_path)}`;
+        }
+
         res.json({
             success: true,
-            data: publications[0]
+            code: 200,
+            message: 'success',
+            data: publication
         });
+
     } catch (error) {
-        console.error('获取论文详情错误:', error);
+        console.error('获取论文详情失败:', error);
         res.status(500).json({
             success: false,
-            message: '获取论文详情失败'
+            code: 500,
+            message: '获取论文详情失败',
+            error: error.message
         });
     }
 });
 
-// 获取论文分类统计 (公开)
-router.get('/stats/categories', async (req, res) => {
-    try {
-        const stats = await db.query(
-            `SELECT category, COUNT(*) as count 
-             FROM publications 
-             WHERE status = "published" 
-             GROUP BY category 
-             ORDER BY count DESC`
-        );
+// ==================== 管理员接口 ====================
 
-        res.json({
-            success: true,
-            data: stats || []
-        });
-    } catch (error) {
-        console.error('获取论文分类统计错误:', error);
-        res.status(500).json({
-            success: false,
-            message: '获取统计数据失败'
-        });
-    }
-});
-
-// 获取年份统计 (公开)
-router.get('/stats/years', async (req, res) => {
-    try {
-        const stats = await db.query(
-            `SELECT YEAR(publish_date) as year, COUNT(*) as count 
-             FROM publications 
-             WHERE status = "published" 
-             GROUP BY YEAR(publish_date) 
-             ORDER BY year DESC`
-        );
-
-        res.json({
-            success: true,
-            data: stats || []
-        });
-    } catch (error) {
-        console.error('获取论文年份统计错误:', error);
-        res.status(500).json({
-            success: false,
-            message: '获取统计数据失败'
-        });
-    }
-});
-
-// ============== 管理员接口 ==============
-
-// 获取论文列表 (管理员)
-router.get('/admin/list', verifyToken, verifyAdmin, async (req, res) => {
+// 获取管理员论文列表
+router.get('/admin/list', authenticateToken, async (req, res) => {
     try {
         const {
             page = 1,
             limit = 10,
-            category,
-            status,
-            search,
+            search = '',
+            type = '',
+            year = '',
             sort = 'created_at',
             order = 'DESC'
         } = req.query;
 
-        const offset = (page - 1) * limit;
-        let whereClause = 'WHERE 1=1';
+        const pageNum = parseInt(page, 10) || 1;
+        const limitNum = parseInt(limit, 10) || 10;
+        const offset = (pageNum - 1) * limitNum;
+        let whereClause = '1=1';
         const params = [];
 
-        // 状态筛选
-        if (status) {
-            whereClause += ' AND status = ?';
-            params.push(status);
-        }
-
-        // 分类筛选
-        if (category) {
-            whereClause += ' AND category = ?';
-            params.push(category);
-        }
-
-        // 搜索功能
+        // 搜索条件
         if (search) {
-            whereClause += ' AND (title LIKE ? OR authors LIKE ? OR journal LIKE ?)';
+            whereClause += ` AND (title LIKE ? OR authors LIKE ? OR journal LIKE ?)`;
             const searchTerm = `%${search}%`;
             params.push(searchTerm, searchTerm, searchTerm);
         }
 
-        // 获取总数
-        const countResult = await db.query(
-            `SELECT COUNT(*) as total FROM publications ${whereClause}`,
-            params
-        );
+        // 类型筛选
+        if (type) {
+            whereClause += ` AND type = ?`;
+            params.push(type);
+        }
 
-        const total = countResult && countResult[0] && countResult[0].total ? countResult[0].total : 0;
+        // 年份筛选
+        if (year) {
+            whereClause += ` AND year = ?`;
+            params.push(year);
+        }
 
-        // 获取论文列表
-        const publications = await db.query(
-            `SELECT * FROM publications ${whereClause} 
-             ORDER BY ${sort} ${order} 
-             LIMIT ${parseInt(limit)} OFFSET ${parseInt(offset)}`,
-            [...params]
-        );
+        // 构建排序
+        const validSorts = ['year', 'citations', 'impact_factor', 'created_at', 'updated_at'];
+        const validOrders = ['ASC', 'DESC'];
+        const sortField = validSorts.includes(sort) ? sort : 'created_at';
+        const sortOrder = validOrders.includes(order.toUpperCase()) ? order.toUpperCase() : 'DESC';
+
+        // 查询总数
+        const countQuery = `SELECT COUNT(*) as total FROM publications WHERE ${whereClause}`;
+        const countResult = await db.query(countQuery, params);
+        const total = countResult[0].total;
+
+        // 查询数据（将 LIMIT/OFFSET 以安全整数直接写入SQL，避免占位符导致错误）
+        const dataQuery = `
+      SELECT * FROM publications 
+      WHERE ${whereClause}
+      ORDER BY ${sortField} ${sortOrder}
+      LIMIT ${limitNum} OFFSET ${offset}
+    `;
+
+        const publications = await db.query(dataQuery, params);
 
         res.json({
             success: true,
-            data: publications || [],
-            pagination: {
-                page: parseInt(page),
-                limit: parseInt(limit),
-                total: total,
-                pages: Math.ceil(total / limit)
+            code: 200,
+            message: 'success',
+            data: {
+                list: publications,
+                pagination: {
+                    page: pageNum,
+                    limit: limitNum,
+                    total: total,
+                    pages: Math.ceil(total / limitNum)
+                }
             }
         });
+
     } catch (error) {
-        console.error('获取论文列表错误:', error);
+        console.error('获取管理员论文列表失败:', error);
         res.status(500).json({
             success: false,
-            message: '获取论文列表失败'
+            code: 500,
+            message: '获取管理员论文列表失败',
+            error: error.message
         });
     }
 });
 
-// 创建论文 (管理员)
-router.post('/admin/create', verifyToken, verifyAdmin, upload.single('pdf'), async (req, res) => {
+// 创建论文
+router.post('/admin/create', authenticateToken, upload.single('pdf_file'), async (req, res) => {
     try {
         const {
-            title, authors, journal, publish_date, category, doi,
-            abstract, keywords, citation_count = 0, impact_factor,
-            status = 'published'
+            title, authors, journal, volume, issue, pages, year, doi, url,
+            abstract, keywords, type, impact_factor, citations, is_featured
         } = req.body;
 
         // 验证必填字段
-        if (!title || !authors || !journal || !publish_date || !category) {
+        if (!title || !authors || !year) {
             return res.status(400).json({
                 success: false,
-                message: '请填写所有必填字段'
+                code: 400,
+                message: '标题、作者和年份为必填项'
             });
         }
 
-        let pdf_url = null;
+        let pdf_path = null;
         if (req.file) {
-            pdf_url = `/uploads/publications/${req.file.filename}`;
+            pdf_path = req.file.path;
         }
 
-        const result = await db.query(
-            `INSERT INTO publications 
-             (title, authors, journal, publish_date, category, doi, pdf_url,
-              abstract, keywords, citation_count, impact_factor, status, created_at, updated_at)
-             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW(), NOW())`,
-            [title, authors, journal, publish_date, category, doi, pdf_url,
-                abstract, keywords, citation_count, impact_factor, status]
-        );
+        const query = `
+      INSERT INTO publications (
+        title, authors, journal, volume, issue, pages, year, doi, url,
+        pdf_path, abstract, keywords, type, impact_factor, citations, is_featured
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    `;
 
-        res.status(201).json({
+        const values = [
+            title, authors, journal || null, volume || null, issue || null,
+            pages || null, year, doi || null, url || null, pdf_path,
+            abstract || null, keywords || null, type || 'journal',
+            impact_factor || null, citations || 0, is_featured === 'true' || is_featured === true
+        ];
+
+        const result = await db.query(query, values);
+
+        res.json({
             success: true,
+            code: 200,
             message: '论文创建成功',
             data: { id: result.insertId }
         });
+
     } catch (error) {
-        console.error('创建论文错误:', error);
+        console.error('创建论文失败:', error);
+
+        // 如果有文件上传失败，删除已上传的文件
+        if (req.file && fs.existsSync(req.file.path)) {
+            fs.unlinkSync(req.file.path);
+        }
+
         res.status(500).json({
             success: false,
-            message: '创建论文失败'
+            code: 500,
+            message: '创建论文失败',
+            error: error.message
         });
     }
 });
 
-// 更新论文 (管理员)
-router.put('/admin/update/:id', verifyToken, verifyAdmin, upload.single('pdf'), async (req, res) => {
+// 更新论文
+router.put('/admin/update/:id', authenticateToken, upload.single('pdf_file'), async (req, res) => {
     try {
-        const publicationId = req.params.id;
+        const { id } = req.params;
         const {
-            title, authors, journal, publish_date, category, doi,
-            abstract, keywords, citation_count, impact_factor, status
+            title, authors, journal, volume, issue, pages, year, doi, url,
+            abstract, keywords, type, impact_factor, citations, is_featured
         } = req.body;
 
+        // 验证必填字段
+        if (!title || !authors || !year) {
+            return res.status(400).json({
+                success: false,
+                code: 400,
+                message: '标题、作者和年份为必填项'
+            });
+        }
+
         // 检查论文是否存在
-        const publications = await db.query('SELECT * FROM publications WHERE id = ?', [publicationId]);
-        if (!publications || publications.length === 0) {
+        const checkQuery = 'SELECT * FROM publications WHERE id = ?';
+        const existing = await db.query(checkQuery, [id]);
+
+        if (existing.length === 0) {
             return res.status(404).json({
                 success: false,
+                code: 404,
                 message: '论文不存在'
             });
         }
 
-        const publication = publications[0];
-        let pdf_url = publication.pdf_url;
+        let pdf_path = existing[0].pdf_path;
 
-        // 处理文件上传
+        // 如果有新文件上传
         if (req.file) {
             // 删除旧文件
-            if (publication.pdf_url) {
-                const oldFilePath = path.join(__dirname, '..', publication.pdf_url);
-                if (fs.existsSync(oldFilePath)) {
-                    fs.unlinkSync(oldFilePath);
-                }
+            if (pdf_path && fs.existsSync(pdf_path)) {
+                fs.unlinkSync(pdf_path);
             }
-            pdf_url = `/uploads/publications/${req.file.filename}`;
+            pdf_path = req.file.path;
         }
 
-        await db.query(
-            `UPDATE publications SET 
-             title = ?, authors = ?, journal = ?, publish_date = ?, category = ?,
-             doi = ?, pdf_url = ?, abstract = ?, keywords = ?, citation_count = ?,
-             impact_factor = ?, status = ?, updated_at = NOW()
-             WHERE id = ?`,
-            [title, authors, journal, publish_date, category, doi, pdf_url,
-                abstract, keywords, citation_count, impact_factor, status, publicationId]
-        );
+        const updateQuery = `
+      UPDATE publications SET 
+        title = ?, authors = ?, journal = ?, volume = ?, issue = ?, 
+        pages = ?, year = ?, doi = ?, url = ?, pdf_path = ?,
+        abstract = ?, keywords = ?, type = ?, impact_factor = ?, 
+        citations = ?, is_featured = ?, updated_at = CURRENT_TIMESTAMP
+      WHERE id = ?
+    `;
+
+        const values = [
+            title, authors, journal || null, volume || null, issue || null,
+            pages || null, year, doi || null, url || null, pdf_path,
+            abstract || null, keywords || null, type || 'journal',
+            impact_factor || null, citations || 0,
+            is_featured === 'true' || is_featured === true, id
+        ];
+
+        await db.query(updateQuery, values);
 
         res.json({
             success: true,
+            code: 200,
             message: '论文更新成功'
         });
+
     } catch (error) {
-        console.error('更新论文错误:', error);
+        console.error('更新论文失败:', error);
+
+        // 如果有文件上传失败，删除已上传的文件
+        if (req.file && fs.existsSync(req.file.path)) {
+            fs.unlinkSync(req.file.path);
+        }
+
         res.status(500).json({
             success: false,
-            message: '更新论文失败'
+            code: 500,
+            message: '更新论文失败',
+            error: error.message
         });
     }
 });
 
-// 删除论文 (管理员)
-router.delete('/admin/delete/:id', verifyToken, verifyAdmin, async (req, res) => {
+// 删除论文
+router.delete('/admin/delete/:id', authenticateToken, async (req, res) => {
     try {
-        const publicationId = req.params.id;
+        const { id } = req.params;
 
-        // 获取论文信息以删除关联文件
-        const publications = await db.query('SELECT pdf_url FROM publications WHERE id = ?', [publicationId]);
+        // 检查论文是否存在
+        const checkQuery = 'SELECT pdf_path FROM publications WHERE id = ?';
+        const existing = await db.query(checkQuery, [id]);
 
-        if (!publications || publications.length === 0) {
+        if (existing.length === 0) {
             return res.status(404).json({
                 success: false,
+                code: 404,
                 message: '论文不存在'
             });
         }
 
-        const publication = publications[0];
-
-        // 删除关联文件
-        if (publication.pdf_url) {
-            const filePath = path.join(__dirname, '..', publication.pdf_url);
-            if (fs.existsSync(filePath)) {
-                fs.unlinkSync(filePath);
-            }
+        // 删除关联的PDF文件
+        if (existing[0].pdf_path && fs.existsSync(existing[0].pdf_path)) {
+            fs.unlinkSync(existing[0].pdf_path);
         }
 
         // 删除数据库记录
-        await db.query('DELETE FROM publications WHERE id = ?', [publicationId]);
+        const deleteQuery = 'DELETE FROM publications WHERE id = ?';
+        await db.query(deleteQuery, [id]);
 
         res.json({
             success: true,
+            code: 200,
             message: '论文删除成功'
         });
+
     } catch (error) {
-        console.error('删除论文错误:', error);
+        console.error('删除论文失败:', error);
         res.status(500).json({
             success: false,
-            message: '删除论文失败'
+            code: 500,
+            message: '删除论文失败',
+            error: error.message
         });
     }
 });
 
-// 批量删除论文 (管理员)
-router.delete('/admin/batch-delete', verifyToken, verifyAdmin, async (req, res) => {
+// 批量删除论文
+router.delete('/admin/batch-delete', authenticateToken, async (req, res) => {
     try {
         const { ids } = req.body;
 
-        if (!ids || !Array.isArray(ids) || ids.length === 0) {
+        if (!Array.isArray(ids) || ids.length === 0) {
             return res.status(400).json({
                 success: false,
-                message: '请提供要删除的论文ID'
+                code: 400,
+                message: '请提供要删除的论文ID列表'
             });
         }
 
-        // 获取所有要删除的论文信息
+        // 获取要删除的论文信息（用于删除文件）
         const placeholders = ids.map(() => '?').join(',');
-        const publications = await db.query(
-            `SELECT id, pdf_url FROM publications WHERE id IN (${placeholders})`,
-            ids
-        );
+        const selectQuery = `SELECT id, pdf_path FROM publications WHERE id IN (${placeholders})`;
+        const publications = await db.query(selectQuery, ids);
 
-        // 删除关联文件
-        if (publications && publications.length > 0) {
-            publications.forEach(publication => {
-                if (publication.pdf_url) {
-                    const filePath = path.join(__dirname, '..', publication.pdf_url);
-                    if (fs.existsSync(filePath)) {
-                        fs.unlinkSync(filePath);
-                    }
-                }
-            });
-        }
+        // 删除关联的PDF文件
+        publications.forEach(pub => {
+            if (pub.pdf_path && fs.existsSync(pub.pdf_path)) {
+                fs.unlinkSync(pub.pdf_path);
+            }
+        });
 
         // 删除数据库记录
-        await db.query(
-            `DELETE FROM publications WHERE id IN (${placeholders})`,
-            ids
-        );
+        const deleteQuery = `DELETE FROM publications WHERE id IN (${placeholders})`;
+        const result = await db.query(deleteQuery, ids);
 
         res.json({
             success: true,
-            message: `成功删除 ${ids.length} 篇论文`
+            code: 200,
+            message: `成功删除 ${result.affectedRows} 条论文记录`
         });
+
     } catch (error) {
-        console.error('批量删除论文错误:', error);
+        console.error('批量删除论文失败:', error);
         res.status(500).json({
             success: false,
-            message: '批量删除失败'
+            code: 500,
+            message: '批量删除论文失败',
+            error: error.message
         });
     }
 });
 
-// 更新论文状态 (管理员)
-router.patch('/admin/status/:id', verifyToken, verifyAdmin, async (req, res) => {
+// 获取论文统计数据
+router.get('/admin/stats', authenticateToken, async (req, res) => {
     try {
-        const publicationId = req.params.id;
-        const { status } = req.body;
+        // 总论文数
+        const totalQuery = 'SELECT COUNT(*) as total FROM publications';
+        const totalResult = await db.query(totalQuery);
+        const total = totalResult[0].total;
 
-        if (!['draft', 'published', 'archived'].includes(status)) {
-            return res.status(400).json({
-                success: false,
-                message: '无效的状态值'
-            });
-        }
+        // 按类型统计
+        const typeQuery = `
+      SELECT type, COUNT(*) as count 
+      FROM publications 
+      GROUP BY type 
+      ORDER BY count DESC
+    `;
+        const typeStats = await db.query(typeQuery);
 
-        await db.query(
-            'UPDATE publications SET status = ?, updated_at = NOW() WHERE id = ?',
-            [status, publicationId]
-        );
+        // 按年份统计
+        const yearQuery = `
+      SELECT year, COUNT(*) as count 
+      FROM publications 
+      GROUP BY year 
+      ORDER BY year DESC 
+      LIMIT 10
+    `;
+        const yearStats = await db.query(yearQuery);
+
+        // 总引用数
+        const citationQuery = 'SELECT SUM(citations) as total_citations FROM publications';
+        const citationResult = await db.query(citationQuery);
+        const totalCitations = citationResult[0].total_citations || 0;
+
+        // 重点论文数
+        const featuredQuery = 'SELECT COUNT(*) as featured_count FROM publications WHERE is_featured = true';
+        const featuredResult = await db.query(featuredQuery);
+        const featuredCount = featuredResult[0].featured_count;
 
         res.json({
             success: true,
-            message: '状态更新成功'
+            code: 200,
+            message: 'success',
+            data: {
+                total,
+                totalCitations,
+                featuredCount,
+                typeStats,
+                yearStats
+            }
         });
+
     } catch (error) {
-        console.error('更新论文状态错误:', error);
+        console.error('获取论文统计失败:', error);
         res.status(500).json({
             success: false,
-            message: '更新状态失败'
-        });
-    }
-});
-
-// 获取论文分类列表 (管理员)
-router.get('/admin/categories', verifyToken, verifyAdmin, async (req, res) => {
-    try {
-        const categories = await db.query(
-            `SELECT category, COUNT(*) as count 
-             FROM publications 
-             GROUP BY category 
-             ORDER BY count DESC, category ASC`
-        );
-
-        res.json({
-            success: true,
-            data: categories || []
-        });
-    } catch (error) {
-        console.error('获取论文分类错误:', error);
-        res.status(500).json({
-            success: false,
-            message: '获取分类失败'
-        });
-    }
-});
-
-// 获取年份列表 (管理员)
-router.get('/admin/years', verifyToken, verifyAdmin, async (req, res) => {
-    try {
-        const years = await db.query(
-            `SELECT YEAR(publish_date) as year, COUNT(*) as count 
-             FROM publications 
-             GROUP BY YEAR(publish_date) 
-             ORDER BY year DESC`
-        );
-
-        res.json({
-            success: true,
-            data: years || []
-        });
-    } catch (error) {
-        console.error('获取论文年份错误:', error);
-        res.status(500).json({
-            success: false,
-            message: '获取年份失败'
+            code: 500,
+            message: '获取论文统计失败',
+            error: error.message
         });
     }
 });

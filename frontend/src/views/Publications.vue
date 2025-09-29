@@ -60,14 +60,10 @@
 
       <!-- 论文列表 -->
       <div class="publications-list" v-loading="loading">
-        <div
-          v-for="publication in publications"
-          :key="publication.id"
-          class="publication-item"
-        >
+        <div v-for="publication in publications" :key="publication.id" class="publication-item">
           <div class="publication-content">
             <h3 class="publication-title">{{ publication.title }}</h3>
-            
+
             <div class="publication-meta">
               <span class="authors">{{ publication.authors }}</span>
               <span class="journal">{{ publication.journal }}</span>
@@ -75,15 +71,17 @@
             </div>
 
             <div class="publication-details">
-              <el-tag v-if="publication.category" size="small" type="info">
-                {{ publication.category }}
+              <el-tag v-if="publication.type" size="small" type="info">
+                {{ getTypeLabel(publication.type) }}
               </el-tag>
-              
+
               <span v-if="publication.citation_count" class="citation-count">
-                <el-icon><Star /></el-icon>
+                <el-icon>
+                  <Star />
+                </el-icon>
                 {{ publication.citation_count }} 引用
               </span>
-              
+
               <span v-if="publication.impact_factor" class="impact-factor">
                 IF: {{ publication.impact_factor }}
               </span>
@@ -202,15 +200,12 @@ const loadPublications = async () => {
       ...filters
     }
 
-    const response = await api.get('/publications/list', { params })
-
-    if (response.data) {
-      publications.value = response.data.data || []
-      if (response.data.pagination) {
-        pagination.total = response.data.pagination.total
-        pagination.page = response.data.pagination.page
-        pagination.limit = response.data.pagination.limit
-      }
+    const resp = await api.get('/publications/list', { params })
+    publications.value = resp.data || []
+    if (resp.pagination) {
+      pagination.total = resp.pagination.total
+      pagination.page = resp.pagination.page
+      pagination.limit = resp.pagination.limit
     }
   } catch (error) {
     console.error('加载论文列表失败:', error)
@@ -223,10 +218,8 @@ const loadPublications = async () => {
 // 加载分类列表
 const loadCategories = async () => {
   try {
-    const response = await api.get('/publications/stats/categories')
-    if (response.data) {
-      categories.value = response.data.data || []
-    }
+    const resp = await api.get('/publications/stats/categories')
+    categories.value = resp.data || []
   } catch (error) {
     console.error('加载分类失败:', error)
   }
@@ -235,10 +228,8 @@ const loadCategories = async () => {
 // 加载年份列表
 const loadYears = async () => {
   try {
-    const response = await api.get('/publications/stats/years')
-    if (response.data) {
-      years.value = response.data.data || []
-    }
+    const resp = await api.get('/publications/stats/years')
+    years.value = resp.data || []
   } catch (error) {
     console.error('加载年份失败:', error)
   }
@@ -279,6 +270,18 @@ const openDOI = (doi) => {
 const getKeywords = (keywords) => {
   if (!keywords) return []
   return keywords.split(',').map(k => k.trim()).filter(k => k)
+}
+
+// 获取类型标签
+const getTypeLabel = (type) => {
+  const typeMap = {
+    journal: '期刊论文',
+    conference: '会议论文',
+    book_chapter: '专著章节',
+    patent: '专利',
+    thesis: '学位论文'
+  }
+  return typeMap[type] || type
 }
 
 // 格式化日期
