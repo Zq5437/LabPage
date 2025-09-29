@@ -33,8 +33,8 @@ export const useAuthStore = defineStore('auth', {
             try {
                 this.loading = true
                 const response = await adminApi.login(credentials)
-
-                const { token, user } = response
+                // 接口返回结构为 { success, message, data: { token, user } }
+                const { token, user } = response?.data || {}
 
                 // 保存令牌和用户信息
                 this.token = token
@@ -88,7 +88,8 @@ export const useAuthStore = defineStore('auth', {
 
             try {
                 // 验证令牌是否有效
-                const user = await adminApi.getCurrentUser()
+                const res = await adminApi.getCurrentUser()
+                const user = res?.data
 
                 this.token = token
                 this.user = user
