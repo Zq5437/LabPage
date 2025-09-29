@@ -12,33 +12,21 @@
       <!-- 筛选工具栏 -->
       <div class="filter-toolbar">
         <div class="filter-left">
-          <el-input
-            v-model="filters.search"
-            placeholder="搜索设备名称、型号、厂商..."
-            style="width: 300px"
-            clearable
-            @input="handleSearch"
-          >
+          <el-input v-model="filters.search" placeholder="搜索设备名称、型号、厂商..." style="width: 300px" clearable
+            @input="handleSearch">
             <template #prefix>
-              <el-icon><Search /></el-icon>
+              <el-icon>
+                <Search />
+              </el-icon>
             </template>
           </el-input>
         </div>
 
         <div class="filter-right">
-          <el-select
-            v-model="filters.category"
-            placeholder="选择分类"
-            clearable
-            style="width: 150px"
-            @change="loadEquipment"
-          >
-            <el-option
-              v-for="category in categories"
-              :key="category.category"
-              :label="category.category"
-              :value="category.category"
-            />
+          <el-select v-model="filters.category" placeholder="选择分类" clearable style="width: 150px"
+            @change="loadEquipment">
+            <el-option v-for="category in categories" :key="category.category" :label="category.category"
+              :value="category.category" />
           </el-select>
 
           <el-select v-model="viewMode" style="width: 120px">
@@ -68,25 +56,22 @@
       <div class="equipment-list" v-loading="loading">
         <!-- 卡片视图 -->
         <div v-if="viewMode === 'card'" class="equipment-grid">
-          <div
-            v-for="equipment in equipmentList"
-            :key="equipment.id"
-            class="equipment-card"
-            @click="viewDetails(equipment)"
-          >
+          <div v-for="equipment in equipmentList" :key="equipment.id" class="equipment-card"
+            @click="viewDetails(equipment)">
             <div class="equipment-image">
-              <img
-                v-if="equipment.image_url"
-                :src="equipment.image_url"
-                :alt="equipment.name"
-                @error="handleImageError"
-              />
+              <img v-if="equipment.image_url" :src="equipment.image_url" :alt="equipment.name"
+                @error="handleImageError" />
               <div v-else class="no-image">
-                <el-icon><Monitor /></el-icon>
+                <el-icon>
+                  <Monitor />
+                </el-icon>
               </div>
-              
-              <div class="equipment-category">
-                <el-tag size="small">{{ equipment.category }}</el-tag>
+
+              <div class="equipment-badges">
+                <el-tag size="small" type="info">{{ equipment.category }}</el-tag>
+                <el-tag v-if="equipment.status" size="small" :type="getStatusTagType(equipment.status)">
+                  {{ getStatusText(equipment.status) }}
+                </el-tag>
               </div>
             </div>
 
@@ -94,14 +79,25 @@
               <h3 class="equipment-name">{{ equipment.name }}</h3>
               <p class="equipment-model">{{ equipment.model }}</p>
               <p class="equipment-manufacturer">{{ equipment.manufacturer }}</p>
-              
+
               <div class="equipment-meta">
                 <span v-if="equipment.location" class="location">
-                  <el-icon><Location /></el-icon>
+                  <el-icon>
+                    <Location />
+                  </el-icon>
                   {{ equipment.location }}
                 </span>
                 <span v-if="equipment.purchase_date" class="purchase-date">
+                  <el-icon>
+                    <Calendar />
+                  </el-icon>
                   {{ formatYear(equipment.purchase_date) }}年
+                </span>
+                <span v-if="equipment.contact_person" class="contact">
+                  <el-icon>
+                    <User />
+                  </el-icon>
+                  {{ equipment.contact_person }}
                 </span>
               </div>
 
@@ -114,21 +110,15 @@
 
         <!-- 列表视图 -->
         <div v-else class="equipment-table">
-          <div
-            v-for="equipment in equipmentList"
-            :key="equipment.id"
-            class="equipment-row"
-            @click="viewDetails(equipment)"
-          >
+          <div v-for="equipment in equipmentList" :key="equipment.id" class="equipment-row"
+            @click="viewDetails(equipment)">
             <div class="equipment-basic">
               <div class="equipment-image-small">
-                <img
-                  v-if="equipment.image_url"
-                  :src="equipment.image_url"
-                  :alt="equipment.name"
-                  @error="handleImageError"
-                />
-                <el-icon v-else><Monitor /></el-icon>
+                <img v-if="equipment.image_url" :src="equipment.image_url" :alt="equipment.name"
+                  @error="handleImageError" />
+                <el-icon v-else>
+                  <Monitor />
+                </el-icon>
               </div>
 
               <div class="equipment-details">
@@ -144,7 +134,9 @@
 
             <div class="equipment-actions">
               <span v-if="equipment.location" class="location">
-                <el-icon><Location /></el-icon>
+                <el-icon>
+                  <Location />
+                </el-icon>
                 {{ equipment.location }}
               </span>
               <el-button type="primary" size="small" @click.stop="viewDetails(equipment)">
@@ -162,35 +154,22 @@
 
       <!-- 分页 -->
       <div class="pagination-container" v-if="pagination.total > 0">
-        <el-pagination
-          v-model:current-page="pagination.page"
-          v-model:page-size="pagination.limit"
-          :page-sizes="[12, 24, 36, 48]"
-          :total="pagination.total"
-          layout="total, sizes, prev, pager, next, jumper"
-          @size-change="loadEquipment"
-          @current-change="loadEquipment"
-        />
+        <el-pagination v-model:current-page="pagination.page" v-model:page-size="pagination.limit"
+          :page-sizes="[12, 24, 36, 48]" :total="pagination.total" layout="total, sizes, prev, pager, next, jumper"
+          @size-change="loadEquipment" @current-change="loadEquipment" />
       </div>
     </div>
 
     <!-- 设备详情对话框 -->
-    <el-dialog
-      v-model="detailVisible"
-      :title="selectedEquipment?.name"
-      width="800px"
-      destroy-on-close
-    >
+    <el-dialog v-model="detailVisible" :title="selectedEquipment?.name" width="800px" destroy-on-close>
       <div v-if="selectedEquipment" class="equipment-detail">
         <div class="detail-header">
           <div class="detail-image">
-            <img
-              v-if="selectedEquipment.image_url"
-              :src="selectedEquipment.image_url"
-              :alt="selectedEquipment.name"
-            />
+            <img v-if="selectedEquipment.image_url" :src="selectedEquipment.image_url" :alt="selectedEquipment.name" />
             <div v-else class="no-image-large">
-              <el-icon><Monitor /></el-icon>
+              <el-icon>
+                <Monitor />
+              </el-icon>
             </div>
           </div>
 
@@ -241,6 +220,11 @@
             <h3>联系人</h3>
             <p>{{ selectedEquipment.contact_person }}</p>
           </div>
+
+          <div v-if="selectedEquipment.price" class="detail-section">
+            <h3>设备价值</h3>
+            <p class="price-info">¥{{ formatPrice(selectedEquipment.price) }}</p>
+          </div>
         </div>
       </div>
     </el-dialog>
@@ -252,7 +236,7 @@ import { ref, reactive, computed, onMounted } from 'vue'
 import { ElMessage } from 'element-plus'
 import api from '@/utils/api'
 import {
-  Search, Monitor, Location
+  Search, Monitor, Location, Calendar, User
 } from '@element-plus/icons-vue'
 
 // 响应式数据
@@ -303,14 +287,16 @@ const loadEquipment = async () => {
     }
 
     const response = await api.get('/equipment/list', { params })
-    
+
+
+    // axios拦截器已经处理了success判断，直接使用响应数据
     if (response.data) {
-      equipmentList.value = response.data.data || []
-      if (response.data.pagination) {
-        pagination.total = response.data.pagination.total
-        pagination.page = response.data.pagination.page
-        pagination.limit = response.data.pagination.limit
-      }
+      equipmentList.value = response.data || []
+    }
+    if (response.pagination) {
+      pagination.total = response.pagination.total
+      pagination.page = response.pagination.page
+      pagination.limit = response.pagination.limit
     }
   } catch (error) {
     console.error('加载设备列表失败:', error)
@@ -324,8 +310,9 @@ const loadEquipment = async () => {
 const loadCategories = async () => {
   try {
     const response = await api.get('/equipment/stats/categories')
+    // axios拦截器已经处理了success判断，直接使用响应数据
     if (response.data) {
-      categories.value = response.data.data || []
+      categories.value = response.data || []
     }
   } catch (error) {
     console.error('加载分类失败:', error)
@@ -364,6 +351,35 @@ const formatYear = (date) => {
 const formatDate = (date) => {
   if (!date) return ''
   return new Date(date).toLocaleDateString('zh-CN')
+}
+
+// 格式化价格
+const formatPrice = (price) => {
+  if (!price) return '0.00'
+  return Number(price).toLocaleString('zh-CN', {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2
+  })
+}
+
+// 获取状态标签类型
+const getStatusTagType = (status) => {
+  const statusMap = {
+    active: 'success',
+    maintenance: 'warning',
+    inactive: 'danger'
+  }
+  return statusMap[status] || 'info'
+}
+
+// 获取状态文本
+const getStatusText = (status) => {
+  const statusMap = {
+    active: '正常',
+    maintenance: '维修中',
+    inactive: '停用'
+  }
+  return statusMap[status] || status
 }
 
 // 初始化
@@ -493,10 +509,14 @@ onMounted(() => {
   font-size: 3rem;
 }
 
-.equipment-category {
+.equipment-badges {
   position: absolute;
   top: 10px;
   right: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  align-items: flex-end;
 }
 
 .equipment-info {
@@ -531,7 +551,8 @@ onMounted(() => {
 }
 
 .location,
-.purchase-date {
+.purchase-date,
+.contact {
   display: flex;
   align-items: center;
   gap: 4px;
@@ -700,6 +721,12 @@ onMounted(() => {
 
 .specifications {
   white-space: pre-line;
+}
+
+.price-info {
+  font-size: 1.2rem;
+  font-weight: 600;
+  color: #e74c3c;
 }
 
 .empty-state {

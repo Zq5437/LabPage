@@ -280,7 +280,7 @@ export const equipmentApi = {
     create: (data) => {
         const formData = new FormData()
         Object.keys(data).forEach(key => {
-            if (data[key] !== null && data[key] !== undefined) {
+            if (data[key] !== null && data[key] !== undefined && data[key] !== '') {
                 formData.append(key, data[key])
             }
         })
@@ -293,7 +293,7 @@ export const equipmentApi = {
     update: (id, data) => {
         const formData = new FormData()
         Object.keys(data).forEach(key => {
-            if (data[key] !== null && data[key] !== undefined) {
+            if (data[key] !== null && data[key] !== undefined && data[key] !== '') {
                 formData.append(key, data[key])
             }
         })

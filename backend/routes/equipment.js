@@ -258,15 +258,22 @@ router.post('/admin/create', verifyToken, verifyAdmin, upload.single('image'), a
             image_url = `/uploads/equipment/${req.file.filename}`;
         }
 
+        // 处理日期字段 - 空字符串转换为null
+        const processedPurchaseDate = purchase_date && purchase_date.trim() !== '' ? purchase_date : null;
+        // 处理价格字段 - 空字符串转换为null
+        const processedPrice = price && price.toString().trim() !== '' ? parseFloat(price) : null;
+        // 处理排序字段
+        const processedSortOrder = sort_order ? parseInt(sort_order) : 0;
+
         const result = await db.query(
             `INSERT INTO equipment 
              (name, category, model, manufacturer, description, specifications,
               image_url, location, purchase_date, price, contact_person, 
-              usage_notes, status, sort_order, created_at, updated_at)
-             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW(), NOW())`,
-            [name, category, model, manufacturer, description, specifications,
-                image_url, location, purchase_date, price, contact_person,
-                usage_notes, status, sort_order]
+              usage_notes, status, sort_order)
+             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+            [name, category, model || null, manufacturer || null, description || null, specifications || null,
+                image_url, location || null, processedPurchaseDate, processedPrice, contact_person || null,
+                usage_notes || null, status, processedSortOrder]
         );
 
         res.status(201).json({
@@ -317,6 +324,13 @@ router.put('/admin/update/:id', verifyToken, verifyAdmin, upload.single('image')
             image_url = `/uploads/equipment/${req.file.filename}`;
         }
 
+        // 处理日期字段 - 空字符串转换为null
+        const processedPurchaseDate = purchase_date && purchase_date.trim() !== '' ? purchase_date : null;
+        // 处理价格字段 - 空字符串转换为null
+        const processedPrice = price && price.toString().trim() !== '' ? parseFloat(price) : null;
+        // 处理排序字段
+        const processedSortOrder = sort_order ? parseInt(sort_order) : 0;
+
         await db.query(
             `UPDATE equipment SET 
              name = ?, category = ?, model = ?, manufacturer = ?, description = ?,
@@ -324,9 +338,9 @@ router.put('/admin/update/:id', verifyToken, verifyAdmin, upload.single('image')
              price = ?, contact_person = ?, usage_notes = ?, status = ?,
              sort_order = ?, updated_at = NOW()
              WHERE id = ?`,
-            [name, category, model, manufacturer, description, specifications,
-                image_url, location, purchase_date, price, contact_person,
-                usage_notes, status, sort_order, equipmentId]
+            [name, category, model || null, manufacturer || null, description || null, specifications || null,
+                image_url, location || null, processedPurchaseDate, processedPrice, contact_person || null,
+                usage_notes || null, status, processedSortOrder, equipmentId]
         );
 
         res.json({

@@ -3,72 +3,53 @@
     <!-- 搜索和操作栏 -->
     <div class="toolbar">
       <div class="toolbar-left">
-        <el-input
-          v-model="searchForm.search"
-          placeholder="搜索设备名称、型号、厂商..."
-          style="width: 300px"
-          clearable
-          @keyup.enter="handleSearch"
-        >
+        <el-input v-model="searchForm.search" placeholder="搜索设备名称、型号、厂商..." style="width: 300px" clearable
+          @keyup.enter="handleSearch">
           <template #prefix>
-            <el-icon><Search /></el-icon>
+            <el-icon>
+              <Search />
+            </el-icon>
           </template>
         </el-input>
-        
-        <el-select
-          v-model="searchForm.category"
-          placeholder="选择分类"
-          clearable
-          style="width: 150px"
-          @change="handleSearch"
-        >
+
+        <el-select v-model="searchForm.category" placeholder="选择分类" clearable style="width: 150px"
+          @change="handleSearch">
           <el-option label="计算设备" value="计算设备" />
           <el-option label="测试仪器" value="测试仪器" />
           <el-option label="实验器材" value="实验器材" />
           <el-option label="办公设备" value="办公设备" />
         </el-select>
 
-        <el-select
-          v-model="searchForm.status"
-          placeholder="选择状态"
-          clearable
-          style="width: 120px"
-          @change="handleSearch"
-        >
+        <el-select v-model="searchForm.status" placeholder="选择状态" clearable style="width: 120px" @change="handleSearch">
           <el-option label="正常使用" value="active" />
           <el-option label="维修中" value="maintenance" />
           <el-option label="已停用" value="inactive" />
         </el-select>
 
         <el-button type="primary" @click="handleSearch">
-          <el-icon><Search /></el-icon>
+          <el-icon>
+            <Search />
+          </el-icon>
           搜索
         </el-button>
       </div>
 
       <div class="toolbar-right">
         <el-button type="primary" @click="handleCreate">
-          <el-icon><Plus /></el-icon>
+          <el-icon>
+            <Plus />
+          </el-icon>
           添加设备
         </el-button>
       </div>
     </div>
 
     <!-- 设备列表 -->
-    <el-table
-      :data="equipment"
-      v-loading="loading"
-      empty-text="暂无设备数据"
-    >
+    <el-table :data="equipment" v-loading="loading" empty-text="暂无设备数据">
       <el-table-column prop="name" label="设备名称" min-width="150">
         <template #default="{ row }">
           <div class="equipment-cell">
-            <img
-              v-if="row.image_url"
-              :src="row.image_url"
-              class="equipment-image"
-              @error="handleImageError"
-            />
+            <img v-if="row.image_url" :src="row.image_url" class="equipment-image" @error="handleImageError" />
             <div class="equipment-info">
               <h4>{{ row.name }}</h4>
               <p>{{ row.model }}</p>
@@ -95,10 +76,7 @@
 
       <el-table-column prop="status" label="状态" width="100">
         <template #default="{ row }">
-          <el-tag
-            :type="getStatusType(row.status)"
-            size="small"
-          >
+          <el-tag :type="getStatusType(row.status)" size="small">
             {{ getStatusText(row.status) }}
           </el-tag>
         </template>
@@ -118,50 +96,24 @@
 
     <!-- 分页 -->
     <div class="pagination-container">
-      <el-pagination
-        v-model:current-page="pagination.page"
-        v-model:page-size="pagination.limit"
-        :page-sizes="[10, 20, 50]"
-        :total="pagination.total"
-        layout="total, sizes, prev, pager, next, jumper"
-        @size-change="loadEquipment"
-        @current-change="loadEquipment"
-      />
+      <el-pagination v-model:current-page="pagination.page" v-model:page-size="pagination.limit"
+        :page-sizes="[10, 20, 50]" :total="pagination.total" layout="total, sizes, prev, pager, next, jumper"
+        @size-change="loadEquipment" @current-change="loadEquipment" />
     </div>
 
     <!-- 添加/编辑设备对话框 -->
-    <el-dialog
-      v-model="dialogVisible"
-      :title="dialogTitle"
-      width="800px"
-      destroy-on-close
-    >
-      <el-form
-        ref="formRef"
-        :model="form"
-        :rules="rules"
-        label-width="100px"
-      >
+    <el-dialog v-model="dialogVisible" :title="dialogTitle" width="800px" destroy-on-close>
+      <el-form ref="formRef" :model="form" :rules="rules" label-width="100px">
         <el-row :gutter="20">
           <el-col :span="12">
             <el-form-item label="设备名称" prop="name">
-              <el-input
-                v-model="form.name"
-                placeholder="请输入设备名称"
-                maxlength="100"
-              />
+              <el-input v-model="form.name" placeholder="请输入设备名称" maxlength="100" />
             </el-form-item>
           </el-col>
 
           <el-col :span="12">
             <el-form-item label="设备分类" prop="category">
-              <el-select
-                v-model="form.category"
-                placeholder="选择分类"
-                style="width: 100%"
-                filterable
-                allow-create
-              >
+              <el-select v-model="form.category" placeholder="选择分类" style="width: 100%" filterable allow-create>
                 <el-option label="计算设备" value="计算设备" />
                 <el-option label="测试仪器" value="测试仪器" />
                 <el-option label="实验器材" value="实验器材" />
@@ -172,119 +124,69 @@
 
           <el-col :span="12">
             <el-form-item label="设备型号">
-              <el-input
-                v-model="form.model"
-                placeholder="请输入设备型号"
-                maxlength="100"
-              />
+              <el-input v-model="form.model" placeholder="请输入设备型号" maxlength="100" />
             </el-form-item>
           </el-col>
 
           <el-col :span="12">
             <el-form-item label="生产厂商">
-              <el-input
-                v-model="form.manufacturer"
-                placeholder="请输入生产厂商"
-                maxlength="100"
-              />
+              <el-input v-model="form.manufacturer" placeholder="请输入生产厂商" maxlength="100" />
             </el-form-item>
           </el-col>
 
           <el-col :span="24">
             <el-form-item label="设备描述">
-              <el-input
-                v-model="form.description"
-                type="textarea"
-                :rows="3"
-                placeholder="请输入设备描述"
-                maxlength="500"
-                show-word-limit
-              />
+              <el-input v-model="form.description" type="textarea" :rows="3" placeholder="请输入设备描述" maxlength="500"
+                show-word-limit />
             </el-form-item>
           </el-col>
 
           <el-col :span="24">
             <el-form-item label="技术规格">
-              <el-input
-                v-model="form.specifications"
-                type="textarea"
-                :rows="3"
-                placeholder="请输入技术规格"
-                maxlength="1000"
-              />
+              <el-input v-model="form.specifications" type="textarea" :rows="3" placeholder="请输入技术规格"
+                maxlength="1000" />
             </el-form-item>
           </el-col>
 
           <el-col :span="12">
             <el-form-item label="存放位置">
-              <el-input
-                v-model="form.location"
-                placeholder="请输入存放位置"
-                maxlength="100"
-              />
+              <el-input v-model="form.location" placeholder="请输入存放位置" maxlength="100" />
             </el-form-item>
           </el-col>
 
           <el-col :span="12">
             <el-form-item label="购买日期">
-              <el-date-picker
-                v-model="form.purchase_date"
-                type="date"
-                placeholder="选择购买日期"
-                style="width: 100%"
-                format="YYYY-MM-DD"
-                value-format="YYYY-MM-DD"
-              />
+              <el-date-picker v-model="form.purchase_date" type="date" placeholder="选择购买日期" style="width: 100%"
+                format="YYYY-MM-DD" value-format="YYYY-MM-DD" />
             </el-form-item>
           </el-col>
 
           <el-col :span="12">
             <el-form-item label="设备价格">
-              <el-input-number
-                v-model="form.price"
-                :min="0"
-                :precision="2"
-                style="width: 100%"
-                placeholder="设备价格（元）"
-              />
+              <el-input-number v-model="form.price" :min="0" :precision="2" style="width: 100%" placeholder="设备价格（元）" />
             </el-form-item>
           </el-col>
 
           <el-col :span="12">
             <el-form-item label="联系人">
-              <el-input
-                v-model="form.contact_person"
-                placeholder="负责人姓名"
-                maxlength="50"
-              />
+              <el-input v-model="form.contact_person" placeholder="负责人姓名" maxlength="50" />
             </el-form-item>
           </el-col>
 
           <el-col :span="24">
             <el-form-item label="使用说明">
-              <el-input
-                v-model="form.usage_notes"
-                type="textarea"
-                :rows="3"
-                placeholder="请输入使用说明和注意事项"
-                maxlength="1000"
-              />
+              <el-input v-model="form.usage_notes" type="textarea" :rows="3" placeholder="请输入使用说明和注意事项"
+                maxlength="1000" />
             </el-form-item>
           </el-col>
 
           <el-col :span="12">
             <el-form-item label="设备图片">
-              <el-upload
-                ref="uploadRef"
-                :auto-upload="false"
-                :limit="1"
-                accept="image/*"
-                :on-change="handleImageChange"
-                :on-remove="handleImageRemove"
-                :file-list="imageList"
-                list-type="picture-card"
-              >
-                <el-icon><Plus /></el-icon>
+              <el-upload ref="uploadRef" :auto-upload="false" :limit="1" accept="image/*" :on-change="handleImageChange"
+                :on-remove="handleImageRemove" :file-list="imageList" list-type="picture-card">
+                <el-icon>
+                  <Plus />
+                </el-icon>
                 <template #tip>
                   <div class="el-upload__tip">
                     只能上传图片文件，且不超过5MB
@@ -306,12 +208,7 @@
 
           <el-col :span="12">
             <el-form-item label="排序权重">
-              <el-input-number
-                v-model="form.sort_order"
-                :min="0"
-                style="width: 100%"
-                placeholder="数值越大排序越靠前"
-              />
+              <el-input-number v-model="form.sort_order" :min="0" style="width: 100%" placeholder="数值越大排序越靠前" />
             </el-form-item>
           </el-col>
         </el-row>
@@ -402,10 +299,10 @@ const loadEquipment = async () => {
       limit: pagination.limit,
       ...searchForm
     }
-    
+
     const response = await equipmentApi.getAdminList(params)
     equipment.value = response.data || []
-    
+
     if (response.pagination) {
       pagination.total = response.pagination.total
       pagination.page = response.pagination.page
@@ -437,7 +334,7 @@ const handleCreate = () => {
 const handleEdit = (row) => {
   dialogMode.value = 'edit'
   currentId.value = row.id
-  
+
   // 填充表单数据
   Object.keys(form).forEach(key => {
     if (key in row) {
@@ -499,8 +396,24 @@ const handleSubmit = async () => {
     await formRef.value.validate()
     submitting.value = true
 
+    // 处理空值，确保空字符串不会被发送到后端
     const submitData = { ...form }
-    
+
+    // 处理日期字段
+    if (submitData.purchase_date === '') {
+      submitData.purchase_date = null
+    }
+
+    // 处理价格字段
+    if (submitData.price === '' || submitData.price === null) {
+      submitData.price = null
+    }
+
+    // 处理排序字段
+    if (submitData.sort_order === '' || submitData.sort_order === null) {
+      submitData.sort_order = 0
+    }
+
     if (dialogMode.value === 'create') {
       await equipmentApi.create(submitData)
       ElMessage.success('设备创建成功')
@@ -628,12 +541,12 @@ onMounted(() => {
   .toolbar {
     flex-direction: column;
   }
-  
+
   .toolbar-left,
   .toolbar-right {
     flex-direction: column;
   }
-  
+
   .toolbar-left .el-input,
   .toolbar-left .el-select {
     width: 100% !important;

@@ -90,7 +90,7 @@
       <div v-if="!searchQuery && researchAreas.length > 0" class="research-highlights">
         <h2>研究亮点</h2>
         <div class="highlights-grid">
-          <div v-for="area in researchAreas.slice(0, 3)" :key="`highlight-${area.id}`" class="highlight-card">
+          <div v-for="area in (researchAreas || []).slice(0, 3)" :key="`highlight-${area.id}`" class="highlight-card">
             <div class="highlight-icon">
               <el-icon>
                 <TrendCharts />
@@ -225,7 +225,9 @@ const loadResearchAreas = async () => {
     })
 
     if (response && response.data) {
-      researchAreas.value = response.data || []
+      // 确保数据是数组格式
+      const data = response.data.data || response.data || []
+      researchAreas.value = Array.isArray(data) ? data : []
     }
   } catch (error) {
     console.error('加载研究方向失败:', error)

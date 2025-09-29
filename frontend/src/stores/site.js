@@ -75,8 +75,9 @@ export const useSiteStore = defineStore('site', {
 
             try {
                 this.loading.researchAreas = true
-                const data = await publicApi.getResearchAreas()
-                this.researchAreas = data
+                const response = await publicApi.getResearchAreas()
+                // 确保数据是数组格式
+                this.researchAreas = Array.isArray(response.data) ? response.data : []
             } catch (error) {
                 console.error('获取研究方向失败:', error)
                 this.researchAreas = []

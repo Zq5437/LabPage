@@ -147,20 +147,24 @@ CREATE TABLE IF NOT EXISTS research_areas (
 CREATE TABLE IF NOT EXISTS equipment (
     id INT PRIMARY KEY AUTO_INCREMENT,
     name VARCHAR(200) NOT NULL COMMENT '设备名称',
+    category VARCHAR(100) COMMENT '设备分类',
     model VARCHAR(100) COMMENT '型号',
     manufacturer VARCHAR(100) COMMENT '生产厂商',
     description TEXT COMMENT '设备描述',
     specifications TEXT COMMENT '技术规格',
+    image_url VARCHAR(500) COMMENT '设备图片路径',
     location VARCHAR(100) COMMENT '存放位置',
     purchase_date DATE COMMENT '购买日期',
-    purchase_price DECIMAL(15,2) COMMENT '购买价格',
-    status ENUM('available', 'in_use', 'maintenance', 'retired') DEFAULT 'available' COMMENT '设备状态',
-    responsible_person VARCHAR(100) COMMENT '负责人',
-    images JSON COMMENT '设备图片',
+    price DECIMAL(15,2) COMMENT '购买价格',
+    contact_person VARCHAR(100) COMMENT '联系人',
+    usage_notes TEXT COMMENT '使用说明',
+    status ENUM('active', 'maintenance', 'inactive') DEFAULT 'active' COMMENT '设备状态',
+    sort_order INT DEFAULT 0 COMMENT '排序权重',
     manual_path VARCHAR(500) COMMENT '使用手册路径',
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    INDEX idx_status (status)
+    INDEX idx_status (status),
+    INDEX idx_category (category)
 ) COMMENT='设备资源表';
 
 -- 招生信息表
@@ -227,3 +231,17 @@ INSERT INTO research_areas (name, name_en, description, sort_order) VALUES
 ('深度学习', 'Deep Learning', '专注于神经网络和深度学习技术', 2),
 ('计算机视觉', 'Computer Vision', '图像处理、目标检测、图像识别等技术研究', 3),
 ('自然语言处理', 'Natural Language Processing', '文本分析、语言理解、机器翻译等', 4);
+
+-- 插入示例设备数据
+INSERT INTO equipment (name, category, model, manufacturer, description, specifications, location, purchase_date, price, contact_person, usage_notes, status, sort_order) VALUES 
+('高性能工作站', '计算设备', 'Precision 7000', 'Dell', '用于深度学习训练和科学计算的高性能工作站', 'CPU: Intel Xeon W-3175X\nGPU: NVIDIA RTX 4090 x2\n内存: 128GB DDR4\n存储: 2TB NVMe SSD', '实验室A区', '2023-03-15', 85000.00, '张教授', '使用前请预约，注意散热和电源管理', 'active', 10),
+('显微镜系统', '测试仪器', 'BX53M', 'Olympus', '高精度光学显微镜，用于材料分析和生物观察', '放大倍数: 50x-1000x\n分辨率: 0.2μm\n照明: LED光源\n相机: 500万像素', '实验室B区', '2023-01-20', 45000.00, '李研究员', '使用后请清洁镜头，避免强光直射', 'active', 9),
+('3D打印机', '实验器材', 'Ultimaker S5', 'Ultimaker', '高精度3D打印机，用于快速原型制作', '打印尺寸: 330×240×300mm\n层高: 0.06-0.6mm\n材料: PLA, ABS, PETG等', '制造间', '2022-11-08', 28000.00, '王工程师', '使用前检查耗材，打印完成后清理平台', 'active', 8),
+('服务器集群', '计算设备', 'PowerEdge R750', 'Dell', '用于大规模数据处理和模型训练的服务器', 'CPU: Intel Xeon Silver 4314 x2\n内存: 256GB DDR4\n存储: 8TB RAID10\n网络: 25GbE', '机房', '2023-06-10', 120000.00, '系统管理员', '24小时运行，定期检查温度和日志', 'active', 10),
+('激光切割机', '实验器材', 'VLS2.30', 'Universal Laser Systems', '精密激光切割和雕刻设备', '工作区域: 610×305mm\n激光功率: 30W CO2\n切割厚度: 最大6mm', '加工车间', '2022-09-15', 65000.00, '技术员', '使用时注意安全防护，定期清洁镜片', 'maintenance', 7),
+('示波器', '测试仪器', 'MSO64', 'Tektronix', '高带宽数字示波器，用于信号分析', '带宽: 1GHz\n采样率: 25GS/s\n通道数: 4+16\n存储深度: 62.5M点', '电子实验室', '2023-02-28', 55000.00, '电子工程师', '使用前校准，避免过载输入', 'active', 6);
+
+-- 插入示例新闻数据
+INSERT INTO news (title, summary, content, author, category, status, is_top, publish_time) VALUES 
+('实验室新增高性能计算设备', '为提升科研计算能力，实验室新采购了一批高性能工作站', '近日，我实验室成功采购并安装了多台高性能工作站，显著提升了深度学习训练和科学计算能力。新设备配备了最新的NVIDIA RTX 4090显卡和高性能CPU，将为研究工作提供强有力的硬件支持。', '管理员', 'news', 'published', true, '2023-03-20 10:00:00'),
+('实验室设备维护通知', '部分设备将进行定期维护，请合理安排实验时间', '为确保设备正常运行，实验室将于本周末对激光切割机等设备进行定期维护。维护期间设备暂停使用，请各位老师和同学提前安排好实验计划。', '设备管理员', 'announcement', 'published', false, '2023-11-15 09:00:00');

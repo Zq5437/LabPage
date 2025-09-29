@@ -12,48 +12,26 @@
       <!-- 筛选工具栏 -->
       <div class="filter-toolbar">
         <div class="filter-left">
-          <el-input
-            v-model="filters.search"
-            placeholder="搜索论文标题、作者、期刊..."
-            style="width: 300px"
-            clearable
-            @input="handleSearch"
-          >
+          <el-input v-model="filters.search" placeholder="搜索论文标题、作者、期刊..." style="width: 300px" clearable
+            @input="handleSearch">
             <template #prefix>
-              <el-icon><Search /></el-icon>
+              <el-icon>
+                <Search />
+              </el-icon>
             </template>
           </el-input>
         </div>
 
         <div class="filter-right">
-          <el-select
-            v-model="filters.category"
-            placeholder="选择分类"
-            clearable
-            style="width: 150px"
-            @change="loadPublications"
-          >
-            <el-option
-              v-for="category in categories"
-              :key="category.category"
-              :label="category.category"
-              :value="category.category"
-            />
+          <el-select v-model="filters.category" placeholder="选择分类" clearable style="width: 150px"
+            @change="loadPublications">
+            <el-option v-for="category in categories" :key="category.category" :label="category.category"
+              :value="category.category" />
           </el-select>
 
-          <el-select
-            v-model="filters.year"
-            placeholder="选择年份"
-            clearable
-            style="width: 120px"
-            @change="loadPublications"
-          >
-            <el-option
-              v-for="year in years"
-              :key="year.year"
-              :label="year.year"
-              :value="year.year"
-            />
+          <el-select v-model="filters.year" placeholder="选择年份" clearable style="width: 120px"
+            @change="loadPublications">
+            <el-option v-for="year in years" :key="year.year" :label="year.year" :value="year.year" />
           </el-select>
 
           <el-select v-model="sortBy" style="width: 150px" @change="loadPublications">
@@ -116,51 +94,34 @@
             </p>
 
             <div class="publication-actions">
-              <el-button
-                v-if="publication.pdf_url"
-                type="primary"
-                size="small"
-                @click="viewPDF(publication.pdf_url)"
-              >
-                <el-icon><Document /></el-icon>
+              <el-button v-if="publication.pdf_url" type="primary" size="small" @click="viewPDF(publication.pdf_url)">
+                <el-icon>
+                  <Document />
+                </el-icon>
                 查看PDF
               </el-button>
-              
-              <el-button
-                v-if="publication.doi"
-                type="default"
-                size="small"
-                @click="openDOI(publication.doi)"
-              >
-                <el-icon><Link /></el-icon>
+
+              <el-button v-if="publication.doi" type="default" size="small" @click="openDOI(publication.doi)">
+                <el-icon>
+                  <Link />
+                </el-icon>
                 DOI链接
               </el-button>
 
-              <el-button
-                type="text"
-                size="small"
-                @click="toggleAbstract(publication.id)"
-              >
+              <el-button type="text" size="small" @click="toggleAbstract(publication.id)">
                 {{ expandedIds.includes(publication.id) ? '收起' : '展开' }}摘要
               </el-button>
             </div>
 
             <!-- 展开的摘要 -->
-            <div
-              v-if="expandedIds.includes(publication.id) && publication.abstract"
-              class="full-abstract"
-            >
+            <div v-if="expandedIds.includes(publication.id) && publication.abstract" class="full-abstract">
               <h4>摘要</h4>
               <p>{{ publication.abstract }}</p>
-              
+
               <div v-if="publication.keywords" class="keywords">
                 <h4>关键词</h4>
-                <el-tag
-                  v-for="keyword in getKeywords(publication.keywords)"
-                  :key="keyword"
-                  size="small"
-                  style="margin-right: 8px; margin-bottom: 8px;"
-                >
+                <el-tag v-for="keyword in getKeywords(publication.keywords)" :key="keyword" size="small"
+                  style="margin-right: 8px; margin-bottom: 8px;">
                   {{ keyword }}
                 </el-tag>
               </div>
@@ -176,15 +137,9 @@
 
       <!-- 分页 -->
       <div class="pagination-container" v-if="pagination.total > 0">
-        <el-pagination
-          v-model:current-page="pagination.page"
-          v-model:page-size="pagination.limit"
-          :page-sizes="[10, 20, 30, 50]"
-          :total="pagination.total"
-          layout="total, sizes, prev, pager, next, jumper"
-          @size-change="loadPublications"
-          @current-change="loadPublications"
-        />
+        <el-pagination v-model:current-page="pagination.page" v-model:page-size="pagination.limit"
+          :page-sizes="[10, 20, 30, 50]" :total="pagination.total" layout="total, sizes, prev, pager, next, jumper"
+          @size-change="loadPublications" @current-change="loadPublications" />
       </div>
     </div>
   </div>
@@ -248,7 +203,7 @@ const loadPublications = async () => {
     }
 
     const response = await api.get('/publications/list', { params })
-    
+
     if (response.data) {
       publications.value = response.data.data || []
       if (response.data.pagination) {

@@ -74,7 +74,7 @@
       <section class="research-areas-section" v-if="researchAreas.length > 0">
         <h2>主要研究领域</h2>
         <div class="areas-grid">
-          <div v-for="area in researchAreas.slice(0, 6)" :key="area.id" class="area-card">
+          <div v-for="area in (researchAreas || []).slice(0, 6)" :key="area.id" class="area-card">
             <div class="area-icon">
               <el-icon>
                 <TrendCharts />
@@ -376,7 +376,9 @@ const loadResearchAreas = async () => {
     })
 
     if (response.data) {
-      researchAreas.value = response.data.data || []
+      // 确保数据是数组格式
+      const data = response.data.data || response.data || []
+      researchAreas.value = Array.isArray(data) ? data : []
     }
   } catch (error) {
     console.error('加载研究方向失败:', error)

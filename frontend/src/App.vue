@@ -17,9 +17,11 @@
 </template>
 
 <script>
+import { onMounted } from 'vue'
 import NavHeader from '@/components/common/NavHeader.vue'
 import SiteFooter from '@/components/common/SiteFooter.vue'
 import BackToTop from '@/components/common/BackToTop.vue'
+import { useSiteStore } from '@/stores/site'
 
 export default {
     name: 'App',
@@ -28,12 +30,17 @@ export default {
         SiteFooter,
         BackToTop
     },
-    created() {
-        // 记录页面访问
-        this.logVisit()
-    },
-    methods: {
-        logVisit() {
+    setup() {
+        const siteStore = useSiteStore()
+
+        onMounted(async () => {
+            // 初始化站点数据
+            await siteStore.initSiteData()
+            // 记录页面访问
+            logVisit()
+        })
+
+        const logVisit = () => {
             // 简单的访问统计
             const visitData = {
                 page_url: window.location.href,
@@ -51,6 +58,8 @@ export default {
                 // 忽略错误，不影响用户体验
             })
         }
+
+        return {}
     }
 }
 </script>
