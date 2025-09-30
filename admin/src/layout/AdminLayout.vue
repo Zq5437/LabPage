@@ -4,17 +4,14 @@
     <div class="layout-sidebar" :class="{ collapsed: sidebarCollapsed }">
       <AdminSidebar :collapsed="sidebarCollapsed" />
     </div>
-    
+
     <!-- 主要内容区域 -->
     <div class="layout-main">
       <!-- 顶部导航 -->
       <div class="layout-header">
-        <AdminHeader 
-          :sidebar-collapsed="sidebarCollapsed" 
-          @toggle-sidebar="toggleSidebar"
-        />
+        <AdminHeader :sidebar-collapsed="sidebarCollapsed" @toggle-sidebar="toggleSidebar" />
       </div>
-      
+
       <!-- 内容区域 -->
       <div class="layout-content">
         <router-view v-slot="{ Component, route }">
@@ -30,7 +27,7 @@
 </template>
 
 <script setup>
-import { ref, computed } from 'vue'
+import { ref, computed, onMounted, onUnmounted } from 'vue'
 import AdminSidebar from './components/AdminSidebar.vue'
 import AdminHeader from './components/AdminHeader.vue'
 
@@ -48,6 +45,11 @@ const keepAliveComponents = computed(() => [
 // 切换侧边栏
 const toggleSidebar = () => {
   sidebarCollapsed.value = !sidebarCollapsed.value
+  // 侧边栏宽度有过渡动画，动画结束后触发一次全局 resize 以通知图表自适应
+  // 与 .layout-sidebar 的 transition: width 0.3s 保持一致，略加偏移
+  setTimeout(() => {
+    window.dispatchEvent(new Event('resize'))
+  }, 320)
 }
 
 // 监听窗口大小变化
@@ -57,10 +59,10 @@ onMounted(() => {
       sidebarCollapsed.value = true
     }
   }
-  
+
   window.addEventListener('resize', handleResize)
   handleResize() // 初始化检查
-  
+
   onUnmounted(() => {
     window.removeEventListener('resize', handleResize)
   })
@@ -78,7 +80,7 @@ onMounted(() => {
   width: var(--admin-sidebar-width);
   flex-shrink: 0;
   transition: width 0.3s ease;
-  
+
   &.collapsed {
     width: 64px;
   }
@@ -126,12 +128,12 @@ onMounted(() => {
     z-index: 1000;
     transform: translateX(-100%);
     transition: transform 0.3s ease;
-    
+
     &:not(.collapsed) {
       transform: translateX(0);
     }
   }
-  
+
   .layout-main {
     width: 100%;
   }

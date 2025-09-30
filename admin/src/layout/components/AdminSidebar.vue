@@ -135,7 +135,7 @@
     <!-- 用户信息 -->
     <div class="sidebar-footer">
       <div class="user-info" :class="{ collapsed }">
-        <el-avatar :size="32">
+        <el-avatar :size="32" :src="avatarSrc">
           <el-icon>
             <Avatar />
           </el-icon>
@@ -179,6 +179,7 @@ const activeMenu = computed(() => {
 // 用户信息
 const username = computed(() => authStore.username)
 const isSuperAdmin = computed(() => authStore.isSuperAdmin)
+const avatarSrc = computed(() => authStore.user?.avatar || '')
 
 // 用户角色文本
 const userRoleText = computed(() => {

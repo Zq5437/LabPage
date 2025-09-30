@@ -26,6 +26,7 @@
 <script setup>
 import { reactive, ref, computed } from 'vue'
 import { ElMessage } from 'element-plus'
+import { useAuthStore } from '@/stores/auth'
 
 const props = defineProps({
     visible: {
@@ -38,6 +39,7 @@ const emit = defineEmits(['update:visible', 'success'])
 
 const formRef = ref()
 const loading = ref(false)
+const authStore = useAuthStore()
 
 const form = reactive({
     oldPassword: '',
@@ -79,14 +81,20 @@ const handleSubmit = async () => {
         await formRef.value.validate()
         loading.value = true
 
-        // 这里调用API修改密码
-        // await changePassword(form)
+        const { success, message } = await authStore.changePassword({
+            oldPassword: form.oldPassword,
+            newPassword: form.newPassword
+        })
+        if (!success) {
+            throw new Error(message || '修改密码失败')
+        }
 
         ElMessage.success('密码修改成功')
         emit('success')
         handleClose()
     } catch (error) {
         console.error('修改密码失败:', error)
+        ElMessage.error(error.message || '修改密码失败')
     } finally {
         loading.value = false
     }
