@@ -9,6 +9,7 @@ declare module 'vue' {
   export interface GlobalComponents {
     AnimatedNumber: typeof import('./src/components/AnimatedNumber.vue')['default']
     ChangePasswordDialog: typeof import('./src/components/ChangePasswordDialog.vue')['default']
+    ContactMessagesList: typeof import('./src/components/dashboard/ContactMessagesList.vue')['default']
     ContentDistributionChart: typeof import('./src/components/charts/ContentDistributionChart.vue')['default']
     ElAvatar: typeof import('element-plus/es')['ElAvatar']
     ElBadge: typeof import('element-plus/es')['ElBadge']

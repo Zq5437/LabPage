@@ -457,4 +457,28 @@ export const recruitmentApi = {
     delete: (id) => api.delete(`/recruitment/admin/${id}`)
 }
 
+// 联系留言管理API
+export const contactApi = {
+    // 获取联系统计信息
+    getStats: () => api.get('/contact/stats'),
+
+    // 获取联系留言列表（管理端）
+    getMessages: (params) => api.get('/contact/messages', { params }),
+
+    // 标记留言为已读
+    markAsRead: (id) => api.put(`/contact/messages/${id}/read`),
+
+    // 批量标记已读
+    batchMarkRead: (ids) => api.put('/contact/messages/batch-read', { ids }),
+
+    // 回复留言
+    replyMessage: (id, reply) => api.put(`/contact/messages/${id}/reply`, { reply }),
+
+    // 删除留言
+    deleteMessage: (id) => api.delete(`/contact/messages/${id}`),
+
+    // 批量删除留言
+    batchDeleteMessages: (ids) => api.delete('/contact/messages/batch', { data: { ids } })
+}
+
 export default api

@@ -108,20 +108,29 @@
           </el-card>
         </el-col>
 
-        <!-- 待办事项 -->
+        <!-- 联系留言 -->
         <el-col :xs="24" :lg="12">
           <el-card class="activity-card">
             <template #header>
               <div class="card-header">
-                <span class="title">待办事项</span>
-                <el-badge :value="todoCount" class="badge">
-                  <el-icon>
-                    <Bell />
-                  </el-icon>
-                </el-badge>
+                <span class="title">联系留言</span>
+                <div class="header-stats">
+                  <el-tag v-if="contactStats.unreadCount > 0" type="danger" size="small">
+                    {{ contactStats.unreadCount }} 条未读
+                  </el-tag>
+                  <el-tag v-if="contactStats.todayCount > 0" type="info" size="small">
+                    今日 {{ contactStats.todayCount }} 条
+                  </el-tag>
+                  <el-button type="text" size="small" @click="$router.push('/contact-messages')">
+                    查看全部
+                    <el-icon>
+                      <ArrowRight />
+                    </el-icon>
+                  </el-button>
+                </div>
               </div>
             </template>
-            <TodoList />
+            <ContactMessagesList ref="contactMessagesRef" @stats-update="handleContactStatsUpdate" />
           </el-card>
         </el-col>
       </el-row>
@@ -144,7 +153,7 @@ import AnimatedNumber from '@/components/AnimatedNumber.vue'
 import VisitTrendChart from '@/components/charts/VisitTrendChart.vue'
 import ContentDistributionChart from '@/components/charts/ContentDistributionChart.vue'
 import RecentNewsList from '@/components/dashboard/RecentNewsList.vue'
-import TodoList from '@/components/dashboard/TodoList.vue'
+import ContactMessagesList from '@/components/dashboard/ContactMessagesList.vue'
 
 const authStore = useAuthStore()
 
@@ -159,12 +168,19 @@ const currentDate = computed(() => {
 // 访问趋势周期
 const visitTrendPeriod = ref('7')
 
-// 待办事项数量（动态计算）
-const todoCount = computed(() => {
-  // 这里应该从TodoList组件或API获取未完成的待办事项数量
-  // 目前使用模拟数据
-  return 5
+// 联系留言组件引用
+const contactMessagesRef = ref()
+
+// 联系留言统计信息
+const contactStats = ref({
+  unreadCount: 0,
+  todayCount: 0
 })
+
+// 处理联系留言统计更新
+const handleContactStatsUpdate = (stats) => {
+  contactStats.value = stats
+}
 
 // 图表数据
 const chartData = ref({
@@ -394,6 +410,27 @@ onMounted(() => {
     font-size: 16px;
     font-weight: 600;
     color: var(--admin-text-primary);
+  }
+
+  .header-stats {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+
+    @media (max-width: 768px) {
+      gap: 4px;
+    }
+
+    .el-tag {
+      margin: 0;
+    }
+
+    .el-button {
+      font-size: 12px;
+      padding: 4px 8px;
+      margin-left: 4px;
+    }
   }
 
   .badge {
