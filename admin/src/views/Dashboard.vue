@@ -15,7 +15,7 @@
               </el-icon>
               发布新闻
             </el-button>
-            <el-button @click="$router.push('/members/create')">
+            <el-button @click="$router.push('/members')">
               <el-icon>
                 <UserFilled />
               </el-icon>
@@ -182,6 +182,123 @@ const handleContactStatsUpdate = (stats) => {
   contactStats.value = stats
 }
 
+// 获取历史数据进行真实比较（简化版本）
+const getHistoricalData = async (type, timeRange) => {
+  try {
+    // 由于API不支持日期范围查询，我们使用一个简化的方法
+    // 获取全部数据，然后在前端过滤日期
+    let response, compareLabel
+
+    switch (type) {
+      case 'news':
+        response = await newsApi.getList({
+          limit: 100, // API最大限制为100
+          status: 'published'
+        }).catch(() => null)
+        compareLabel = timeRange === 'lastMonth' ? '较上月' : '较半年前'
+        break
+      case 'members':
+        response = await membersApi.getList({
+          limit: 100, // API最大限制为100
+          status: 'active'
+        }).catch(() => null)
+        compareLabel = timeRange === 'lastMonth' ? '较上月' : '较半年前'
+        break
+      case 'projects':
+        response = await projectsApi.getList({
+          limit: 100, // API最大限制为100
+          status: 'ongoing'
+        }).catch(() => null)
+        compareLabel = timeRange === 'lastMonth' ? '较上月' : '较半年前'
+        break
+      default:
+        return { count: 0, label: '无对比数据' }
+    }
+
+    if (!response?.data) {
+      return { count: 0, label: compareLabel }
+    }
+
+    // 根据API类型获取正确的数据数组
+    let dataArray = []
+    switch (type) {
+      case 'news':
+        dataArray = response.data.news || []
+        break
+      case 'members':
+        dataArray = response.data.members || []
+        break
+      case 'projects':
+        dataArray = response.data.projects || []
+        break
+      default:
+        return { count: 0, label: compareLabel }
+    }
+
+    // 在前端过滤历史数据
+    const now = dayjs()
+    let compareDate
+
+    switch (timeRange) {
+      case 'lastMonth':
+        compareDate = now.subtract(1, 'month')
+        break
+      case 'sixMonthsAgo':
+        compareDate = now.subtract(6, 'month')
+        break
+      default:
+        return { count: 0, label: compareLabel }
+    }
+
+    // 计算指定时间点之前的数据数量
+    const historicalCount = dataArray.filter(item => {
+      const itemDate = dayjs(item.created_at)
+      return itemDate.isBefore(compareDate)
+    }).length
+
+    return { count: historicalCount, label: compareLabel }
+
+  } catch (error) {
+    console.error(`获取${type}历史数据失败:`, error)
+    return { count: 0, label: '无对比数据' }
+  }
+}
+
+// 计算真实的趋势信息
+const calculateRealTrend = (current, historical, label, unit) => {
+  if (current === 0) {
+    switch (unit) {
+      case '篇':
+        return { type: 'up', text: '内容建设中' }
+      case '人':
+        return { type: 'up', text: '团队组建中' }
+      case '个':
+        return { type: 'up', text: '项目启动中' }
+      default:
+        return { type: 'up', text: '等待数据更新' }
+    }
+  }
+
+  const diff = current - historical
+
+  if (diff > 0) {
+    return {
+      type: 'up',
+      text: `${label} +${diff}${unit}`
+    }
+  } else if (diff < 0) {
+    return {
+      type: 'down',
+      text: `${label} ${diff}${unit}`
+    }
+  } else {
+    return {
+      type: 'up',
+      text: `${label}无变化`
+    }
+  }
+}
+
 // 图表数据
 const chartData = ref({
   visitTrend: []
@@ -228,11 +345,24 @@ const loadStats = async () => {
   try {
     // 并行加载所有统计数据
     const days = parseInt(visitTrendPeriod.value) || 7
-    const [analyticsResponse, newsResponse, membersResponse, projectsResponse] = await Promise.all([
+    const [
+      analyticsResponse,
+      newsResponse,
+      membersResponse,
+      projectsResponse,
+      // 获取历史数据用于真实比较
+      newsHistorical,
+      membersHistorical,
+      projectsHistorical
+    ] = await Promise.all([
       publicApi.getStatistics({ days }).catch(() => ({ data: { totalVisits: 0, recentVisits: 0, dailyStats: [] } })),
       newsApi.getList({ limit: 1, status: 'published' }).catch(() => ({ data: { pagination: { total: 0 } } })),
       membersApi.getList({ limit: 1, status: 'active' }).catch(() => ({ data: { pagination: { total: 0 } } })),
-      projectsApi.getList({ limit: 1, status: 'ongoing' }).catch(() => ({ data: { pagination: { total: 0 } } }))
+      projectsApi.getList({ limit: 1, status: 'ongoing' }).catch(() => ({ data: { pagination: { total: 0 } } })),
+      // 获取历史数据
+      getHistoricalData('news', 'lastMonth'),      // 新闻按月比较
+      getHistoricalData('members', 'sixMonthsAgo'), // 成员按半年比较
+      getHistoricalData('projects', 'lastMonth')    // 项目按月比较
     ])
 
     const analyticsData = analyticsResponse.data || {}
@@ -240,18 +370,43 @@ const loadStats = async () => {
     const membersData = membersResponse.data || {}
     const projectsData = projectsResponse.data || {}
 
-    // 更新统计数据
-    statsData.value[0].value = newsData.pagination?.total || 0  // 新闻数量
-    statsData.value[1].value = membersData.pagination?.total || 0   // 成员数量  
-    statsData.value[2].value = projectsData.pagination?.total || 0   // 项目数量
-    statsData.value[3].value = analyticsData.totalVisits || 0  // 总访问量
+    // 当前数据
+    const currentNews = newsData.pagination?.total || 0
+    const currentMembers = membersData.pagination?.total || 0
+    const currentProjects = projectsData.pagination?.total || 0
+    const currentVisits = analyticsData.totalVisits || 0
 
-    // 更新访问量趋势文本
+    // 更新统计数据和趋势（使用真实历史数据比较）
+    statsData.value[0].value = currentNews
+    statsData.value[0].trend = calculateRealTrend(
+      currentNews,
+      newsHistorical.count,
+      newsHistorical.label,
+      '篇'
+    )
+
+    statsData.value[1].value = currentMembers
+    statsData.value[1].trend = calculateRealTrend(
+      currentMembers,
+      membersHistorical.count,
+      membersHistorical.label,
+      '人'
+    )
+
+    statsData.value[2].value = currentProjects
+    statsData.value[2].trend = calculateRealTrend(
+      currentProjects,
+      projectsHistorical.count,
+      projectsHistorical.label,
+      '个'
+    )
+
+    statsData.value[3].value = currentVisits
+    // 访问量保持现有逻辑（近7天数据）
     const recentVisits = analyticsData.recentVisits || 0
-    const averageDaily = Math.round(recentVisits / days)
     statsData.value[3].trend = {
       type: 'up',
-      text: `日均 ${averageDaily} 次访问`
+      text: `近${days}天共 ${recentVisits} 次访问`
     }
 
     // 更新图表数据
@@ -260,10 +415,10 @@ const loadStats = async () => {
   } catch (error) {
     console.error('加载统计数据失败:', error)
     // 出错时使用默认值
-    statsData.value[0].value = 0
-    statsData.value[1].value = 0
-    statsData.value[2].value = 0
-    statsData.value[3].value = 0
+    statsData.value.forEach((stat, index) => {
+      stat.value = 0
+      stat.trend = { type: 'up', text: '暂无数据' }
+    })
     chartData.value.visitTrend = []
   }
 }
