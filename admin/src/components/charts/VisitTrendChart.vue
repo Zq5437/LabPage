@@ -259,8 +259,7 @@ onUnmounted(() => {
 <style scoped>
 .visit-trend-chart {
     width: 100%;
-    height: 350px;
-    /* 设置固定高度 */
+    height: 100%;
     min-height: 350px;
     display: flex;
     align-items: center;

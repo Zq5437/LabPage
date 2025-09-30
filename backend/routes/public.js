@@ -9,7 +9,7 @@ const router = express.Router();
 // 获取实验室基本信息（公开接口）
 router.get('/lab-info', async (req, res) => {
     try {
-        const [labInfo] = await db.query('SELECT * FROM lab_info LIMIT 1');
+        const labInfo = await db.query('SELECT * FROM lab_info LIMIT 1');
 
         if (labInfo.length === 0) {
             return res.status(404).json({
@@ -35,7 +35,7 @@ router.get('/lab-info', async (req, res) => {
 // 获取研究方向列表（公开接口）
 router.get('/research-areas', async (req, res) => {
     try {
-        const [areas] = await db.query(
+        const areas = await db.query(
             'SELECT * FROM research_areas WHERE status = "active" ORDER BY sort_order DESC, id ASC'
         );
 
@@ -80,14 +80,14 @@ router.get('/publications', async (req, res) => {
         }
 
         // 获取总数
-        const [countResult] = await db.query(
+        const countResult = await db.query(
             `SELECT COUNT(*) as total FROM publications ${whereClause}`,
             params
         );
-        const total = countResult[0].total;
+        const total = countResult && countResult[0] ? countResult[0].total : 0;
 
         // 获取论文列表
-        const [publications] = await db.query(
+        const publications = await db.query(
             `SELECT * FROM publications ${whereClause} 
        ORDER BY is_featured DESC, year DESC, id DESC 
        LIMIT ${parseInt(limit)} OFFSET ${parseInt(offset)}`,
@@ -119,7 +119,7 @@ router.get('/publications', async (req, res) => {
 // 获取招生信息（公开接口）
 router.get('/recruitment', async (req, res) => {
     try {
-        const [recruitment] = await db.query(
+        const recruitment = await db.query(
             'SELECT * FROM recruitment WHERE status = "open" ORDER BY is_featured DESC, created_at DESC'
         );
 
@@ -140,22 +140,16 @@ router.get('/recruitment', async (req, res) => {
 // 获取设备资源列表（公开接口）
 router.get('/equipment', async (req, res) => {
     try {
-        const status = req.query.status || 'available';
+        const status = req.query.status || 'active';
 
-        const [equipment] = await db.query(
-            'SELECT id, name, model, manufacturer, description, specifications, location, status, images FROM equipment WHERE status = ? ORDER BY name ASC',
+        const equipment = await db.query(
+            'SELECT id, name, model, manufacturer, description, specifications, location, status, image_url FROM equipment WHERE status = ? ORDER BY name ASC',
             [status]
         );
 
-        // 解析图片JSON字段
+        // 将image_url转换为images数组格式以保持兼容性
         equipment.forEach(item => {
-            if (item.images) {
-                try {
-                    item.images = JSON.parse(item.images);
-                } catch (e) {
-                    item.images = [];
-                }
-            }
+            item.images = item.image_url ? [item.image_url] : [];
         });
 
         res.json({
@@ -335,7 +329,7 @@ router.put('/admin/lab-info', [
         const updates = { ...req.body };
 
         // 检查是否已存在实验室信息
-        const [existing] = await db.query('SELECT id FROM lab_info LIMIT 1');
+        const existing = await db.query('SELECT id FROM lab_info LIMIT 1');
 
         if (existing.length === 0) {
             // 创建新记录

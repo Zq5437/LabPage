@@ -69,7 +69,7 @@
                 </el-radio-group>
               </div>
             </template>
-            <VisitTrendChart :period="visitTrendPeriod" />
+            <VisitTrendChart :data="chartData.visitTrend" :loading="false" />
           </el-card>
         </el-col>
 
@@ -130,9 +130,9 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted, markRaw } from 'vue'
+import { ref, computed, onMounted, markRaw, watch } from 'vue'
 import { useAuthStore } from '@/stores/auth'
-import { publicApi } from '@/utils/api'
+import { publicApi, newsApi, membersApi, projectsApi } from '@/utils/api'
 import dayjs from 'dayjs'
 import {
   Plus, UserFilled, Document, User, Folder, TrendCharts,
@@ -159,8 +159,17 @@ const currentDate = computed(() => {
 // 访问趋势周期
 const visitTrendPeriod = ref('7')
 
-// 待办事项数量
-const todoCount = ref(5)
+// 待办事项数量（动态计算）
+const todoCount = computed(() => {
+  // 这里应该从TodoList组件或API获取未完成的待办事项数量
+  // 目前使用模拟数据
+  return 5
+})
+
+// 图表数据
+const chartData = ref({
+  visitTrend: []
+})
 
 // 统计数据
 const statsData = ref([
@@ -201,33 +210,62 @@ const statsData = ref([
 // 加载统计数据
 const loadStats = async () => {
   try {
-    // 加载访问统计数据
-    const analyticsResponse = await publicApi.getStatistics({ days: 30 })
-    const analyticsData = analyticsResponse.data || {}
+    // 并行加载所有统计数据
+    const days = parseInt(visitTrendPeriod.value) || 7
+    const [analyticsResponse, newsResponse, membersResponse, projectsResponse] = await Promise.all([
+      publicApi.getStatistics({ days }).catch(() => ({ data: { totalVisits: 0, recentVisits: 0, dailyStats: [] } })),
+      newsApi.getList({ limit: 1, status: 'published' }).catch(() => ({ data: { pagination: { total: 0 } } })),
+      membersApi.getList({ limit: 1, status: 'active' }).catch(() => ({ data: { pagination: { total: 0 } } })),
+      projectsApi.getList({ limit: 1, status: 'ongoing' }).catch(() => ({ data: { pagination: { total: 0 } } }))
+    ])
 
-    // 模拟其他统计数据（实际项目中应该有对应的API）
-    statsData.value[0].value = 128  // 新闻数量
-    statsData.value[1].value = 45   // 成员数量  
-    statsData.value[2].value = 23   // 项目数量
+    const analyticsData = analyticsResponse.data || {}
+    const newsData = newsResponse.data || {}
+    const membersData = membersResponse.data || {}
+    const projectsData = projectsResponse.data || {}
+
+    // 更新统计数据
+    statsData.value[0].value = newsData.pagination?.total || 0  // 新闻数量
+    statsData.value[1].value = membersData.pagination?.total || 0   // 成员数量  
+    statsData.value[2].value = projectsData.pagination?.total || 0   // 项目数量
     statsData.value[3].value = analyticsData.totalVisits || 0  // 总访问量
 
     // 更新访问量趋势文本
     const recentVisits = analyticsData.recentVisits || 0
-    const averageDaily = Math.round(recentVisits / 30)
+    const averageDaily = Math.round(recentVisits / days)
     statsData.value[3].trend = {
       type: 'up',
       text: `日均 ${averageDaily} 次访问`
     }
 
+    // 更新图表数据
+    updateChartData(analyticsData)
+
   } catch (error) {
     console.error('加载统计数据失败:', error)
     // 出错时使用默认值
-    statsData.value[0].value = 128
-    statsData.value[1].value = 45
-    statsData.value[2].value = 23
+    statsData.value[0].value = 0
+    statsData.value[1].value = 0
+    statsData.value[2].value = 0
     statsData.value[3].value = 0
+    chartData.value.visitTrend = []
   }
 }
+
+// 更新图表数据
+const updateChartData = (analyticsData) => {
+  // 处理访问趋势数据
+  const dailyStats = analyticsData.dailyStats || []
+  chartData.value.visitTrend = dailyStats.map(item => ({
+    date: item.date,
+    visits: item.visits
+  })).sort((a, b) => new Date(a.date) - new Date(b.date))
+}
+
+// 监听访问趋势周期变化
+watch(visitTrendPeriod, () => {
+  loadStats()
+})
 
 onMounted(() => {
   loadStats()
@@ -327,7 +365,7 @@ onMounted(() => {
   margin-bottom: 20px;
 
   .chart-card {
-    height: 400px;
+    height: 460px;
 
     :deep(.el-card__body) {
       height: calc(100% - 57px);
