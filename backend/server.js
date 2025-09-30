@@ -32,10 +32,16 @@ app.use(cors({
     credentials: true
 }));
 
-// 请求限制
+// 请求限制 - 针对管理后台调整为更宽松的限制
 const limiter = rateLimit({
     windowMs: 15 * 60 * 1000, // 15分钟
-    max: 100 // 限制每个IP 15分钟内最多100个请求
+    max: 300, // 限制每个IP 15分钟内最多300个请求（适合功能丰富的管理后台）
+    message: {
+        success: false,
+        message: '请求过于频繁，请稍后再试'
+    },
+    standardHeaders: true, // 在响应头中返回速率限制信息
+    legacyHeaders: false, // 禁用 X-RateLimit-* 头部
 });
 app.use('/api', limiter);
 

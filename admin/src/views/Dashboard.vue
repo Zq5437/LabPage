@@ -182,38 +182,56 @@ const handleContactStatsUpdate = (stats) => {
   contactStats.value = stats
 }
 
-// 获取历史数据进行真实比较（简化版本）
-const getHistoricalData = async (type, timeRange) => {
+// 缓存API响应以减少重复请求
+const apiCache = new Map()
+
+// 获取历史数据进行真实比较（优化版本，减少API调用）
+const getHistoricalData = async (type, timeRange, cachedResponse = null) => {
   try {
-    // 由于API不支持日期范围查询，我们使用一个简化的方法
-    // 获取全部数据，然后在前端过滤日期
     let response, compareLabel
 
-    switch (type) {
-      case 'news':
-        response = await newsApi.getList({
-          limit: 100, // API最大限制为100
-          status: 'published'
-        }).catch(() => null)
-        compareLabel = timeRange === 'lastMonth' ? '较上月' : '较半年前'
-        break
-      case 'members':
-        response = await membersApi.getList({
-          limit: 100, // API最大限制为100
-          status: 'active'
-        }).catch(() => null)
-        compareLabel = timeRange === 'lastMonth' ? '较上月' : '较半年前'
-        break
-      case 'projects':
-        response = await projectsApi.getList({
-          limit: 100, // API最大限制为100
-          status: 'ongoing'
-        }).catch(() => null)
-        compareLabel = timeRange === 'lastMonth' ? '较上月' : '较半年前'
-        break
-      default:
-        return { count: 0, label: '无对比数据' }
+    // 如果有缓存的响应，直接使用，避免重复API调用
+    if (cachedResponse) {
+      response = cachedResponse
+    } else {
+      // 检查内存缓存
+      const cacheKey = `${type}_list`
+      if (apiCache.has(cacheKey)) {
+        response = apiCache.get(cacheKey)
+      } else {
+        // 发起API请求并缓存结果
+        switch (type) {
+          case 'news':
+            response = await newsApi.getList({
+              limit: 100, // API最大限制为100
+              status: 'published'
+            }).catch(() => null)
+            break
+          case 'members':
+            response = await membersApi.getList({
+              limit: 100, // API最大限制为100
+              status: 'active'
+            }).catch(() => null)
+            break
+          case 'projects':
+            response = await projectsApi.getList({
+              limit: 100, // API最大限制为100
+              status: 'ongoing'
+            }).catch(() => null)
+            break
+          default:
+            return { count: 0, label: '无对比数据' }
+        }
+
+        // 缓存响应（5分钟有效期）
+        if (response) {
+          apiCache.set(cacheKey, response)
+          setTimeout(() => apiCache.delete(cacheKey), 5 * 60 * 1000)
+        }
+      }
     }
+
+    compareLabel = timeRange === 'lastMonth' ? '较上月' : '较半年前'
 
     if (!response?.data) {
       return { count: 0, label: compareLabel }
@@ -345,24 +363,19 @@ const loadStats = async () => {
   try {
     // 并行加载所有统计数据
     const days = parseInt(visitTrendPeriod.value) || 7
-    const [
-      analyticsResponse,
-      newsResponse,
-      membersResponse,
-      projectsResponse,
-      // 获取历史数据用于真实比较
-      newsHistorical,
-      membersHistorical,
-      projectsHistorical
-    ] = await Promise.all([
+    // 首先获取基础统计数据和详细列表数据
+    const [analyticsResponse, newsResponse, membersResponse, projectsResponse] = await Promise.all([
       publicApi.getStatistics({ days }).catch(() => ({ data: { totalVisits: 0, recentVisits: 0, dailyStats: [] } })),
-      newsApi.getList({ limit: 1, status: 'published' }).catch(() => ({ data: { pagination: { total: 0 } } })),
-      membersApi.getList({ limit: 1, status: 'active' }).catch(() => ({ data: { pagination: { total: 0 } } })),
-      projectsApi.getList({ limit: 1, status: 'ongoing' }).catch(() => ({ data: { pagination: { total: 0 } } })),
-      // 获取历史数据
-      getHistoricalData('news', 'lastMonth'),      // 新闻按月比较
-      getHistoricalData('members', 'sixMonthsAgo'), // 成员按半年比较
-      getHistoricalData('projects', 'lastMonth')    // 项目按月比较
+      newsApi.getList({ limit: 100, status: 'published' }).catch(() => ({ data: { pagination: { total: 0 } } })),
+      membersApi.getList({ limit: 100, status: 'active' }).catch(() => ({ data: { pagination: { total: 0 } } })),
+      projectsApi.getList({ limit: 100, status: 'ongoing' }).catch(() => ({ data: { pagination: { total: 0 } } }))
+    ])
+
+    // 使用已获取的响应来计算历史数据，避免重复API调用
+    const [newsHistorical, membersHistorical, projectsHistorical] = await Promise.all([
+      getHistoricalData('news', 'lastMonth', newsResponse),        // 复用新闻响应
+      getHistoricalData('members', 'sixMonthsAgo', membersResponse), // 复用成员响应
+      getHistoricalData('projects', 'lastMonth', projectsResponse)   // 复用项目响应
     ])
 
     const analyticsData = analyticsResponse.data || {}
