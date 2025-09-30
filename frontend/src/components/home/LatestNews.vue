@@ -3,24 +3,26 @@
     <div class="container">
       <div class="section-header">
         <h2>最新新闻</h2>
-        <router-link to="/news" class="more-link">查看全部</router-link>
+        <router-link to="/news" class="more-link">查看全部 →</router-link>
       </div>
 
-      <div class="news-grid" v-loading="loading">
-        <div v-for="item in news" :key="item.id" class="news-card" @click="goDetail(item)">
-          <div class="cover">
-            <img v-if="item.cover_image" :src="item.cover_image" :alt="item.title" />
-            <div v-else class="default-cover">ICL</div>
+      <div class="news-list" v-loading="loading">
+        <div v-for="item in news" :key="item.id" class="news-item" @click="goDetail(item)">
+          <div class="news-media">
+            <img v-if="item.cover_image" :src="item.cover_image" :alt="item.title" class="news-image" />
+            <div v-else class="default-image">📰</div>
             <div class="badge" v-if="item.is_top === 1">置顶</div>
           </div>
-          <div class="content">
-            <div class="meta">
-              <el-tag size="small" :type="getCategoryTagType(item.category)">{{ getCategoryText(item.category)
-              }}</el-tag>
+
+          <div class="news-content">
+            <div class="news-meta">
+              <el-tag size="small" :type="getCategoryTagType(item.category)">
+                {{ getCategoryText(item.category) }}
+              </el-tag>
               <span class="date">{{ formatDate(item.publish_time) }}</span>
             </div>
-            <h3 class="title">{{ item.title }}</h3>
-            <p class="summary">{{ item.summary }}</p>
+            <h3 class="news-title">{{ item.title }}</h3>
+            <p class="news-summary">{{ item.summary }}</p>
           </div>
         </div>
       </div>
@@ -38,14 +40,14 @@ import api from '@/utils/api'
 
 export default {
   name: 'LatestNews',
-  setup(_, { emit }) {
+  setup() {
     const news = ref([])
     const loading = ref(false)
 
     const loadNews = async () => {
       try {
         loading.value = true
-        const response = await api.get('/news', { params: { page: 1, limit: 6, status: 'published' } })
+        const response = await api.get('/news', { params: { page: 1, limit: 4, status: 'published' } })
         news.value = response?.data?.news || []
       } catch (e) {
         news.value = []
@@ -101,58 +103,75 @@ export default {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 30px;
+  margin-bottom: 40px;
 }
 
 .section-header h2 {
   margin: 0;
-  font-size: 1.8rem;
+  font-size: 2rem;
+  color: #2c3e50;
 }
 
 .more-link {
   color: #667eea;
   text-decoration: none;
+  font-size: 1rem;
+  transition: opacity 0.2s;
 }
 
-.news-grid {
+.more-link:hover {
+  opacity: 0.8;
+}
+
+.news-list {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.news-item {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
-  gap: 20px;
-}
-
-.news-card {
+  grid-template-columns: 280px 1fr;
+  gap: 32px;
+  align-items: center;
   background: #fff;
+  padding: 24px;
   border-radius: 12px;
-  overflow: hidden;
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
   cursor: pointer;
-  transition: transform .2s ease;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
 
-.news-card:hover {
-  transform: translateY(-4px);
+.news-item:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
 }
 
-.cover {
+.news-media {
   position: relative;
-  height: 160px;
-  background: #f0f2f5;
-}
-
-.cover img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-}
-
-.default-cover {
-  width: 100%;
-  height: 100%;
   display: flex;
   align-items: center;
   justify-content: center;
-  color: #c0c4cc;
-  font-size: 2rem;
+  overflow: hidden;
+  border-radius: 8px;
+}
+
+.news-image {
+  width: 280px;
+  height: 180px;
+  object-fit: cover;
+  border-radius: 8px;
+}
+
+.default-image {
+  width: 280px;
+  height: 180px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 3rem;
+  border-radius: 8px;
 }
 
 .badge {
@@ -161,27 +180,31 @@ export default {
   right: 10px;
   background: #f39c12;
   color: #fff;
-  padding: 2px 8px;
-  border-radius: 10px;
-  font-size: .75rem;
+  padding: 4px 12px;
+  border-radius: 12px;
+  font-size: 0.85rem;
+  font-weight: 500;
 }
 
-.content {
-  padding: 16px 18px 20px;
+.news-content {
+  color: #2c3e50;
 }
 
-.meta {
+.news-meta {
   display: flex;
-  justify-content: space-between;
+  gap: 12px;
   align-items: center;
-  margin-bottom: 10px;
-  color: #999;
-  font-size: .9rem;
+  margin-bottom: 12px;
 }
 
-.title {
-  margin: 6px 0 8px 0;
-  font-size: 1.1rem;
+.date {
+  color: #999;
+  font-size: 0.9rem;
+}
+
+.news-title {
+  font-size: 1.5rem;
+  margin: 0 0 12px 0;
   color: #2c3e50;
   line-height: 1.4;
   display: -webkit-box;
@@ -191,10 +214,10 @@ export default {
   overflow: hidden;
 }
 
-.summary {
+.news-summary {
   margin: 0;
-  color: #666;
-  line-height: 1.6;
+  color: #555;
+  line-height: 1.8;
   display: -webkit-box;
   -webkit-line-clamp: 2;
   line-clamp: 2;
@@ -203,12 +226,27 @@ export default {
 }
 
 .empty {
-  padding: 20px 0;
+  padding: 40px 0;
 }
 
 @media (max-width: 768px) {
-  .news-grid {
+  .news-item {
     grid-template-columns: 1fr;
+    gap: 16px;
+  }
+
+  .news-media {
+    order: 1;
+  }
+
+  .news-content {
+    order: 2;
+  }
+
+  .news-image,
+  .default-image {
+    width: 100%;
+    height: 200px;
   }
 }
 </style>

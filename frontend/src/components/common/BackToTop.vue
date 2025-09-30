@@ -1,13 +1,8 @@
 <template>
   <Transition name="fade">
-    <button 
-      v-show="isVisible" 
-      class="back-to-top" 
-      @click="scrollToTop"
-      :title="'返回顶部'"
-    >
+    <button v-show="isVisible" class="back-to-top" @click="scrollToTop" :title="'返回顶部'">
       <svg class="arrow-icon" viewBox="0 0 24 24" fill="currentColor">
-        <path d="M7.41 15.41L12 10.83l4.59 4.58L18 14l-6-6-6 6z"/>
+        <path d="M7.41 15.41L12 10.83l4.59 4.58L18 14l-6-6-6 6z" />
       </svg>
     </button>
   </Transition>
@@ -20,12 +15,12 @@ export default {
   name: 'BackToTop',
   setup() {
     const isVisible = ref(false)
-    
+
     // 监听滚动事件
     const handleScroll = () => {
       isVisible.value = window.scrollY > 300
     }
-    
+
     // 滚动到顶部
     const scrollToTop = () => {
       window.scrollTo({
@@ -33,15 +28,15 @@ export default {
         behavior: 'smooth'
       })
     }
-    
+
     onMounted(() => {
       window.addEventListener('scroll', handleScroll, { passive: true })
     })
-    
+
     onUnmounted(() => {
       window.removeEventListener('scroll', handleScroll)
     })
-    
+
     return {
       isVisible,
       scrollToTop
@@ -68,17 +63,17 @@ export default {
   justify-content: center;
   box-shadow: var(--shadow-medium);
   transition: all 0.3s ease;
-  
+
   &:hover {
     background: var(--primary-hover);
     transform: translateY(-3px);
     box-shadow: var(--shadow-heavy);
   }
-  
+
   &:active {
     transform: translateY(-1px);
   }
-  
+
   @media (max-width: 768px) {
     bottom: 20px;
     right: 20px;
@@ -91,7 +86,7 @@ export default {
   width: 24px;
   height: 24px;
   transition: transform 0.3s ease;
-  
+
   .back-to-top:hover & {
     transform: translateY(-2px);
   }

@@ -1,42 +1,156 @@
 <template>
-  <section class="researchhighlights-section">
+  <section class="researchhighlights-section" ref="sectionRef">
     <div class="container">
-      <div class="section-header">
-        <h2>研究方向</h2>
-        <router-link to="/research" class="more-link">查看全部</router-link>
+      <div class="section-header" :class="{ 'visible': isVisible }">
+        <div class="header-content">
+          <h2>研究方向</h2>
+          <p class="header-subtitle">探索前沿科技，推动创新发展</p>
+        </div>
+        <router-link to="/research" class="more-link">
+          查看全部
+          <span class="arrow">→</span>
+        </router-link>
       </div>
 
-      <div class="areas-grid">
-        <div v-for="area in areasToShow" :key="area.id" class="area-card">
-          <div class="area-cover">
-            <img v-if="area.cover_image" :src="area.cover_image" :alt="area.name" />
-            <div v-else class="default-cover">
-              <span class="icon" v-if="area.icon">{{ area.icon }}</span>
-              <span v-else>RA</span>
+      <div class="areas-list">
+        <div v-for="(area, index) in areasToShow" :key="area.id" :ref="el => setItemRef(el, index)" class="area-item"
+          :class="{ 'reverse': index % 2 === 1, 'visible': visibleItems[index] }">
+          <div class="area-media">
+            <div class="media-wrapper">
+              <img v-if="area.cover_image" :src="area.cover_image" :alt="area.name" class="area-image" />
+              <div v-else class="default-image">
+                <span class="icon" v-if="area.icon">{{ area.icon }}</span>
+                <span v-else>🔬</span>
+              </div>
             </div>
+            <div class="number-badge">{{ String(index + 1).padStart(2, '0') }}</div>
           </div>
+
           <div class="area-content">
-            <h3 class="area-title">{{ area.name }}</h3>
-            <p class="area-desc">{{ area.description }}</p>
+            <div class="content-inner">
+              <h3 class="area-title">{{ area.name }}</h3>
+              <p class="area-description">{{ area.description }}</p>
+              <div class="area-actions">
+                <router-link :to="`/research#area-${area.id}`" class="learn-more">
+                  了解更多 <span class="arrow-icon">→</span>
+                </router-link>
+              </div>
+            </div>
           </div>
         </div>
       </div>
     </div>
+
+    <!-- 装饰性背景元素 -->
+    <div class="bg-decoration decoration-1"></div>
+    <div class="bg-decoration decoration-2"></div>
   </section>
 </template>
 
 <script>
-import { computed } from 'vue'
+import { computed, ref, onMounted, onUnmounted, reactive, nextTick } from 'vue'
 import { useSiteStore } from '@/stores/site'
 
 export default {
   name: 'ResearchHighlights',
   setup() {
     const siteStore = useSiteStore()
-    const areasToShow = computed(() => (siteStore.researchAreas || []).slice(0, 6))
+    const areasToShow = computed(() => (siteStore.researchAreas || []).slice(0, 4))
+
+    const sectionRef = ref(null)
+    const isVisible = ref(false)
+    const itemRefs = ref([])
+    const visibleItems = reactive({})
+
+    let sectionObserver = null
+    let itemObservers = []
+
+    const setItemRef = (el, index) => {
+      if (el) {
+        itemRefs.value[index] = el
+      }
+    }
+
+    const initObservers = async () => {
+      // 等待 DOM 完全渲染
+      await nextTick()
+
+      // 再次确认元素存在
+      if (!sectionRef.value || itemRefs.value.length === 0) {
+        return
+      }
+
+      // 监听整个区块的标题
+      sectionObserver = new IntersectionObserver(
+        (entries) => {
+          entries.forEach((entry) => {
+            if (entry.isIntersecting) {
+              isVisible.value = true
+              if (sectionObserver && entry.target) {
+                sectionObserver.unobserve(entry.target)
+              }
+            }
+          })
+        },
+        {
+          threshold: 0.1,
+          rootMargin: '0px 0px -100px 0px'
+        }
+      )
+
+      if (sectionRef.value) {
+        sectionObserver.observe(sectionRef.value)
+      }
+
+      // 为每个卡片单独创建观察器
+      itemRefs.value.forEach((item, index) => {
+        if (item && item instanceof Element) {
+          const observer = new IntersectionObserver(
+            (entries) => {
+              entries.forEach((entry) => {
+                if (entry.isIntersecting) {
+                  visibleItems[index] = true
+                  if (observer && entry.target) {
+                    observer.unobserve(entry.target)
+                  }
+                }
+              })
+            },
+            {
+              threshold: 0.1, // 当10%的卡片可见时触发
+              rootMargin: '0px 0px 50px 0px' // 在元素即将进入视口时就触发
+            }
+          )
+          observer.observe(item)
+          itemObservers.push(observer)
+        }
+      })
+    }
+
+    onMounted(() => {
+      initObservers()
+    })
+
+    onUnmounted(() => {
+      // 清理观察器
+      if (sectionObserver) {
+        sectionObserver.disconnect()
+        sectionObserver = null
+      }
+      itemObservers.forEach((observer) => {
+        if (observer) {
+          observer.disconnect()
+        }
+      })
+      itemObservers = []
+    })
 
     return {
-      areasToShow
+      areasToShow,
+      sectionRef,
+      isVisible,
+      visibleItems,
+      setItemRef
     }
   }
 }
@@ -44,98 +158,355 @@ export default {
 
 <style scoped>
 .researchhighlights-section {
-  padding: 80px 0;
-  background: #f8f9fa;
+  padding: 100px 0;
+  background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+  position: relative;
+  overflow: hidden;
+}
+
+/* 装饰性背景元素 */
+.bg-decoration {
+  position: absolute;
+  border-radius: 50%;
+  opacity: 0.1;
+  pointer-events: none;
+}
+
+.decoration-1 {
+  width: 400px;
+  height: 400px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  top: -100px;
+  right: -100px;
+  animation: float 20s infinite ease-in-out;
+}
+
+.decoration-2 {
+  width: 300px;
+  height: 300px;
+  background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+  bottom: -50px;
+  left: -50px;
+  animation: float 15s infinite ease-in-out reverse;
+}
+
+@keyframes float {
+
+  0%,
+  100% {
+    transform: translateY(0) rotate(0deg);
+  }
+
+  50% {
+    transform: translateY(-20px) rotate(10deg);
+  }
 }
 
 .container {
   max-width: 1200px;
   margin: 0 auto;
   padding: 0 20px;
+  position: relative;
+  z-index: 1;
 }
 
 .section-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 30px;
+  margin-bottom: 60px;
+  opacity: 0;
+  transform: translateY(30px);
+  transition: opacity 0.8s ease, transform 0.8s ease;
 }
 
-.section-header h2 {
-  font-size: 1.8rem;
+.section-header.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.header-content h2 {
+  font-size: 2.5rem;
+  margin: 0 0 8px 0;
+  color: #2c3e50;
+  font-weight: 700;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.header-subtitle {
   margin: 0;
+  color: #666;
+  font-size: 1.1rem;
 }
 
 .more-link {
   color: #667eea;
   text-decoration: none;
+  font-size: 1.1rem;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  transition: all 0.3s ease;
+  padding: 10px 20px;
+  border-radius: 25px;
+  background: rgba(102, 126, 234, 0.1);
 }
 
-.areas-grid {
+.more-link:hover {
+  background: rgba(102, 126, 234, 0.2);
+  transform: translateX(5px);
+}
+
+.more-link .arrow {
+  transition: transform 0.3s ease;
+}
+
+.more-link:hover .arrow {
+  transform: translateX(5px);
+}
+
+.areas-list {
+  display: flex;
+  flex-direction: column;
+  gap: 60px;
+}
+
+.area-item {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
-  gap: 20px;
+  grid-template-columns: 1fr 1fr;
+  gap: 60px;
+  align-items: center;
+  opacity: 0;
+  transform: translateY(60px);
+  transition: opacity 0.8s cubic-bezier(0.4, 0, 0.2, 1), transform 0.8s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-.area-card {
-  background: #fff;
-  border-radius: 12px;
+.area-item.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.area-item.reverse {
+  direction: rtl;
+}
+
+.area-item.reverse>* {
+  direction: ltr;
+}
+
+.area-media {
+  position: relative;
+}
+
+.media-wrapper {
+  position: relative;
   overflow: hidden;
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
-  transition: transform .2s ease;
+  border-radius: 20px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
+  transition: box-shadow 0.5s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-.area-card:hover {
-  transform: translateY(-4px);
+.area-item:hover .media-wrapper {
+  box-shadow: 0 30px 80px rgba(0, 0, 0, 0.25);
 }
 
-.area-cover {
-  height: 140px;
-  background: #eef2ff;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.area-cover img {
+.area-image {
   width: 100%;
-  height: 100%;
+  height: 360px;
   object-fit: cover;
+  display: block;
+  transition: transform 0.7s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-.default-cover {
+.area-item:hover .area-image {
+  transform: scale(1.1);
+}
+
+.default-image {
   width: 100%;
-  height: 100%;
+  height: 360px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   display: flex;
   align-items: center;
   justify-content: center;
-  color: #667eea;
-  font-weight: 600;
+  font-size: 4rem;
+  transition: transform 0.7s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.area-item:hover .default-image {
+  transform: scale(1.1);
+}
+
+.number-badge {
+  position: absolute;
+  top: -15px;
+  right: -15px;
+  width: 60px;
+  height: 60px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: #fff;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.5rem;
+  font-weight: 700;
+  box-shadow: 0 10px 30px rgba(102, 126, 234, 0.4);
 }
 
 .area-content {
-  padding: 18px;
+  padding: 20px;
 }
 
-.area-title {
-  margin: 0 0 8px 0;
-  font-size: 1.1rem;
-  color: #2c3e50;
-}
-
-.area-desc {
-  margin: 0;
-  color: #666;
-  line-height: 1.6;
-  display: -webkit-box;
-  -webkit-line-clamp: 3;
-  -webkit-box-orient: vertical;
+.content-inner {
+  background: #fff;
+  padding: 40px;
+  border-radius: 20px;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.08);
+  transition: all 0.4s ease;
+  position: relative;
   overflow: hidden;
 }
 
-@media (max-width: 768px) {
-  .areas-grid {
+.content-inner::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 5px;
+  height: 100%;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  transform: scaleY(0);
+  transition: transform 0.4s ease;
+}
+
+.area-item:hover .content-inner::before {
+  transform: scaleY(1);
+}
+
+.area-item:hover .content-inner {
+  box-shadow: 0 15px 50px rgba(0, 0, 0, 0.15);
+}
+
+.area-title {
+  font-size: 2rem;
+  margin: 0 0 20px 0;
+  color: #2c3e50;
+  font-weight: 700;
+  line-height: 1.3;
+  position: relative;
+  padding-bottom: 15px;
+}
+
+.area-title::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 60px;
+  height: 4px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border-radius: 2px;
+  transition: width 0.4s ease;
+}
+
+.area-item:hover .area-title::after {
+  width: 120px;
+}
+
+.area-description {
+  line-height: 1.9;
+  color: #555;
+  margin: 0 0 24px 0;
+  font-size: 1.05rem;
+}
+
+.area-actions {
+  margin-top: 24px;
+}
+
+.learn-more {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: #667eea;
+  text-decoration: none;
+  font-weight: 600;
+  font-size: 1.05rem;
+  transition: all 0.3s ease;
+  padding: 12px 24px;
+  border-radius: 25px;
+  background: rgba(102, 126, 234, 0.1);
+}
+
+.learn-more:hover {
+  background: rgba(102, 126, 234, 0.2);
+  transform: translateX(5px);
+}
+
+.arrow-icon {
+  transition: transform 0.3s ease;
+  font-size: 1.2rem;
+}
+
+.learn-more:hover .arrow-icon {
+  transform: translateX(5px);
+}
+
+@media (max-width: 968px) {
+  .area-item {
     grid-template-columns: 1fr;
+    gap: 30px;
+  }
+
+  .area-item.reverse {
+    direction: ltr;
+  }
+
+  .area-image,
+  .default-image {
+    height: 280px;
+  }
+
+  .content-inner {
+    padding: 30px;
+  }
+
+  .area-title {
+    font-size: 1.6rem;
+  }
+}
+
+@media (max-width: 768px) {
+  .section-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 20px;
+  }
+
+  .header-content h2 {
+    font-size: 2rem;
+  }
+
+  .areas-list {
+    gap: 40px;
+  }
+
+  .area-image,
+  .default-image {
+    height: 220px;
+  }
+
+  .number-badge {
+    width: 50px;
+    height: 50px;
+    font-size: 1.2rem;
+    top: -10px;
+    right: -10px;
   }
 }
 </style>

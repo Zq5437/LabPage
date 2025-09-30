@@ -5,7 +5,6 @@
         <!-- 实验室信息 -->
         <div class="footer-section">
           <h3 class="section-title">{{ siteTitle }}</h3>
-          <p v-if="labInfo.description" class="section-desc">{{ labInfo.description }}</p>
           <div class="contact-info">
             <div v-if="contactEmail" class="contact-item">
               <i class="icon-email"></i>
@@ -62,8 +61,10 @@
       <!-- 版权信息 -->
       <div class="footer-bottom">
         <div class="copyright">
-          <p>&copy; {{ currentYear }} {{ siteTitle }}. 保留所有权利.</p>
-          <p v-if="labInfo.established_year">成立于 {{ labInfo.established_year }} 年</p>
+          <p>
+            &copy; {{ currentYear }} {{ siteTitle }}. 保留所有权利.
+            <span v-if="labInfo.established_year" class="established"> 成立于 {{ labInfo.established_year }} 年</span>
+          </p>
         </div>
         <div class="footer-links">
           <a href="#" @click.prevent>隐私政策</a>
@@ -221,6 +222,10 @@ export default {
     font-size: 13px;
     line-height: 1.5;
     margin: 0;
+
+    .established {
+      margin-left: 4px;
+    }
   }
 }
 
