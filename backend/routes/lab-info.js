@@ -58,10 +58,11 @@ router.get('/', async (req, res) => {
                     phone: '010-12345678',
                     email: 'lab@university.edu.cn',
                     website: 'https://lab.university.edu.cn',
-                    founded_year: new Date().getFullYear(),
+                    established_year: new Date().getFullYear(),
                     director: '张教授',
-                    logo_url: null,
-                    banner_url: null
+                    introduction: '',
+                    logo: null,
+                    banner: null
                 }
             });
         }
@@ -89,8 +90,17 @@ router.put('/admin/update', verifyToken, verifyAdmin, upload.fields([
     try {
         const {
             name, name_en, description, address, phone, email,
-            website, founded_year, director, introduction
+            website, director
         } = req.body;
+        const established_year = req.body.established_year || req.body.founded_year || null;
+        const introduction = req.body.introduction || null;
+
+        // 确保 introduction 字段存在（若数据库已添加会抛出重复字段错误，忽略即可）
+        try {
+            await db.query('ALTER TABLE lab_info ADD COLUMN introduction TEXT NULL');
+        } catch (e) {
+            // ER_DUP_FIELDNAME 重复字段，说明已存在，忽略
+        }
 
         // 验证必填字段
         if (!name || !description) {
@@ -107,8 +117,8 @@ router.put('/admin/update', verifyToken, verifyAdmin, upload.fields([
         let banner_url = null;
 
         if (existingInfo && existingInfo.length > 0) {
-            logo_url = existingInfo[0].logo_url;
-            banner_url = existingInfo[0].banner_url;
+            logo_url = existingInfo[0].logo;
+            banner_url = existingInfo[0].banner;
         }
 
         // 处理文件上传
@@ -137,26 +147,26 @@ router.put('/admin/update', verifyToken, verifyAdmin, upload.fields([
         }
 
         if (existingInfo && existingInfo.length > 0) {
-            // 更新现有记录
+            // 更新现有记录（与当前数据库字段对齐）
             await db.query(
                 `UPDATE lab_info SET 
                  name = ?, name_en = ?, description = ?, address = ?, phone = ?,
-                 email = ?, website = ?, founded_year = ?, director = ?,
-                 introduction = ?, logo_url = ?, banner_url = ?, updated_at = NOW()
+                 email = ?, website = ?, established_year = ?, director = ?,
+                 introduction = ?, logo = ?, banner = ?, updated_at = NOW()
                  WHERE id = 1`,
                 [name || null, name_en || null, description || null, address || null, phone || null,
-                email || null, website || null, founded_year || null, director || null,
+                email || null, website || null, established_year || null, director || null,
                 introduction || null, logo_url || null, banner_url || null]
             );
         } else {
-            // 创建新记录
+            // 创建新记录（与当前数据库字段对齐）
             await db.query(
                 `INSERT INTO lab_info 
                  (id, name, name_en, description, address, phone, email, website,
-                  founded_year, director, introduction, logo_url, banner_url, created_at, updated_at)
+                  established_year, director, introduction, logo, banner, created_at, updated_at)
                  VALUES (1, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW(), NOW())`,
                 [name || null, name_en || null, description || null, address || null, phone || null,
-                email || null, website || null, founded_year || null, director || null,
+                email || null, website || null, established_year || null, director || null,
                 introduction || null, logo_url || null, banner_url || null]
             );
         }

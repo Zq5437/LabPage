@@ -44,7 +44,8 @@
           </div>
 
           <div class="intro-image">
-            <img v-if="labInfo.banner_url" :src="labInfo.banner_url" alt="实验室" @error="handleImageError" />
+            <img v-if="labInfo.banner_url || labInfo.banner" :src="labInfo.banner_url || labInfo.banner" alt="实验室"
+              @error="handleImageError" />
             <div v-else class="placeholder-image">
               <el-icon>
                 <Office />
@@ -344,9 +345,13 @@ const milestones = ref([
 
 // 计算属性
 const foundedYear = computed(() => {
-  const founded = labInfo.value.founded_date
+  const founded = labInfo.value.established_year || labInfo.value.founded_year || labInfo.value.founded_date
   if (founded) {
-    return new Date(founded).getFullYear()
+    const year = typeof founded === 'string' ? parseInt(founded, 10) : founded
+    if (!Number.isNaN(year)) return year
+    try {
+      return new Date(founded).getFullYear()
+    } catch (e) { }
   }
   return milestones.value[0]?.year || '2015'
 })
@@ -354,9 +359,10 @@ const foundedYear = computed(() => {
 // 加载实验室信息
 const loadLabInfo = async () => {
   try {
-    const response = await api.get('/lab-info/info')
+    // 统一使用公开接口
+    const response = await api.get('/public/lab-info')
     if (response.data) {
-      labInfo.value = response.data.data || {}
+      labInfo.value = response.data || response.data.data || {}
     }
   } catch (error) {
     console.error('加载实验室信息失败:', error)

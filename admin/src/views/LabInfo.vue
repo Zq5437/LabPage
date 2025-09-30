@@ -5,88 +5,56 @@
         <div class="card-header">
           <h3>实验室信息管理</h3>
           <el-button type="primary" @click="handleSave" :loading="saving">
-            <el-icon><Check /></el-icon>
+            <el-icon>
+              <Check />
+            </el-icon>
             保存修改
           </el-button>
         </div>
       </template>
 
-      <el-form
-        ref="formRef"
-        :model="form"
-        :rules="rules"
-        label-width="120px"
-        style="max-width: 900px"
-        v-loading="loading"
-      >
+      <el-form ref="formRef" :model="form" :rules="rules" label-width="120px" style="max-width: 900px"
+        v-loading="loading">
         <el-tabs v-model="activeTab" type="border-card">
           <!-- 基本信息 -->
           <el-tab-pane label="基本信息" name="basic">
             <el-row :gutter="20">
               <el-col :span="12">
                 <el-form-item label="实验室名称" prop="name">
-                  <el-input
-                    v-model="form.name"
-                    placeholder="请输入实验室中文名称"
-                    maxlength="100"
-                  />
+                  <el-input v-model="form.name" placeholder="请输入实验室中文名称" maxlength="100" />
                 </el-form-item>
               </el-col>
 
               <el-col :span="12">
                 <el-form-item label="英文名称">
-                  <el-input
-                    v-model="form.name_en"
-                    placeholder="请输入实验室英文名称"
-                    maxlength="200"
-                  />
+                  <el-input v-model="form.name_en" placeholder="请输入实验室英文名称" maxlength="200" />
                 </el-form-item>
               </el-col>
 
               <el-col :span="24">
                 <el-form-item label="实验室简介" prop="description">
-                  <el-input
-                    v-model="form.description"
-                    type="textarea"
-                    :rows="4"
-                    placeholder="请输入实验室简介"
-                    maxlength="500"
-                    show-word-limit
-                  />
+                  <el-input v-model="form.description" type="textarea" :rows="4" placeholder="请输入实验室简介" maxlength="500"
+                    show-word-limit />
                 </el-form-item>
               </el-col>
 
               <el-col :span="24">
                 <el-form-item label="详细介绍">
-                  <el-input
-                    v-model="form.introduction"
-                    type="textarea"
-                    :rows="6"
-                    placeholder="请输入实验室详细介绍"
-                    maxlength="2000"
-                    show-word-limit
-                  />
+                  <el-input v-model="form.introduction" type="textarea" :rows="6" placeholder="请输入实验室详细介绍"
+                    maxlength="2000" show-word-limit />
                 </el-form-item>
               </el-col>
 
               <el-col :span="12">
                 <el-form-item label="实验室主任">
-                  <el-input
-                    v-model="form.director"
-                    placeholder="请输入实验室主任姓名"
-                    maxlength="50"
-                  />
+                  <el-input v-model="form.director" placeholder="请输入实验室主任姓名" maxlength="50" />
                 </el-form-item>
               </el-col>
 
               <el-col :span="12">
                 <el-form-item label="成立年份">
-                  <el-input-number
-                    v-model="form.founded_year"
-                    :min="1900"
-                    :max="new Date().getFullYear()"
-                    style="width: 100%"
-                  />
+                  <el-input-number v-model="form.founded_year" :min="1900" :max="new Date().getFullYear()"
+                    style="width: 100%" />
                 </el-form-item>
               </el-col>
             </el-row>
@@ -97,41 +65,25 @@
             <el-row :gutter="20">
               <el-col :span="24">
                 <el-form-item label="地址">
-                  <el-input
-                    v-model="form.address"
-                    placeholder="请输入实验室地址"
-                    maxlength="200"
-                  />
+                  <el-input v-model="form.address" placeholder="请输入实验室地址" maxlength="200" />
                 </el-form-item>
               </el-col>
 
               <el-col :span="12">
                 <el-form-item label="联系电话">
-                  <el-input
-                    v-model="form.phone"
-                    placeholder="请输入联系电话"
-                    maxlength="20"
-                  />
+                  <el-input v-model="form.phone" placeholder="请输入联系电话" maxlength="20" />
                 </el-form-item>
               </el-col>
 
               <el-col :span="12">
                 <el-form-item label="邮箱地址">
-                  <el-input
-                    v-model="form.email"
-                    placeholder="请输入邮箱地址"
-                    maxlength="100"
-                  />
+                  <el-input v-model="form.email" placeholder="请输入邮箱地址" maxlength="100" />
                 </el-form-item>
               </el-col>
 
               <el-col :span="24">
                 <el-form-item label="官方网站">
-                  <el-input
-                    v-model="form.website"
-                    placeholder="请输入官方网站地址"
-                    maxlength="200"
-                  />
+                  <el-input v-model="form.website" placeholder="请输入官方网站地址" maxlength="200" />
                 </el-form-item>
               </el-col>
             </el-row>
@@ -142,17 +94,12 @@
             <el-row :gutter="20">
               <el-col :span="12">
                 <el-form-item label="实验室Logo">
-                  <el-upload
-                    ref="logoUploadRef"
-                    :auto-upload="false"
-                    :limit="1"
-                    accept="image/*"
-                    :on-change="handleLogoChange"
-                    :on-remove="handleLogoRemove"
-                    :file-list="logoList"
-                    list-type="picture-card"
-                  >
-                    <el-icon><Plus /></el-icon>
+                  <el-upload ref="logoUploadRef" :auto-upload="false" :limit="1" accept="image/*"
+                    :on-change="handleLogoChange" :on-remove="handleLogoRemove" :file-list="logoList"
+                    list-type="picture-card">
+                    <el-icon>
+                      <Plus />
+                    </el-icon>
                     <template #tip>
                       <div class="el-upload__tip">
                         建议尺寸：200x200px，仅支持图片格式
@@ -164,17 +111,12 @@
 
               <el-col :span="12">
                 <el-form-item label="首页横幅">
-                  <el-upload
-                    ref="bannerUploadRef"
-                    :auto-upload="false"
-                    :limit="1"
-                    accept="image/*"
-                    :on-change="handleBannerChange"
-                    :on-remove="handleBannerRemove"
-                    :file-list="bannerList"
-                    list-type="picture-card"
-                  >
-                    <el-icon><Plus /></el-icon>
+                  <el-upload ref="bannerUploadRef" :auto-upload="false" :limit="1" accept="image/*"
+                    :on-change="handleBannerChange" :on-remove="handleBannerRemove" :file-list="bannerList"
+                    list-type="picture-card">
+                    <el-icon>
+                      <Plus />
+                    </el-icon>
                     <template #tip>
                       <div class="el-upload__tip">
                         建议尺寸：1920x600px，仅支持图片格式
@@ -239,28 +181,42 @@ const rules = {
 const loadLabInfo = async () => {
   try {
     loading.value = true
-    const data = await labInfoApi.getInfo()
-    
+    const resp = await labInfoApi.getInfo()
+    const data = resp?.data || resp || {}
+
     if (data) {
+      // 映射基础字段（跳过文件字段，避免将字符串路径写入文件对象）
       Object.keys(form).forEach(key => {
+        if (key === 'logo' || key === 'banner') return
         if (key in data) {
           form[key] = data[key]
         }
       })
 
-      // 处理现有图片
-      if (data.logo_url) {
-        logoList.value = [{
-          name: '当前Logo',
-          url: data.logo_url
-        }]
+      // 年份字段兼容 established_year / founded_year（总是以后端为准）
+      if (data.established_year !== undefined && data.established_year !== null) {
+        form.founded_year = Number(data.established_year) || null
+      } else if (data.founded_year !== undefined && data.founded_year !== null) {
+        form.founded_year = Number(data.founded_year) || null
       }
 
-      if (data.banner_url) {
+      // 处理现有图片
+      if (data.logo_url || data.logo) {
+        logoList.value = [{
+          name: '当前Logo',
+          url: data.logo_url || data.logo
+        }]
+      } else {
+        logoList.value = []
+      }
+
+      if (data.banner_url || data.banner) {
         bannerList.value = [{
           name: '当前横幅',
-          url: data.banner_url
+          url: data.banner_url || data.banner
         }]
+      } else {
+        bannerList.value = []
       }
     }
   } catch (error) {
@@ -297,7 +253,7 @@ const handleSave = async () => {
 
     await labInfoApi.update(form)
     ElMessage.success('实验室信息保存成功')
-    
+
     // 重新加载数据
     loadLabInfo()
   } catch (error) {
