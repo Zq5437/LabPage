@@ -12,7 +12,7 @@
             </div>
           </router-link>
         </div>
-        
+
         <!-- 导航菜单 -->
         <nav class="nav-menu" :class="{ 'active': mobileMenuActive }">
           <ul class="nav-list">
@@ -46,9 +46,11 @@
             </li>
           </ul>
         </nav>
-        
-        <!-- 移动端菜单按钮 -->
-        <button class="mobile-menu-btn d-lg-none" @click="toggleMobileMenu">
+
+        <!-- 菜单按钮（≤1024px 显示） -->
+        <button class="mobile-menu-btn d-lg-none" :class="{ active: mobileMenuActive }"
+          @click.stop.prevent="toggleMobileMenu" :aria-expanded="mobileMenuActive.toString()" aria-label="切换导航"
+          type="button">
           <span class="hamburger-line"></span>
           <span class="hamburger-line"></span>
           <span class="hamburger-line"></span>
@@ -68,35 +70,47 @@ export default {
     const siteStore = useSiteStore()
     const isScrolled = ref(false)
     const mobileMenuActive = ref(false)
-    
+
     const labInfo = computed(() => siteStore.labInfo)
     const siteTitle = computed(() => siteStore.siteTitle)
-    
+
     // 监听滚动事件
     const handleScroll = () => {
       isScrolled.value = window.scrollY > 50
     }
-    
+
     // 切换移动端菜单
     const toggleMobileMenu = () => {
       mobileMenuActive.value = !mobileMenuActive.value
     }
-    
+
     // 关闭移动端菜单
     const closeMobileMenu = () => {
       mobileMenuActive.value = false
     }
-    
+
+    const syncMenuByViewport = () => {
+      // ≥1025px 桌面端默认展开；≤1024px 默认收起
+      if (window.innerWidth >= 1025) {
+        mobileMenuActive.value = true
+      } else {
+        mobileMenuActive.value = false
+      }
+    }
+
     onMounted(() => {
       window.addEventListener('scroll', handleScroll)
+      window.addEventListener('resize', syncMenuByViewport)
+      syncMenuByViewport()
       // 初始化站点数据
       siteStore.initSiteData()
     })
-    
+
     onUnmounted(() => {
       window.removeEventListener('scroll', handleScroll)
+      window.removeEventListener('resize', syncMenuByViewport)
     })
-    
+
     return {
       labInfo,
       siteTitle,
@@ -120,7 +134,7 @@ export default {
   backdrop-filter: blur(10px);
   border-bottom: 1px solid var(--border-light);
   transition: all 0.3s ease;
-  
+
   &.scrolled {
     background: rgba(255, 255, 255, 0.98);
     box-shadow: var(--shadow-light);
@@ -139,26 +153,26 @@ export default {
     display: flex;
     align-items: center;
     color: var(--text-primary);
-    
+
     &:hover {
       color: var(--primary-color);
     }
   }
-  
+
   .brand-logo {
     width: 50px;
     height: 50px;
     margin-right: 12px;
     border-radius: var(--border-radius);
   }
-  
+
   .brand-title {
     font-size: 20px;
     font-weight: 600;
     line-height: 1.2;
     margin: 0;
   }
-  
+
   .brand-subtitle {
     font-size: 12px;
     color: var(--text-secondary);
@@ -168,7 +182,7 @@ export default {
 }
 
 .nav-menu {
-  @media (max-width: 768px) {
+  @media (max-width: 1024px) {
     position: fixed;
     top: var(--header-height);
     left: 0;
@@ -179,21 +193,30 @@ export default {
     transform: translateY(-100%);
     opacity: 0;
     visibility: hidden;
+    pointer-events: none;
     transition: all 0.3s ease;
-    
+
     &.active {
       transform: translateY(0);
       opacity: 1;
       visibility: visible;
+      pointer-events: auto;
     }
+  }
+
+  @media (min-width: 1025px) {
+    // 桌面端默认可见
+    opacity: 1;
+    visibility: visible;
+    transform: none;
   }
 }
 
 .nav-list {
   display: flex;
   align-items: center;
-  
-  @media (max-width: 768px) {
+
+  @media (max-width: 1024px) {
     flex-direction: column;
     padding: 20px 0;
   }
@@ -202,13 +225,13 @@ export default {
 .nav-item {
   position: relative;
   margin: 0 8px;
-  
-  @media (max-width: 768px) {
+
+  @media (max-width: 1024px) {
     margin: 8px 0;
     width: 100%;
     text-align: center;
   }
-  
+
   &.dropdown {
     &:hover .dropdown-menu {
       opacity: 1;
@@ -227,17 +250,17 @@ export default {
   color: var(--text-primary);
   border-radius: var(--border-radius);
   transition: all 0.3s ease;
-  
+
   &:hover {
     color: var(--primary-color);
     background: rgba(24, 144, 255, 0.1);
   }
-  
+
   &.router-link-active {
     color: var(--primary-color);
     background: rgba(24, 144, 255, 0.1);
   }
-  
+
   &.dropdown-toggle::after {
     content: '';
     width: 0;
@@ -263,8 +286,8 @@ export default {
   visibility: hidden;
   transform: translateY(-10px);
   transition: all 0.3s ease;
-  
-  @media (max-width: 768px) {
+
+  @media (max-width: 1024px) {
     position: static;
     opacity: 1;
     visibility: visible;
@@ -274,7 +297,7 @@ export default {
     background: var(--background-light);
     margin-top: 8px;
   }
-  
+
   li {
     a {
       display: block;
@@ -282,12 +305,12 @@ export default {
       color: var(--text-primary);
       font-size: 14px;
       border-radius: 0;
-      
+
       &:hover {
         color: var(--primary-color);
         background: var(--background-light);
       }
-      
+
       &.router-link-active {
         color: var(--primary-color);
         background: rgba(24, 144, 255, 0.1);
@@ -305,7 +328,9 @@ export default {
   background: transparent;
   border: none;
   cursor: pointer;
-  
+  position: relative;
+  z-index: 1001; // 高于 .nav-header 的 z-index 内容层，避免被菜单捕获点击
+
   .hamburger-line {
     width: 20px;
     height: 2px;
@@ -314,9 +339,35 @@ export default {
     transition: all 0.3s ease;
     transform-origin: center;
   }
-  
+
   &:hover .hamburger-line {
     background: var(--primary-color);
   }
+
+  &.active {
+    .hamburger-line:nth-child(1) {
+      transform: translateY(4px) rotate(45deg);
+    }
+
+    .hamburger-line:nth-child(2) {
+      opacity: 0;
+    }
+
+    .hamburger-line:nth-child(3) {
+      transform: translateY(-4px) rotate(-45deg);
+    }
+  }
+}
+
+// 兜底：桌面端强制隐藏汉堡按钮，避免 scoped 样式覆盖全局的 d-lg-none
+@media (min-width: 1025px) {
+  .mobile-menu-btn {
+    display: none !important;
+  }
+}
+
+// 桌面端：下拉箭头在 hover 时旋转，反馈更直观
+.nav-item.dropdown:hover .nav-link.dropdown-toggle::after {
+  transform: rotate(180deg);
 }
 </style>

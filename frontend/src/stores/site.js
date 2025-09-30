@@ -60,8 +60,9 @@ export const useSiteStore = defineStore('site', {
 
             try {
                 this.loading.labInfo = true
-                const data = await publicApi.getLabInfo()
-                this.labInfo = { ...this.labInfo, ...data }
+                const response = await publicApi.getLabInfo()
+                const payload = response && response.data ? response.data : {}
+                this.labInfo = { ...this.labInfo, ...payload }
             } catch (error) {
                 console.error('获取实验室信息失败:', error)
             } finally {
@@ -92,8 +93,9 @@ export const useSiteStore = defineStore('site', {
 
             try {
                 this.loading.siteConfig = true
-                const data = await publicApi.getSiteConfig()
-                this.siteConfig = { ...this.siteConfig, ...data }
+                const response = await publicApi.getSiteConfig()
+                const payload = response && response.data ? response.data : {}
+                this.siteConfig = { ...this.siteConfig, ...payload }
             } catch (error) {
                 console.error('获取网站配置失败:', error)
             } finally {

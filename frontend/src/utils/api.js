@@ -80,6 +80,9 @@ export const publicApi = {
     // 记录访问
     logVisit: (data) => api.post('/public/visit-log', data),
 
+    // 获取公开访问统计
+    getStatistics: (params) => api.get('/public/statistics', { params }),
+
     // 获取论文列表
     getPublications: (params) => api.get('/public/publications', { params }),
 

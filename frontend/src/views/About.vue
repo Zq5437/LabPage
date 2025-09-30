@@ -48,7 +48,7 @@
               @error="handleImageError" />
             <div v-else class="placeholder-image">
               <el-icon>
-                <Office />
+                <OfficeBuilding />
               </el-icon>
             </div>
           </div>
@@ -82,7 +82,7 @@
               </el-icon>
             </div>
             <h3>{{ area.title }}</h3>
-            <p>{{ area.description.substring(0, 100) }}...</p>
+            <p>{{ (area.description || '').substring(0, 100) }}...</p>
           </div>
         </div>
         <div class="more-areas">
@@ -108,7 +108,7 @@
           <div class="culture-item">
             <div class="culture-icon">
               <el-icon>
-                <Users />
+                <User />
               </el-icon>
             </div>
             <h3>团队协作</h3>
@@ -126,7 +126,7 @@
           <div class="culture-item">
             <div class="culture-icon">
               <el-icon>
-                <Education />
+                <Reading />
               </el-icon>
             </div>
             <h3>学术传承</h3>
@@ -293,13 +293,15 @@
 import { ref, reactive, computed, onMounted } from 'vue'
 import { ElMessage } from 'element-plus'
 import api from '@/utils/api'
+import { useSiteStore } from '@/stores/site'
 import {
-  Office, TrendCharts, Star, Users, Trophy, Education,
+  OfficeBuilding, TrendCharts, Star, User, Trophy, Reading,
   Monitor, Collection, Connection, Location, Phone, Message, Link
 } from '@element-plus/icons-vue'
 
 // 响应式数据
 const loading = ref(false)
+const siteStore = useSiteStore()
 const labInfo = ref({})
 const researchAreas = ref([])
 const stats = reactive({
@@ -366,6 +368,8 @@ const loadLabInfo = async () => {
     }
   } catch (error) {
     console.error('加载实验室信息失败:', error)
+    // 回退到站点仓库数据
+    labInfo.value = siteStore.labInfo || {}
   }
 }
 
@@ -388,6 +392,8 @@ const loadResearchAreas = async () => {
     }
   } catch (error) {
     console.error('加载研究方向失败:', error)
+    // 回退到仓库中的研究方向
+    researchAreas.value = Array.isArray(siteStore.researchAreas) ? siteStore.researchAreas.slice(0, 6) : []
   }
 }
 
@@ -396,29 +402,26 @@ const loadStats = async () => {
   try {
     loading.value = true
 
-    // 并行加载各项统计数据
+    // 并行加载各项统计数据（使用公开列表接口）
     const [membersRes, projectsRes, publicationsRes] = await Promise.all([
-      api.get('/members/list', { params: { limit: 1 } }),
-      api.get('/projects/list', { params: { limit: 1 } }),
-      api.get('/publications/list', { params: { limit: 1 } })
+      api.get('/members', { params: { status: 'active' } }),
+      api.get('/projects', { params: { page: 1, limit: 1 } }),
+      api.get('/publications/list', { params: { page: 1, limit: 1 } })
     ])
 
-    if (membersRes.data?.pagination) {
-      stats.members = membersRes.data.pagination.total
-    }
-    if (projectsRes.data?.pagination) {
-      stats.projects = projectsRes.data.pagination.total
-    }
-    if (publicationsRes.data?.pagination) {
-      stats.publications = publicationsRes.data.pagination.total
-    }
+    // 成员总数（公开接口不分页，返回 { members, groupedMembers }）
+    stats.members = (membersRes?.data?.members || []).length
 
-    // 设备数量
+    // 项目总数（公开接口返回 { projects, pagination }）
+    stats.projects = projectsRes?.data?.pagination?.total || (projectsRes?.data?.projects || []).length
+
+    // 论文总数（公开接口返回 data数组与 pagination）
+    stats.publications = publicationsRes?.pagination?.total || (publicationsRes?.data?.length || 0)
+
+    // 设备数量（公开接口返回 data数组与 pagination）
     try {
-      const equipmentRes = await api.get('/equipment/list', { params: { limit: 1 } })
-      if (equipmentRes.data?.pagination) {
-        stats.equipment = equipmentRes.data.pagination.total
-      }
+      const equipmentRes = await api.get('/equipment/list', { params: { page: 1, limit: 1 } })
+      stats.equipment = equipmentRes?.pagination?.total || (equipmentRes?.data?.length || 0)
     } catch (error) {
       console.error('加载设备统计失败:', error)
     }

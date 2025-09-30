@@ -252,6 +252,50 @@ router.post('/visit-log', [
     }
 });
 
+// 获取访问统计（公开接口）
+router.get('/statistics', async (req, res) => {
+    try {
+        const days = parseInt(req.query.days) || 30;
+
+        // 总访问量
+        const totalVisitsResult = await db.query('SELECT COUNT(*) as total FROM site_statistics');
+        const totalVisits = totalVisitsResult.length > 0 ? (totalVisitsResult[0].total || 0) : 0;
+
+        // 最近N天访问量
+        const recentVisitsResult = await db.query(
+            'SELECT COUNT(*) as total FROM site_statistics WHERE visit_time >= DATE_SUB(NOW(), INTERVAL ? DAY)',
+            [days]
+        );
+        const recentVisits = recentVisitsResult.length > 0 ? (recentVisitsResult[0].total || 0) : 0;
+
+        // 每日访问趋势（仅公开基础趋势，不含页面明细）
+        const dailyStats = await db.query(
+            `SELECT DATE(visit_time) as date, COUNT(*) as visits 
+             FROM site_statistics 
+             WHERE visit_time >= DATE_SUB(NOW(), INTERVAL ? DAY)
+             GROUP BY DATE(visit_time)
+             ORDER BY date DESC`,
+            [days]
+        );
+
+        res.json({
+            success: true,
+            data: {
+                totalVisits: totalVisits || 0,
+                recentVisits: recentVisits || 0,
+                days,
+                dailyStats: dailyStats || []
+            }
+        });
+    } catch (error) {
+        console.error('获取公开访问统计错误:', error);
+        res.status(500).json({
+            success: false,
+            message: '服务器内部错误'
+        });
+    }
+});
+
 // 获取访问统计（管理员接口）
 router.get('/admin/statistics', [authenticateToken, requireAdmin], async (req, res) => {
     try {
