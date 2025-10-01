@@ -48,7 +48,7 @@
 </template>
 
 <script>
-import { computed, ref, onMounted, onUnmounted, reactive, nextTick } from 'vue'
+import { computed, ref, onMounted, onUnmounted, reactive, nextTick, watch } from 'vue'
 import { useSiteStore } from '@/stores/site'
 
 export default {
@@ -64,6 +64,7 @@ export default {
 
     let sectionObserver = null
     let itemObservers = []
+    let isObserversInitialized = ref(false)
 
     const setItemRef = (el, index) => {
       if (el) {
@@ -71,7 +72,27 @@ export default {
       }
     }
 
+    const cleanupObservers = () => {
+      // 清理观察器
+      if (sectionObserver) {
+        sectionObserver.disconnect()
+        sectionObserver = null
+      }
+      itemObservers.forEach((observer) => {
+        if (observer) {
+          observer.disconnect()
+        }
+      })
+      itemObservers = []
+      isObserversInitialized.value = false
+    }
+
     const initObservers = async () => {
+      // 如果已经初始化过，先清理
+      if (isObserversInitialized.value) {
+        cleanupObservers()
+      }
+
       // 等待 DOM 完全渲染
       await nextTick()
 
@@ -125,24 +146,33 @@ export default {
           itemObservers.push(observer)
         }
       })
+
+      isObserversInitialized.value = true
     }
 
+    // 监听数据变化，当数据加载完成后初始化观察器
+    watch(
+      () => areasToShow.value.length,
+      (newLength) => {
+        if (newLength > 0 && !isObserversInitialized.value) {
+          // 延迟一下，确保 DOM 已经渲染
+          setTimeout(() => {
+            initObservers()
+          }, 100)
+        }
+      },
+      { immediate: true }
+    )
+
     onMounted(() => {
-      initObservers()
+      // 如果数据已经存在，立即初始化
+      if (areasToShow.value.length > 0) {
+        initObservers()
+      }
     })
 
     onUnmounted(() => {
-      // 清理观察器
-      if (sectionObserver) {
-        sectionObserver.disconnect()
-        sectionObserver = null
-      }
-      itemObservers.forEach((observer) => {
-        if (observer) {
-          observer.disconnect()
-        }
-      })
-      itemObservers = []
+      cleanupObservers()
     })
 
     return {
