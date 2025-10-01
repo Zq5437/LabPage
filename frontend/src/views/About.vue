@@ -1,16 +1,26 @@
 <template>
   <div class="about-page">
     <!-- 页面头部 -->
-    <div class="about-header">
+    <div class="about-hero">
       <div class="container">
-        <h1>关于我们</h1>
-        <p>致力于科技创新，推动学术发展</p>
+        <div class="hero-content">
+          <h1>关于我们</h1>
+          <p>以研究为本，用技术创造价值</p>
+          <div class="hero-actions">
+            <router-link to="/research">
+              <el-button type="primary" size="large">了解研究方向</el-button>
+            </router-link>
+            <router-link to="/members">
+              <el-button plain size="large">认识我们的团队</el-button>
+            </router-link>
+          </div>
+        </div>
       </div>
     </div>
 
     <div class="container">
       <!-- 实验室简介 -->
-      <section class="lab-intro" v-loading="loading">
+      <section class="lab-intro reveal-on-scroll" v-loading="loading">
         <div class="intro-content">
           <div class="intro-text">
             <h2>实验室简介</h2>
@@ -18,9 +28,9 @@
               {{ labInfo.description }}
             </div>
             <div class="description" v-else>
-              我们是一个专注于前沿科技研究的创新实验室，致力于推动科学技术的发展与创新。
-              实验室拥有一支高水平的科研团队，在多个领域取得了重要的研究成果。
-              我们秉承"创新、协作、卓越"的理念，为培养优秀人才和推动科技进步不懈努力。
+              我们是一支专注于前沿智能计算的科研团队，聚焦算法、系统与应用的交叉创新。
+              团队坚持「简洁、可靠、可复用」的工程理念与「开放协作」的学术文化，
+              以高质量科研与真实场景落地为导向，持续输出有影响力的成果与人才。
             </div>
 
             <div class="key-stats">
@@ -56,10 +66,10 @@
       </section>
 
       <!-- 发展历程 -->
-      <section class="timeline-section">
+      <section class="timeline-section reveal-on-scroll">
         <h2>发展历程</h2>
         <div class="timeline">
-          <div v-for="(milestone, index) in milestones" :key="index" class="timeline-item"
+          <div v-for="(milestone, index) in milestones" :key="index" class="timeline-item reveal-on-scroll"
             :class="{ 'right': index % 2 === 1 }">
             <div class="timeline-content">
               <div class="timeline-year">{{ milestone.year }}</div>
@@ -72,10 +82,10 @@
       </section>
 
       <!-- 研究领域 -->
-      <section class="research-areas-section" v-if="researchAreas.length > 0">
+      <section class="research-areas-section reveal-on-scroll" v-if="researchAreas.length > 0">
         <h2>主要研究领域</h2>
         <div class="areas-grid">
-          <div v-for="area in (researchAreas || []).slice(0, 6)" :key="area.id" class="area-card">
+          <div v-for="area in (researchAreas || []).slice(0, 6)" :key="area.id" class="area-card reveal-on-scroll">
             <div class="area-icon">
               <el-icon>
                 <TrendCharts />
@@ -93,10 +103,10 @@
       </section>
 
       <!-- 实验室文化 -->
-      <section class="culture-section">
+      <section class="culture-section reveal-on-scroll">
         <h2>实验室文化</h2>
         <div class="culture-grid">
-          <div class="culture-item">
+          <div class="culture-item reveal-on-scroll">
             <div class="culture-icon">
               <el-icon>
                 <Star />
@@ -105,7 +115,7 @@
             <h3>创新精神</h3>
             <p>鼓励创新思维，勇于探索未知领域，追求科技前沿突破</p>
           </div>
-          <div class="culture-item">
+          <div class="culture-item reveal-on-scroll">
             <div class="culture-icon">
               <el-icon>
                 <User />
@@ -114,7 +124,7 @@
             <h3>团队协作</h3>
             <p>重视团队合作，促进学术交流，共同攻克科研难题</p>
           </div>
-          <div class="culture-item">
+          <div class="culture-item reveal-on-scroll">
             <div class="culture-icon">
               <el-icon>
                 <Trophy />
@@ -123,7 +133,7 @@
             <h3>追求卓越</h3>
             <p>以高标准要求自己，追求学术卓越和研究质量</p>
           </div>
-          <div class="culture-item">
+          <div class="culture-item reveal-on-scroll">
             <div class="culture-icon">
               <el-icon>
                 <Reading />
@@ -136,7 +146,7 @@
       </section>
 
       <!-- 实验室设施 -->
-      <section class="facilities-section">
+      <section class="facilities-section reveal-on-scroll">
         <h2>实验室设施</h2>
         <div class="facilities-content">
           <div class="facilities-text">
@@ -169,15 +179,15 @@
             </div>
           </div>
           <div class="facilities-stats">
-            <div class="stats-card">
+            <div class="stats-card reveal-on-scroll">
               <span class="stats-number">{{ stats.equipment || 0 }}</span>
               <span class="stats-label">台设备</span>
             </div>
-            <div class="stats-card">
+            <div class="stats-card reveal-on-scroll">
               <span class="stats-number">1000+</span>
               <span class="stats-label">平方米</span>
             </div>
-            <div class="stats-card">
+            <div class="stats-card reveal-on-scroll">
               <span class="stats-number">24/7</span>
               <span class="stats-label">开放时间</span>
             </div>
@@ -186,7 +196,7 @@
       </section>
 
       <!-- 合作伙伴 -->
-      <section class="partners-section">
+      <section class="partners-section reveal-on-scroll">
         <h2>合作伙伴</h2>
         <div class="partners-content">
           <p class="partners-intro">
@@ -194,7 +204,7 @@
             共同推进科技创新和人才培养。
           </p>
           <div class="partners-grid">
-            <div class="partner-category">
+            <div class="partner-category reveal-on-scroll">
               <h3>学术合作</h3>
               <ul>
                 <li>北京大学</li>
@@ -204,7 +214,7 @@
                 <li>Stanford University</li>
               </ul>
             </div>
-            <div class="partner-category">
+            <div class="partner-category reveal-on-scroll">
               <h3>产业合作</h3>
               <ul>
                 <li>华为技术有限公司</li>
@@ -214,7 +224,7 @@
                 <li>字节跳动</li>
               </ul>
             </div>
-            <div class="partner-category">
+            <div class="partner-category reveal-on-scroll">
               <h3>国际交流</h3>
               <ul>
                 <li>IEEE 学会</li>
@@ -229,10 +239,10 @@
       </section>
 
       <!-- 联系信息 -->
-      <section class="contact-section">
+      <section class="contact-section reveal-on-scroll">
         <h2>联系我们</h2>
         <div class="contact-grid">
-          <div class="contact-item">
+          <div class="contact-item reveal-on-scroll">
             <div class="contact-icon">
               <el-icon>
                 <Location />
@@ -243,7 +253,7 @@
               <p>{{ labInfo.address || '请查看联系我们页面获取详细地址' }}</p>
             </div>
           </div>
-          <div class="contact-item">
+          <div class="contact-item reveal-on-scroll">
             <div class="contact-icon">
               <el-icon>
                 <Phone />
@@ -254,7 +264,7 @@
               <p>{{ labInfo.phone || '+86 xxx-xxxx-xxxx' }}</p>
             </div>
           </div>
-          <div class="contact-item">
+          <div class="contact-item reveal-on-scroll">
             <div class="contact-icon">
               <el-icon>
                 <Message />
@@ -265,7 +275,7 @@
               <p>{{ labInfo.email || 'info@lab.edu.cn' }}</p>
             </div>
           </div>
-          <div class="contact-item">
+          <div class="contact-item reveal-on-scroll">
             <div class="contact-icon">
               <el-icon>
                 <Link />
@@ -290,7 +300,7 @@
 </template>
 
 <script setup>
-import { ref, reactive, computed, onMounted } from 'vue'
+import { ref, reactive, computed, onMounted, onUnmounted } from 'vue'
 import { ElMessage } from 'element-plus'
 import api from '@/utils/api'
 import { useSiteStore } from '@/stores/site'
@@ -442,7 +452,83 @@ onMounted(() => {
   loadLabInfo()
   loadResearchAreas()
   loadStats()
+  initScrollReveal()
 })
+
+// 滚动显隐动画（IntersectionObserver + MutationObserver，支持动态内容）
+const initScrollReveal = () => {
+  if (typeof window === 'undefined') return
+
+  const preferReducedMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches
+  if (preferReducedMotion) {
+    document.querySelectorAll('.reveal-on-scroll').forEach((el) => el.classList.add('is-visible'))
+    return
+  }
+
+  let intersectionObserver
+  let mutationObserver
+
+  const ensureVisibleIfInViewport = (el, ratio = 0.12) => {
+    const rect = el.getBoundingClientRect()
+    const vh = window.innerHeight || document.documentElement.clientHeight
+    const visibleHeight = Math.min(rect.bottom, vh) - Math.max(rect.top, 0)
+    const elHeight = Math.max(rect.height, 1)
+    return visibleHeight / elHeight >= ratio
+  }
+
+  const bindElement = (el) => {
+    if (!el || el.dataset.revealBound === '1') return
+    el.dataset.revealBound = '1'
+    if (ensureVisibleIfInViewport(el)) {
+      el.classList.add('is-visible')
+      return
+    }
+    intersectionObserver.observe(el)
+  }
+
+  const bindAll = () => {
+    document.querySelectorAll('.reveal-on-scroll').forEach(bindElement)
+  }
+
+  if ('IntersectionObserver' in window) {
+    intersectionObserver = new IntersectionObserver((entries) => {
+      entries.forEach((entry) => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('is-visible')
+          intersectionObserver.unobserve(entry.target)
+        }
+      })
+    }, { threshold: 0.12, rootMargin: '0px 0px -10% 0px' })
+  } else {
+    // 退化处理：直接显示
+    document.querySelectorAll('.reveal-on-scroll').forEach((el) => el.classList.add('is-visible'))
+    return
+  }
+
+  // 首次绑定
+  bindAll()
+
+  // 监听后续动态插入节点（如异步加载的研究领域卡片）
+  mutationObserver = new MutationObserver((mutations) => {
+    for (const mutation of mutations) {
+      if (mutation.type === 'childList') {
+        mutation.addedNodes.forEach((node) => {
+          if (!(node instanceof HTMLElement)) return
+          if (node.classList && node.classList.contains('reveal-on-scroll')) bindElement(node)
+          node.querySelectorAll && node.querySelectorAll('.reveal-on-scroll').forEach(bindElement)
+        })
+      }
+    }
+  })
+
+  const root = document.querySelector('.about-page') || document.body
+  mutationObserver.observe(root, { childList: true, subtree: true })
+
+  onUnmounted(() => {
+    try { intersectionObserver && intersectionObserver.disconnect() } catch (_) { }
+    try { mutationObserver && mutationObserver.disconnect() } catch (_) { }
+  })
+}
 </script>
 
 <style scoped>
@@ -451,24 +537,38 @@ onMounted(() => {
   background: #f8f9fa;
 }
 
-.about-header {
-  background: linear-gradient(135deg, #2d3748 0%, #4a5568 100%);
-  color: white;
-  padding: 80px 0 60px;
+.about-hero {
+  position: relative;
+  background: radial-gradient(1200px 400px at 20% 0%, rgba(45, 55, 72, 0.6), transparent),
+    linear-gradient(135deg, #2d3748 0%, #4a5568 100%);
+  color: #fff;
+  padding: 96px 0 72px;
+  overflow: hidden;
+}
+
+.hero-content {
   text-align: center;
 }
 
-.about-header h1 {
+.about-hero h1 {
   font-size: 3rem;
-  margin: 0 0 15px 0;
+  margin: 0 0 12px 0;
   font-weight: 700;
 }
 
-.about-header p {
-  font-size: 1.3rem;
-  margin: 0;
+.about-hero p {
+  font-size: 1.2rem;
+  margin: 0 0 20px 0;
   opacity: 0.95;
 }
+
+.hero-actions {
+  display: flex;
+  gap: 16px;
+  justify-content: center;
+}
+
+/* 已移除 .hero-wave 元素 */
 
 .container {
   max-width: 1200px;
@@ -493,7 +593,7 @@ section h2 {
   background: white;
   border-radius: 16px;
   padding: 50px;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 6px 24px rgba(17, 24, 39, 0.12);
   margin: 60px 0 80px;
 }
 
@@ -643,11 +743,12 @@ section h2 {
 .timeline-marker {
   position: absolute;
   left: 50%;
+  top: 50%;
   width: 16px;
   height: 16px;
   background: #2d3748;
   border-radius: 50%;
-  transform: translateX(-50%);
+  transform: translate(-50%, -50%);
   z-index: 1;
 }
 
@@ -664,12 +765,13 @@ section h2 {
   padding: 30px;
   border-radius: 12px;
   text-align: center;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
-  transition: transform 0.3s ease;
+  box-shadow: 0 6px 24px rgba(17, 24, 39, 0.08);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
 }
 
 .area-card:hover {
-  transform: translateY(-5px);
+  transform: translateY(-6px);
+  box-shadow: 0 12px 32px rgba(17, 24, 39, 0.12);
 }
 
 .area-icon {
@@ -713,12 +815,13 @@ section h2 {
   padding: 40px 30px;
   border-radius: 12px;
   text-align: center;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
-  transition: transform 0.3s ease;
+  box-shadow: 0 6px 24px rgba(17, 24, 39, 0.08);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
 }
 
 .culture-item:hover {
-  transform: translateY(-5px);
+  transform: translateY(-6px);
+  box-shadow: 0 12px 32px rgba(17, 24, 39, 0.12);
 }
 
 .culture-icon {
@@ -784,7 +887,7 @@ section h2 {
   padding: 30px;
   border-radius: 12px;
   text-align: center;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 6px 24px rgba(17, 24, 39, 0.08);
 }
 
 .stats-card .stats-number {
@@ -822,7 +925,7 @@ section h2 {
   background: white;
   padding: 40px;
   border-radius: 12px;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 6px 24px rgba(17, 24, 39, 0.08);
 }
 
 .partner-category h3 {
@@ -863,7 +966,31 @@ section h2 {
   background: white;
   padding: 30px;
   border-radius: 12px;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 6px 24px rgba(17, 24, 39, 0.08);
+}
+
+/* 滚动显隐过渡 */
+.reveal-on-scroll {
+  opacity: 0;
+  transform: translateY(18px);
+  transition: opacity 0.6s ease-out, transform 0.6s ease-out;
+}
+
+.reveal-on-scroll.is-visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* 动效偏好：用户偏好减少动画时，禁用过渡 */
+@media (prefers-reduced-motion: reduce) {
+
+  .reveal-on-scroll,
+  .area-card,
+  .culture-item {
+    transition: none !important;
+    transform: none !important;
+    animation: none !important;
+  }
 }
 
 .contact-icon {
@@ -896,11 +1023,11 @@ section h2 {
 }
 
 @media (max-width: 768px) {
-  .about-header h1 {
+  .about-hero h1 {
     font-size: 2.2rem;
   }
 
-  .about-header p {
+  .about-hero p {
     font-size: 1.1rem;
   }
 
