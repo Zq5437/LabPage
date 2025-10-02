@@ -698,6 +698,8 @@ const initScrollReveal = () => {
 .about-page {
   min-height: 100vh;
   background: linear-gradient(180deg, #f8fafb 0%, #ffffff 100%);
+  overflow-x: hidden;
+  width: 100%;
 }
 
 /* ========== Hero Section - 增强版 ========== */
