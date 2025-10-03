@@ -145,15 +145,19 @@
           </el-col>
         </el-row>
 
+        <el-form-item label="别名/其他名字">
+          <el-input v-model="formData.aliases" type="textarea" :rows="2"
+            placeholder="请输入该成员的其他可能名字，用分号分隔。例如：Zhang, Q.; Q. Zhang; 张琪; Qi Zhang; チョウ キ" />
+          <div style="font-size: 12px; color: #999; margin-top: 4px;">
+            💡 用于论文作者智能匹配。可以包含：拼音、缩写、日文名、其他语言名等。用分号（;）分隔
+          </div>
+        </el-form-item>
+
         <el-row :gutter="20">
           <el-col :span="12">
-            <el-form-item label="职位" prop="title">
-              <el-input v-model="formData.title" placeholder="请输入职位" />
-            </el-form-item>
-          </el-col>
-          <el-col :span="12">
             <el-form-item label="类别" prop="category">
-              <el-select v-model="formData.category" placeholder="选择类别" style="width: 100%">
+              <el-select v-model="formData.category" placeholder="选择类别" style="width: 100%"
+                @change="handleCategoryChange">
                 <el-option label="教师" value="faculty" />
                 <el-option label="博士后" value="postdoc" />
                 <el-option label="博士生" value="phd" />
@@ -161,6 +165,35 @@
                 <el-option label="本科生" value="undergraduate" />
                 <el-option label="校友" value="alumni" />
               </el-select>
+            </el-form-item>
+          </el-col>
+          <el-col :span="12">
+            <el-form-item :label="getTitleLabel(formData.category)" prop="title">
+              <el-input v-model="formData.title" :placeholder="getTitlePlaceholder(formData.category)" />
+            </el-form-item>
+          </el-col>
+        </el-row>
+
+        <!-- 学生特有字段：年级 -->
+        <el-row :gutter="20" v-if="isStudent(formData.category)">
+          <el-col :span="12">
+            <el-form-item label="年级">
+              <el-input v-model="formData.grade" placeholder="例如：2023级" />
+            </el-form-item>
+          </el-col>
+          <el-col :span="12" v-if="formData.category === 'undergraduate'">
+            <el-form-item label="专业">
+              <el-input v-model="formData.major" placeholder="请输入专业" />
+            </el-form-item>
+          </el-col>
+        </el-row>
+
+        <!-- 学生/博士后特有字段：导师 -->
+        <el-row :gutter="20" v-if="isStudent(formData.category) || formData.category === 'postdoc'">
+          <el-col :span="24">
+            <el-form-item :label="formData.category === 'postdoc' ? '合作导师' : '导师'">
+              <el-input v-model="formData.supervisor"
+                :placeholder="formData.category === 'postdoc' ? '请输入合作导师姓名' : '请输入导师姓名'" />
             </el-form-item>
           </el-col>
         </el-row>
@@ -201,9 +234,51 @@
           <el-input v-model="formData.research_interests" placeholder="多个兴趣请用英文逗号分隔" />
         </el-form-item>
 
-        <el-form-item label="教育背景">
+        <el-form-item label="教育背景" v-if="formData.category !== 'undergraduate'">
           <el-input v-model="formData.education" type="textarea" :rows="2" placeholder="请输入教育背景" />
         </el-form-item>
+
+        <!-- 教师特有字段：荣誉称号 -->
+        <el-form-item label="荣誉称号" v-if="formData.category === 'faculty'">
+          <el-input v-model="formData.honors" type="textarea" :rows="2" placeholder="请输入荣誉称号、获奖情况等" />
+        </el-form-item>
+
+        <!-- 教师/博士后特有字段：职位履历 -->
+        <el-form-item label="职位履历" v-if="formData.category === 'faculty' || formData.category === 'postdoc'">
+          <el-input v-model="formData.positions" type="textarea" :rows="4"
+            placeholder="例如：&#10;2022.12-  Lecturer, SSTC, Northeastern University, China&#10;2021.03-2022.04  Researcher, RIKEN, Japan" />
+        </el-form-item>
+
+        <!-- 教师/博士后特有字段：学术服务 -->
+        <el-form-item label="学术服务" v-if="formData.category === 'faculty' || formData.category === 'postdoc'">
+          <el-input v-model="formData.academic_service" type="textarea" :rows="4"
+            placeholder="例如：&#10;Reviewer of IEEE Transactions on...&#10;PC member of..." />
+        </el-form-item>
+
+        <!-- 教师特有字段：指导学生数 -->
+        <el-form-item label="指导学生数" v-if="formData.category === 'faculty'">
+          <el-input-number v-model="formData.student_count" :min="0" :max="999" placeholder="当前指导学生数" />
+        </el-form-item>
+
+        <!-- 校友特有字段：原身份和当前去向 -->
+        <el-row :gutter="20" v-if="formData.category === 'alumni'">
+          <el-col :span="12">
+            <el-form-item label="离开前身份">
+              <el-select v-model="formData.alumni_category" placeholder="选择身份" style="width: 100%">
+                <el-option label="教师" value="faculty" />
+                <el-option label="博士后" value="postdoc" />
+                <el-option label="博士生" value="phd" />
+                <el-option label="硕士生" value="master" />
+                <el-option label="本科生" value="undergraduate" />
+              </el-select>
+            </el-form-item>
+          </el-col>
+          <el-col :span="12">
+            <el-form-item label="当前去向">
+              <el-input v-model="formData.current_position" placeholder="例如：某某大学副教授" />
+            </el-form-item>
+          </el-col>
+        </el-row>
 
         <el-row :gutter="20">
           <el-col :span="8">
@@ -224,21 +299,42 @@
         </el-row>
 
         <el-row :gutter="20">
-          <el-col :span="8">
-            <el-form-item label="入学/入职日期">
+          <!-- 教师/博士后：入职日期 -->
+          <el-col :span="8" v-if="formData.category === 'faculty' || formData.category === 'postdoc'">
+            <el-form-item :label="formData.category === 'postdoc' ? '入站日期' : '入职日期'">
               <el-date-picker v-model="formData.join_date" type="date" placeholder="选择日期" style="width: 100%"
                 value-format="YYYY-MM-DD" />
             </el-form-item>
           </el-col>
-          <el-col :span="8">
-            <el-form-item label="毕业日期">
+
+          <!-- 学生：入学年份 -->
+          <el-col :span="8" v-if="isStudent(formData.category)">
+            <el-form-item label="入学年份">
+              <el-date-picker v-model="formData.join_date" type="year" placeholder="选择年份" style="width: 100%"
+                value-format="YYYY" />
+            </el-form-item>
+          </el-col>
+
+          <!-- 学生：预计毕业日期 -->
+          <el-col :span="8" v-if="isStudent(formData.category)">
+            <el-form-item label="预计毕业">
+              <el-date-picker v-model="formData.expected_graduation_date" type="date" placeholder="选择日期"
+                style="width: 100%" value-format="YYYY-MM-DD" />
+            </el-form-item>
+          </el-col>
+
+          <!-- 校友/离职：离开日期 -->
+          <el-col :span="8" v-if="formData.category === 'alumni' || formData.status === 'alumni'">
+            <el-form-item label="离开/毕业日期">
               <el-date-picker v-model="formData.graduation_date" type="date" placeholder="选择日期" style="width: 100%"
                 value-format="YYYY-MM-DD" />
             </el-form-item>
           </el-col>
+
           <el-col :span="8">
-            <el-form-item label="排序">
-              <el-input-number v-model="formData.sort_order" :min="0" :max="999" style="width: 100%" />
+            <el-form-item label="排序权重">
+              <el-input-number v-model="formData.sort_order" :min="0" :max="999" style="width: 100%"
+                placeholder="数字越大越靠前" />
             </el-form-item>
           </el-col>
         </el-row>
@@ -263,7 +359,7 @@
 </template>
 
 <script setup>
-import { ref, reactive, onMounted, computed } from 'vue'
+import { ref, reactive, onMounted, computed, nextTick } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { Plus, Search, Edit, Delete, UserFilled } from '@element-plus/icons-vue'
 import api from '@/utils/api'
@@ -275,6 +371,7 @@ const loading = ref(false)
 const saving = ref(false)
 const dialogVisible = ref(false)
 const editingMember = ref(null)
+const isLoadingData = ref(false) // 标记是否正在加载数据
 
 // 数据
 const members = ref([])
@@ -302,8 +399,12 @@ const formRef = ref()
 const formData = reactive({
   name: '',
   name_en: '',
+  aliases: '',
   title: '',
   category: '',
+  grade: '',
+  major: '',
+  supervisor: '',
   email: '',
   phone: '',
   office: '',
@@ -311,11 +412,18 @@ const formData = reactive({
   bio: '',
   research_interests: '',
   education: '',
+  honors: '',
+  positions: '',
+  academic_service: '',
+  student_count: 0,
+  current_position: '',
+  alumni_category: '',
   homepage: '',
   google_scholar: '',
   orcid: '',
   join_date: '',
   graduation_date: '',
+  expected_graduation_date: '',
   sort_order: 0,
   status: 'active'
 })
@@ -403,9 +511,26 @@ const showCreateDialog = () => {
 // 编辑成员
 const editMember = (member) => {
   editingMember.value = member
+  isLoadingData.value = true // 设置加载数据标志
+
   Object.keys(formData).forEach(key => {
-    formData[key] = member[key] || (key === 'sort_order' ? 0 : '')
+    // 使用 ?? 而不是 ||，避免 0 和空字符串被误判
+    if (member[key] !== undefined && member[key] !== null) {
+      formData[key] = member[key]
+    } else if (key === 'sort_order' || key === 'student_count') {
+      formData[key] = 0
+    } else if (key === 'status') {
+      formData[key] = 'active'
+    } else {
+      formData[key] = ''
+    }
   })
+
+  // 使用 nextTick 确保数据加载完成后再清除标志
+  nextTick(() => {
+    isLoadingData.value = false
+  })
+
   dialogVisible.value = true
 }
 
@@ -553,6 +678,52 @@ const getInterests = (interests) => {
 const formatDate = (dateString) => {
   if (!dateString) return '-'
   return new Date(dateString).toLocaleString('zh-CN')
+}
+
+// 判断是否为学生
+const isStudent = (category) => {
+  return ['phd', 'master', 'undergraduate'].includes(category)
+}
+
+// 获取职位/职称标签
+const getTitleLabel = (category) => {
+  const map = {
+    faculty: '职称',
+    postdoc: '职位',
+    phd: '研究方向',
+    master: '研究方向',
+    undergraduate: '研究兴趣',
+    alumni: '离开前职位'
+  }
+  return map[category] || '职位'
+}
+
+// 获取职位/职称占位符
+const getTitlePlaceholder = (category) => {
+  const map = {
+    faculty: '例如：教授、副教授',
+    postdoc: '例如：博士后研究员',
+    phd: '例如：机器学习方向',
+    master: '例如：深度学习方向',
+    undergraduate: '例如：计算机视觉',
+    alumni: '例如：原副教授'
+  }
+  return map[category] || '请输入职位'
+}
+
+// 类别变化处理
+const handleCategoryChange = () => {
+  // 只在用户手动更改时清空字段，加载数据时不清空
+  if (isLoadingData.value) return
+
+  // 切换类别时清空一些特定字段
+  formData.grade = ''
+  formData.major = ''
+  formData.supervisor = ''
+  formData.honors = ''
+  formData.student_count = 0
+  formData.current_position = ''
+  formData.alumni_category = ''
 }
 
 // 初始化

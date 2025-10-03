@@ -83,7 +83,7 @@ router.get('/list', async (req, res) => {
 
         // 查询数据（将 LIMIT/OFFSET 以安全整数直接写入SQL，避免占位符导致错误）
         const dataQuery = `
-      SELECT id, title, authors, journal, volume, issue, pages, year, 
+      SELECT id, title, authors, member_ids, journal, volume, issue, pages, year, 
              year as publish_date, doi, url, pdf_path, abstract, keywords, 
              type, impact_factor, citations as citation_count, is_featured,
              created_at, updated_at
@@ -190,7 +190,7 @@ router.get('/:id', async (req, res) => {
         const { id } = req.params;
 
         const query = `
-      SELECT id, title, authors, journal, volume, issue, pages, year, doi, url, 
+      SELECT id, title, authors, member_ids, journal, volume, issue, pages, year, doi, url, 
              pdf_path, abstract, keywords, type, impact_factor, citations, is_featured,
              created_at, updated_at
       FROM publications 
@@ -323,7 +323,7 @@ router.get('/admin/list', authenticateToken, async (req, res) => {
 router.post('/admin/create', authenticateToken, upload.single('pdf_file'), async (req, res) => {
     try {
         const {
-            title, authors, journal, volume, issue, pages, year, doi, url,
+            title, authors, member_ids, journal, volume, issue, pages, year, doi, url,
             abstract, keywords, type, impact_factor, citations, is_featured
         } = req.body;
 
@@ -341,15 +341,25 @@ router.post('/admin/create', authenticateToken, upload.single('pdf_file'), async
             pdf_path = req.file.path;
         }
 
+        // 处理 member_ids：确保是有效的 JSON
+        let memberIdsValue = null;
+        if (member_ids) {
+            try {
+                memberIdsValue = typeof member_ids === 'string' ? member_ids : JSON.stringify(member_ids);
+            } catch (e) {
+                memberIdsValue = null;
+            }
+        }
+
         const query = `
       INSERT INTO publications (
-        title, authors, journal, volume, issue, pages, year, doi, url,
+        title, authors, member_ids, journal, volume, issue, pages, year, doi, url,
         pdf_path, abstract, keywords, type, impact_factor, citations, is_featured
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     `;
 
         const values = [
-            title, authors, journal || null, volume || null, issue || null,
+            title, authors, memberIdsValue, journal || null, volume || null, issue || null,
             pages || null, year, doi || null, url || null, pdf_path,
             abstract || null, keywords || null, type || 'journal',
             impact_factor || null, citations || 0, is_featured === 'true' || is_featured === true
@@ -386,7 +396,7 @@ router.put('/admin/update/:id', authenticateToken, upload.single('pdf_file'), as
     try {
         const { id } = req.params;
         const {
-            title, authors, journal, volume, issue, pages, year, doi, url,
+            title, authors, member_ids, journal, volume, issue, pages, year, doi, url,
             abstract, keywords, type, impact_factor, citations, is_featured
         } = req.body;
 
@@ -422,9 +432,19 @@ router.put('/admin/update/:id', authenticateToken, upload.single('pdf_file'), as
             pdf_path = req.file.path;
         }
 
+        // 处理 member_ids：确保是有效的 JSON
+        let memberIdsValue = null;
+        if (member_ids) {
+            try {
+                memberIdsValue = typeof member_ids === 'string' ? member_ids : JSON.stringify(member_ids);
+            } catch (e) {
+                memberIdsValue = null;
+            }
+        }
+
         const updateQuery = `
       UPDATE publications SET 
-        title = ?, authors = ?, journal = ?, volume = ?, issue = ?, 
+        title = ?, authors = ?, member_ids = ?, journal = ?, volume = ?, issue = ?, 
         pages = ?, year = ?, doi = ?, url = ?, pdf_path = ?,
         abstract = ?, keywords = ?, type = ?, impact_factor = ?, 
         citations = ?, is_featured = ?, updated_at = CURRENT_TIMESTAMP
@@ -432,7 +452,7 @@ router.put('/admin/update/:id', authenticateToken, upload.single('pdf_file'), as
     `;
 
         const values = [
-            title, authors, journal || null, volume || null, issue || null,
+            title, authors, memberIdsValue, journal || null, volume || null, issue || null,
             pages || null, year, doi || null, url || null, pdf_path,
             abstract || null, keywords || null, type || 'journal',
             impact_factor || null, citations || 0,

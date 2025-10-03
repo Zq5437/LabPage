@@ -100,6 +100,42 @@ router.get('/', [
     }
 });
 
+// 获取成员相关论文（公开接口）- 必须在 /:id 之前
+router.get('/:id/publications', async (req, res) => {
+    try {
+        const memberId = req.params.id;
+
+        // 只通过 member_ids 精确匹配论文
+        const publications = await db.query(
+            `SELECT * FROM publications 
+             WHERE JSON_CONTAINS(member_ids, ?, '$')
+             ORDER BY year DESC, created_at DESC`,
+            [memberId]
+        );
+
+        // 处理PDF路径
+        if (publications && publications.length > 0) {
+            publications.forEach(pub => {
+                if (pub.pdf_path) {
+                    pub.pdf_url = `/uploads/publications/${path.basename(pub.pdf_path)}`;
+                }
+            });
+        }
+
+        res.json({
+            success: true,
+            data: publications || []
+        });
+
+    } catch (error) {
+        console.error('获取成员论文错误:', error);
+        res.json({
+            success: true,
+            data: []
+        });
+    }
+});
+
 // 获取成员详情（公开接口）
 router.get('/:id', async (req, res) => {
     try {

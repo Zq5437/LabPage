@@ -37,6 +37,25 @@
             <el-input v-model="form.authors" placeholder="请输入作者，多个作者用逗号分隔" maxlength="1000" show-word-limit />
           </el-form-item>
 
+          <el-form-item label="参与成员">
+            <el-select v-model="form.member_ids" multiple filterable placeholder="请选择实验室参与成员" style="width: 100%"
+              :loading="membersLoading">
+              <el-option v-for="member in allMembers" :key="member.id"
+                :label="`${member.name}${member.name_en ? ' (' + member.name_en + ')' : ''} - ${getCategoryLabel(member.category)}`"
+                :value="Number(member.id)" />
+            </el-select>
+            <div class="form-tip">
+              <span v-if="!matchResult.message">选择实验室中参与此论文的成员，将在成员个人主页中显示此论文</span>
+              <span v-else
+                :style="{ color: matchResult.type === 'success' ? '#67c23a' : matchResult.type === 'warning' ? '#e6a23c' : '#909399' }">
+                <el-icon>
+                  <InfoFilled />
+                </el-icon>
+                {{ matchResult.message }}
+              </span>
+            </div>
+          </el-form-item>
+
           <el-row :gutter="20">
             <el-col :span="12">
               <el-form-item label="期刊/会议" prop="journal">
@@ -173,10 +192,10 @@
 </template>
 
 <script setup>
-import { ref, reactive, onMounted, nextTick } from 'vue'
+import { ref, reactive, onMounted, nextTick, watch } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { ElMessage, ElMessageBox } from 'element-plus'
-import { ArrowLeft, Check, Upload, Document } from '@element-plus/icons-vue'
+import { ArrowLeft, Check, Upload, Document, InfoFilled } from '@element-plus/icons-vue'
 import api from '@/utils/api'
 
 const router = useRouter()
@@ -190,11 +209,18 @@ const isEdit = ref(false)
 const publicationId = ref(null)
 const uploadFile = ref(null)
 const currentPdfFile = ref('')
+const allMembers = ref([])
+const membersLoading = ref(false)
+const matchResult = reactive({
+  message: '',
+  type: '' // success, warning, info
+})
 
 // 表单数据
 const form = reactive({
   title: '',
   authors: '',
+  member_ids: [],
   journal: '',
   volume: '',
   issue: '',
@@ -247,12 +273,34 @@ const goBack = () => {
 const loadPublication = async (id) => {
   try {
     const resp = await api.get(`/publications/${id}`)
+
     if (resp.success && resp.code === 200) {
       const data = resp.data
+
       if (data) {
         Object.keys(form).forEach(key => {
           if (data[key] !== undefined) {
-            form[key] = data[key]
+            // 特殊处理 member_ids
+            if (key === 'member_ids') {
+              // 处理 member_ids：可能是字符串或数组
+              let memberIds = data[key]
+
+              if (typeof memberIds === 'string') {
+                try {
+                  memberIds = JSON.parse(memberIds)
+                } catch (e) {
+                  memberIds = []
+                }
+              }
+              // 确保是数组，并且元素都是数字类型（与el-option的value类型一致）
+              if (Array.isArray(memberIds)) {
+                form[key] = memberIds.map(id => Number(id))
+              } else {
+                form[key] = []
+              }
+            } else {
+              form[key] = data[key]
+            }
           }
         })
 
@@ -331,7 +379,12 @@ const handleSave = async () => {
     // 添加表单字段
     Object.keys(form).forEach(key => {
       if (form[key] !== null && form[key] !== '') {
-        formData.append(key, form[key])
+        // member_ids 需要转为 JSON 字符串
+        if (key === 'member_ids') {
+          formData.append(key, JSON.stringify(form[key]))
+        } else {
+          formData.append(key, form[key])
+        }
       }
     })
 
@@ -373,8 +426,124 @@ const handleSave = async () => {
   }
 }
 
+// 加载成员列表
+const loadMembers = async () => {
+  try {
+    membersLoading.value = true
+    const response = await api.get('/members/admin/list')
+
+    if (response && response.data && response.data.members) {
+      allMembers.value = response.data.members
+    }
+  } catch (error) {
+    console.error('加载成员列表失败:', error)
+  } finally {
+    membersLoading.value = false
+  }
+}
+
+// 获取成员类别标签
+const getCategoryLabel = (category) => {
+  const labels = {
+    faculty: '教师',
+    postdoc: '博士后',
+    phd: '博士生',
+    master: '硕士生',
+    undergraduate: '本科生',
+    alumni: '校友'
+  }
+  return labels[category] || category
+}
+
+// 智能识别作者并匹配成员
+const handleAuthorsChange = () => {
+  if (!form.authors || !allMembers.value.length) {
+    matchResult.message = ''
+    return
+  }
+
+  // 解析作者名字（按逗号、分号、顿号分隔）
+  const authorNames = form.authors
+    .split(/[,，;；、]/)
+    .map(name => name.trim())
+    .filter(name => name)
+
+  const matchedMembers = []
+  const duplicateMatches = []
+
+  // 遍历每个作者名字
+  authorNames.forEach(authorName => {
+    const matches = allMembers.value.filter(member => {
+      // 匹配中文名或英文名（不区分大小写）
+      const nameMatch = member.name && member.name.includes(authorName)
+      const enNameMatch = member.name_en && member.name_en.toLowerCase().includes(authorName.toLowerCase())
+
+      // 匹配别名（支持多个别名，分号分隔）
+      let aliasMatch = false
+      if (member.aliases) {
+        const aliases = member.aliases.split(/[;；]/).map(a => a.trim()).filter(a => a)
+        aliasMatch = aliases.some(alias =>
+          alias.toLowerCase().includes(authorName.toLowerCase()) ||
+          authorName.toLowerCase().includes(alias.toLowerCase())
+        )
+      }
+
+      return nameMatch || enNameMatch || aliasMatch
+    })
+
+    if (matches.length === 1) {
+      // 唯一匹配
+      if (!matchedMembers.find(m => m.id === matches[0].id)) {
+        matchedMembers.push(matches[0])
+      }
+    } else if (matches.length > 1) {
+      // 重复匹配
+      duplicateMatches.push({
+        name: authorName,
+        matches: matches
+      })
+    }
+  })
+
+  // 处理匹配结果
+  if (duplicateMatches.length > 0) {
+    // 有重复的，提示管理员
+    const names = duplicateMatches.map(d => d.name).join('、')
+    matchResult.message = `检测到重名作者「${names}」，请手动选择对应成员`
+    matchResult.type = 'warning'
+  } else if (matchedMembers.length > 0) {
+    // 自动勾选唯一匹配的成员
+    const newIds = matchedMembers.map(m => Number(m.id))
+    // 保留已手动选择的ID，合并自动匹配的ID
+    const existingIds = (form.member_ids || []).map(id => Number(id))
+    form.member_ids = [...new Set([...existingIds, ...newIds])]
+
+    matchResult.message = `已自动识别并选择 ${matchedMembers.length} 位成员`
+    matchResult.type = 'success'
+  } else {
+    matchResult.message = '未识别到实验室成员，请手动选择'
+    matchResult.type = 'info'
+  }
+}
+
+// 监听作者变化，自动识别成员
+watch(() => form.authors, () => {
+  // 如果有作者但还没选择成员，自动触发识别
+  if (form.authors && (!form.member_ids || form.member_ids.length === 0) && allMembers.value.length > 0) {
+    handleAuthorsChange()
+  }
+}, { immediate: false })
+
+// 监听成员列表加载完成，如果有作者但没选成员，自动识别
+watch(() => allMembers.value.length, (newLength) => {
+  if (newLength > 0 && form.authors && (!form.member_ids || form.member_ids.length === 0)) {
+    handleAuthorsChange()
+  }
+})
+
 // 初始化
 onMounted(() => {
+  loadMembers()
   const id = route.params.id
   if (id) {
     isEdit.value = true
