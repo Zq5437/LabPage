@@ -109,7 +109,7 @@ export default {
   background: #1a1a1a;
   color: #e6e6e6;
   padding: 60px 0 20px;
-  margin-top: 80px;
+  // margin-top: 80px;
 }
 
 .footer-content {
