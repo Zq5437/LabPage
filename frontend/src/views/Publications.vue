@@ -1,135 +1,209 @@
 <template>
   <div class="publications-page">
-    <!-- 页面头部 -->
+    <!-- 页面头部 - 增强设计 -->
     <div class="publications-header">
+      <div class="header-bg-pattern"></div>
       <div class="container">
-        <h1>发表论文</h1>
-        <p>实验室学术成果与研究论文展示</p>
+        <div class="header-content">
+          <div class="header-icon">
+            <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path
+                d="M9 11H7C6.44772 11 6 11.4477 6 12V19C6 19.5523 6.44772 20 7 20H9C9.55228 20 10 19.5523 10 19V12C10 11.4477 9.55228 11 9 11Z"
+                fill="currentColor" />
+              <path
+                d="M13 7C12.4477 7 12 7.44772 12 8V19C12 19.5523 12.4477 20 13 20H15C15.5523 20 16 19.5523 16 19V8C16 7.44772 15.5523 7 15 7H13Z"
+                fill="currentColor" />
+              <path
+                d="M17 4C17 3.44772 17.4477 3 18 3H20C20.5523 3 21 3.44772 21 4V19C21 19.5523 20.5523 20 20 20H18C17.4477 20 17 19.5523 17 19V4Z"
+                fill="currentColor" />
+            </svg>
+          </div>
+          <h1>学术成果</h1>
+          <p>探索实验室前沿研究与学术贡献</p>
+          <div class="header-stats">
+            <div class="header-stat-item" v-if="!loading">
+              <span class="stat-value">{{ pagination.total }}</span>
+              <span class="stat-label">发表论文</span>
+            </div>
+            <div class="header-stat-item" v-if="!loading">
+              <span class="stat-value">{{ totalCitations }}</span>
+              <span class="stat-label">总引用</span>
+            </div>
+            <div class="header-stat-item" v-if="!loading">
+              <span class="stat-value">{{ uniqueJournals }}</span>
+              <span class="stat-label">期刊数</span>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
 
     <div class="container">
-      <!-- 筛选工具栏 -->
-      <div class="filter-toolbar">
-        <div class="filter-left">
-          <el-input v-model="filters.search" placeholder="搜索论文标题、作者、期刊..." style="width: 300px" clearable
-            @input="handleSearch">
-            <template #prefix>
-              <el-icon>
-                <Search />
-              </el-icon>
-            </template>
-          </el-input>
-        </div>
-
-        <div class="filter-right">
-          <el-select v-model="filters.category" placeholder="选择分类" clearable style="width: 150px"
-            @change="loadPublications">
-            <el-option v-for="category in categories" :key="category.category" :label="category.category"
-              :value="category.category" />
-          </el-select>
-
-          <el-select v-model="filters.year" placeholder="选择年份" clearable style="width: 120px"
-            @change="loadPublications">
-            <el-option v-for="year in years" :key="year.year" :label="year.year" :value="year.year" />
-          </el-select>
-
-          <el-select v-model="sortBy" style="width: 150px" @change="loadPublications">
-            <el-option label="按时间排序" value="publish_date" />
-            <el-option label="按引用数排序" value="citation_count" />
-            <el-option label="按影响因子排序" value="impact_factor" />
-          </el-select>
-        </div>
-      </div>
-
-      <!-- 统计信息 -->
-      <div class="stats-section" v-if="!loading">
-        <div class="stats-item">
-          <span class="stats-number">{{ pagination.total }}</span>
-          <span class="stats-label">篇论文</span>
-        </div>
-        <div class="stats-item">
-          <span class="stats-number">{{ totalCitations }}</span>
-          <span class="stats-label">总引用数</span>
-        </div>
-        <div class="stats-item">
-          <span class="stats-number">{{ uniqueJournals }}</span>
-          <span class="stats-label">发表期刊</span>
-        </div>
-      </div>
-
-      <!-- 论文列表 -->
-      <div class="publications-list" v-loading="loading">
-        <div v-for="publication in publications" :key="publication.id" class="publication-item">
-          <div class="publication-content">
-            <h3 class="publication-title">{{ publication.title }}</h3>
-
-            <div class="publication-meta">
-              <span class="authors">{{ publication.authors }}</span>
-              <span class="journal">{{ publication.journal }}</span>
-              <span class="date">{{ formatDate(publication.publish_date) }}</span>
-            </div>
-
-            <div class="publication-details">
-              <el-tag v-if="publication.type" size="small" type="info">
-                {{ getTypeLabel(publication.type) }}
-              </el-tag>
-
-              <span v-if="publication.citation_count" class="citation-count">
+      <!-- 筛选工具栏 - 优化设计 -->
+      <div class="filter-section">
+        <div class="filter-toolbar">
+          <div class="search-wrapper">
+            <el-input v-model="filters.search" placeholder="搜索论文标题、作者、期刊、关键词..." class="search-input" clearable
+              @input="handleSearch">
+              <template #prefix>
                 <el-icon>
-                  <Star />
+                  <Search />
                 </el-icon>
-                {{ publication.citation_count }} 引用
-              </span>
+              </template>
+            </el-input>
+          </div>
 
-              <span v-if="publication.impact_factor" class="impact-factor">
-                IF: {{ publication.impact_factor }}
-              </span>
-            </div>
+          <div class="filter-controls">
+            <el-select v-model="filters.category" placeholder="所有分类" clearable class="filter-select">
+              <el-option v-for="category in categories" :key="category.category" :label="category.category"
+                :value="category.category" />
+            </el-select>
 
-            <p v-if="publication.abstract" class="publication-abstract">
-              {{ publication.abstract.substring(0, 200) }}{{ publication.abstract.length > 200 ? '...' : '' }}
-            </p>
+            <el-select v-model="filters.year" placeholder="所有年份" clearable class="filter-select">
+              <el-option v-for="year in years" :key="year.year" :label="year.year" :value="year.year" />
+            </el-select>
 
-            <div class="publication-actions">
-              <el-button v-if="publication.pdf_url" type="primary" size="small" @click="viewPDF(publication.pdf_url)">
-                <el-icon>
-                  <Document />
-                </el-icon>
-                查看PDF
-              </el-button>
-
-              <el-button v-if="publication.doi" type="default" size="small" @click="openDOI(publication.doi)">
-                <el-icon>
-                  <Link />
-                </el-icon>
-                DOI链接
-              </el-button>
-
-              <el-button type="text" size="small" @click="toggleAbstract(publication.id)">
-                {{ expandedIds.includes(publication.id) ? '收起' : '展开' }}摘要
-              </el-button>
-            </div>
-
-            <!-- 展开的摘要 -->
-            <div v-if="expandedIds.includes(publication.id) && publication.abstract" class="full-abstract">
-              <h4>摘要</h4>
-              <p>{{ publication.abstract }}</p>
-
-              <div v-if="publication.keywords" class="keywords">
-                <h4>关键词</h4>
-                <el-tag v-for="keyword in getKeywords(publication.keywords)" :key="keyword" size="small"
-                  style="margin-right: 8px; margin-bottom: 8px;">
-                  {{ keyword }}
-                </el-tag>
-              </div>
-            </div>
+            <el-select v-model="sortBy" class="filter-select" @change="loadPublications">
+              <el-option label="最新发表" value="publish_date" />
+              <el-option label="引用最多" value="citation_count" />
+              <el-option label="影响因子" value="impact_factor" />
+            </el-select>
           </div>
         </div>
+      </div>
 
-        <!-- 空状态 -->
+      <!-- 论文列表 - 重新设计 -->
+      <div class="publications-list" v-loading="loading">
+        <transition-group name="list" tag="div" class="list-container">
+          <div v-for="(publication, index) in publications" :key="publication.id" class="publication-card"
+            :style="{ animationDelay: `${index * 0.1}s` }">
+            <!-- 左侧视觉区域 -->
+            <div class="card-visual">
+              <div class="visual-placeholder">
+                <div class="placeholder-icon">
+                  <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path
+                      d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+                      stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                  </svg>
+                </div>
+                <div class="publication-year">{{ new Date(publication.publish_date).getFullYear() }}</div>
+              </div>
+
+              <!-- 类型标签 -->
+              <div class="type-badge" v-if="publication.type">
+                {{ getTypeLabel(publication.type) }}
+              </div>
+            </div>
+
+            <!-- 右侧内容区域 -->
+            <div class="card-content">
+              <div class="content-header">
+                <h3 class="publication-title">{{ publication.title }}</h3>
+
+                <!-- 指标标签 -->
+                <div class="metrics">
+                  <span v-if="publication.citation_count" class="metric-badge citation">
+                    <el-icon>
+                      <Star />
+                    </el-icon>
+                    <span>{{ publication.citation_count }}</span>
+                  </span>
+                  <span v-if="publication.impact_factor" class="metric-badge impact">
+                    <span class="if-label">IF</span>
+                    <span>{{ publication.impact_factor }}</span>
+                  </span>
+                </div>
+              </div>
+
+              <div class="publication-meta">
+                <div class="meta-item authors">
+                  <svg viewBox="0 0 20 20" fill="currentColor">
+                    <path
+                      d="M9 6a3 3 0 11-6 0 3 3 0 016 0zM17 6a3 3 0 11-6 0 3 3 0 016 0zM12.93 17c.046-.327.07-.66.07-1a6.97 6.97 0 00-1.5-4.33A5 5 0 0119 16v1h-6.07zM6 11a5 5 0 015 5v1H1v-1a5 5 0 015-5z" />
+                  </svg>
+                  {{ publication.authors }}
+                </div>
+                <div class="meta-item journal">
+                  <svg viewBox="0 0 20 20" fill="currentColor">
+                    <path fill-rule="evenodd"
+                      d="M2 5a2 2 0 012-2h8a2 2 0 012 2v10a2 2 0 002 2H4a2 2 0 01-2-2V5zm3 1h6v4H5V6zm6 6H5v2h6v-2z" />
+                    <path d="M15 7h1a2 2 0 012 2v5.5a1.5 1.5 0 01-3 0V7z" />
+                  </svg>
+                  {{ publication.journal }}
+                </div>
+                <div class="meta-item date">
+                  <svg viewBox="0 0 20 20" fill="currentColor">
+                    <path fill-rule="evenodd"
+                      d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z" />
+                  </svg>
+                  {{ formatDate(publication.publish_date) }}
+                </div>
+              </div>
+
+              <p v-if="publication.abstract" class="publication-abstract">
+                {{ publication.abstract.substring(0, 200) }}{{ publication.abstract.length > 200 ? '...' : '' }}
+              </p>
+
+              <!-- 操作按钮 -->
+              <div class="card-actions">
+                <button v-if="publication.pdf_url" class="action-btn primary" @click="viewPDF(publication.pdf_url)">
+                  <el-icon>
+                    <Document />
+                  </el-icon>
+                  <span>PDF全文</span>
+                </button>
+
+                <button v-if="publication.doi" class="action-btn secondary" @click="openDOI(publication.doi)">
+                  <el-icon>
+                    <Link />
+                  </el-icon>
+                  <span>DOI</span>
+                </button>
+
+                <button class="action-btn text" @click="toggleAbstract(publication.id)">
+                  <span>{{ expandedIds.includes(publication.id) ? '收起详情' : '查看详情' }}</span>
+                  <svg class="arrow-icon" :class="{ 'expanded': expandedIds.includes(publication.id) }"
+                    viewBox="0 0 20 20" fill="currentColor">
+                    <path fill-rule="evenodd"
+                      d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" />
+                  </svg>
+                </button>
+              </div>
+
+              <!-- 展开的详情 -->
+              <transition name="expand">
+                <div v-if="expandedIds.includes(publication.id)" class="expanded-content">
+                  <div class="abstract-section" v-if="publication.abstract">
+                    <h4>摘要</h4>
+                    <p>{{ publication.abstract }}</p>
+                  </div>
+
+                  <div class="keywords-section" v-if="publication.keywords">
+                    <h4>关键词</h4>
+                    <div class="keywords-list">
+                      <span v-for="keyword in getKeywords(publication.keywords)" :key="keyword" class="keyword-tag">
+                        {{ keyword }}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              </transition>
+            </div>
+          </div>
+        </transition-group>
+
+        <!-- 空状态优化 -->
         <div v-if="!loading && publications.length === 0" class="empty-state">
-          <el-empty description="暂无论文数据" />
+          <div class="empty-icon">
+            <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path
+                d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+            </svg>
+          </div>
+          <h3>暂无论文数据</h3>
+          <p>当前筛选条件下没有找到相关论文</p>
         </div>
       </div>
 
@@ -137,7 +211,7 @@
       <div class="pagination-container" v-if="pagination.total > 0">
         <el-pagination v-model:current-page="pagination.page" v-model:page-size="pagination.limit"
           :page-sizes="[10, 20, 30, 50]" :total="pagination.total" layout="total, sizes, prev, pager, next, jumper"
-          @size-change="loadPublications" @current-change="loadPublications" />
+          @size-change="loadPublications" @current-change="loadPublications" background />
       </div>
     </div>
   </div>
@@ -304,25 +378,98 @@ onMounted(() => {
 <style scoped>
 .publications-page {
   min-height: 100vh;
-  background: #f8f9fa;
+  background: linear-gradient(to bottom, #f8fafc 0%, #ffffff 100%);
 }
 
+/* 头部区域 */
 .publications-header {
+  position: relative;
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   color: white;
-  padding: 60px 0 40px;
+  padding: 80px 0 60px;
+  overflow: hidden;
+}
+
+.header-bg-pattern {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-image:
+    radial-gradient(circle at 20% 50%, rgba(255, 255, 255, 0.1) 0%, transparent 50%),
+    radial-gradient(circle at 80% 80%, rgba(255, 255, 255, 0.1) 0%, transparent 50%);
+  opacity: 0.5;
+}
+
+.header-content {
+  position: relative;
+  z-index: 1;
   text-align: center;
 }
 
+.header-icon {
+  display: inline-block;
+  width: 80px;
+  height: 80px;
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 20px;
+  padding: 20px;
+  margin-bottom: 20px;
+  backdrop-filter: blur(10px);
+  animation: float 3s ease-in-out infinite;
+}
+
+.header-icon svg {
+  width: 100%;
+  height: 100%;
+}
+
+@keyframes float {
+
+  0%,
+  100% {
+    transform: translateY(0px);
+  }
+
+  50% {
+    transform: translateY(-10px);
+  }
+}
+
 .publications-header h1 {
-  font-size: 2.5rem;
-  margin: 0 0 10px 0;
-  font-weight: 600;
+  font-size: 3rem;
+  margin: 0 0 15px 0;
+  font-weight: 700;
+  letter-spacing: -0.5px;
 }
 
 .publications-header p {
-  font-size: 1.1rem;
-  margin: 0;
+  font-size: 1.2rem;
+  margin: 0 0 40px 0;
+  opacity: 0.95;
+}
+
+.header-stats {
+  display: flex;
+  justify-content: center;
+  gap: 60px;
+  margin-top: 40px;
+}
+
+.header-stat-item {
+  text-align: center;
+}
+
+.stat-value {
+  display: block;
+  font-size: 2.5rem;
+  font-weight: 700;
+  margin-bottom: 5px;
+}
+
+.stat-label {
+  font-size: 0.95rem;
   opacity: 0.9;
 }
 
@@ -332,189 +479,525 @@ onMounted(() => {
   padding: 0 20px;
 }
 
+/* 筛选区域 */
+.filter-section {
+  margin: -30px 0 40px 0;
+  position: relative;
+  z-index: 10;
+}
+
 .filter-toolbar {
+  background: white;
+  border-radius: 16px;
+  padding: 24px;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
   display: flex;
-  justify-content: space-between;
+  gap: 20px;
   align-items: center;
-  margin: 30px 0;
-  padding: 20px;
-  background: white;
-  border-radius: 8px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  flex-wrap: wrap;
 }
 
-.filter-right {
+.search-wrapper {
+  flex: 1;
+  min-width: 280px;
+}
+
+.search-input {
+  width: 100%;
+}
+
+.search-input :deep(.el-input__wrapper) {
+  border-radius: 12px;
+  padding: 8px 16px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+.filter-controls {
   display: flex;
-  gap: 15px;
+  gap: 12px;
+  flex-wrap: wrap;
 }
 
-.stats-section {
-  display: flex;
-  gap: 40px;
-  margin: 30px 0;
-  padding: 20px;
-  background: white;
-  border-radius: 8px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+.filter-select {
+  min-width: 140px;
 }
 
-.stats-item {
-  text-align: center;
+.filter-select :deep(.el-input__wrapper) {
+  border-radius: 12px;
 }
 
-.stats-number {
-  display: block;
-  font-size: 2rem;
-  font-weight: 700;
-  color: #667eea;
-}
-
-.stats-label {
-  font-size: 0.9rem;
-  color: #666;
-}
-
+/* 论文列表 */
 .publications-list {
   min-height: 400px;
 }
 
-.publication-item {
-  background: white;
-  border-radius: 8px;
-  padding: 25px;
-  margin-bottom: 20px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-  transition: transform 0.2s, box-shadow 0.2s;
+.list-container {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
 }
 
-.publication-item:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+.publication-card {
+  display: flex;
+  background: white;
+  border-radius: 16px;
+  overflow: hidden;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  animation: fadeInUp 0.6s ease-out both;
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.publication-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 12px 32px rgba(102, 126, 234, 0.15);
+}
+
+/* 卡片视觉区域 */
+.card-visual {
+  position: relative;
+  width: 200px;
+  flex-shrink: 0;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 30px 20px;
+}
+
+.visual-placeholder {
+  text-align: center;
+  color: white;
+}
+
+.placeholder-icon {
+  width: 80px;
+  height: 80px;
+  margin: 0 auto 20px;
+  opacity: 0.9;
+}
+
+.placeholder-icon svg {
+  width: 100%;
+  height: 100%;
+}
+
+.publication-year {
+  font-size: 2rem;
+  font-weight: 700;
+  opacity: 0.95;
+}
+
+.type-badge {
+  position: absolute;
+  top: 15px;
+  right: 15px;
+  background: rgba(255, 255, 255, 0.25);
+  color: white;
+  padding: 4px 12px;
+  border-radius: 12px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  backdrop-filter: blur(10px);
+}
+
+/* 卡片内容区域 */
+.card-content {
+  flex: 1;
+  padding: 30px;
+  display: flex;
+  flex-direction: column;
+}
+
+.content-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 20px;
+  margin-bottom: 20px;
 }
 
 .publication-title {
-  font-size: 1.3rem;
-  font-weight: 600;
-  color: #2c3e50;
-  margin: 0 0 15px 0;
-  line-height: 1.4;
+  flex: 1;
+  font-size: 1.4rem;
+  font-weight: 700;
+  color: #1a202c;
+  margin: 0;
+  line-height: 1.5;
 }
 
+.metrics {
+  display: flex;
+  gap: 10px;
+  flex-shrink: 0;
+}
+
+.metric-badge {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  border-radius: 8px;
+  font-size: 0.875rem;
+  font-weight: 600;
+}
+
+.metric-badge.citation {
+  background: #fef3c7;
+  color: #d97706;
+}
+
+.metric-badge.impact {
+  background: #dbeafe;
+  color: #2563eb;
+}
+
+.if-label {
+  font-size: 0.75rem;
+  opacity: 0.8;
+}
+
+/* 元数据 */
 .publication-meta {
   display: flex;
-  flex-wrap: wrap;
-  gap: 15px;
-  margin-bottom: 15px;
+  flex-direction: column;
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+.meta-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: #64748b;
   font-size: 0.95rem;
-  color: #666;
 }
 
-.authors {
+.meta-item svg {
+  width: 18px;
+  height: 18px;
+  flex-shrink: 0;
+  opacity: 0.7;
+}
+
+.meta-item.authors {
   font-weight: 500;
+  color: #475569;
 }
 
-.journal {
+.meta-item.journal {
   font-style: italic;
 }
 
-.publication-details {
-  display: flex;
-  align-items: center;
-  gap: 15px;
-  margin-bottom: 15px;
-}
-
-.citation-count,
-.impact-factor {
-  display: flex;
-  align-items: center;
-  gap: 4px;
-  font-size: 0.9rem;
-  color: #667eea;
-  font-weight: 500;
-}
-
 .publication-abstract {
-  color: #555;
-  line-height: 1.6;
-  margin: 15px 0;
+  color: #64748b;
+  line-height: 1.7;
+  margin-bottom: 20px;
+  font-size: 0.95rem;
 }
 
-.publication-actions {
+/* 操作按钮 */
+.card-actions {
   display: flex;
-  gap: 10px;
-  margin-top: 15px;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-top: auto;
 }
 
-.full-abstract {
-  margin-top: 20px;
-  padding-top: 20px;
-  border-top: 1px solid #eee;
+.action-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 20px;
+  border: none;
+  border-radius: 10px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
 }
 
-.full-abstract h4 {
-  color: #2c3e50;
+.action-btn.primary {
+  background: #667eea;
+  color: white;
+}
+
+.action-btn.primary:hover {
+  background: #5568d3;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+}
+
+.action-btn.secondary {
+  background: #f1f5f9;
+  color: #475569;
+}
+
+.action-btn.secondary:hover {
+  background: #e2e8f0;
+}
+
+.action-btn.text {
+  background: transparent;
+  color: #667eea;
+  padding: 10px 16px;
+}
+
+.action-btn.text:hover {
+  background: #f1f5f9;
+}
+
+.arrow-icon {
+  width: 16px;
+  height: 16px;
+  transition: transform 0.3s;
+}
+
+.arrow-icon.expanded {
+  transform: rotate(180deg);
+}
+
+/* 展开内容 */
+.expanded-content {
+  margin-top: 24px;
+  padding-top: 24px;
+  border-top: 2px solid #f1f5f9;
+}
+
+.expand-enter-active,
+.expand-leave-active {
+  transition: all 0.3s ease;
+  max-height: 1000px;
+  overflow: hidden;
+}
+
+.expand-enter-from,
+.expand-leave-to {
+  max-height: 0;
+  opacity: 0;
+}
+
+.abstract-section h4,
+.keywords-section h4 {
+  color: #1a202c;
+  font-size: 1rem;
+  font-weight: 600;
+  margin: 0 0 12px 0;
+}
+
+.abstract-section p {
+  color: #64748b;
+  line-height: 1.8;
+  margin: 0 0 20px 0;
+}
+
+.keywords-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.keyword-tag {
+  display: inline-block;
+  background: #f1f5f9;
+  color: #475569;
+  padding: 6px 14px;
+  border-radius: 8px;
+  font-size: 0.85rem;
+  font-weight: 500;
+  transition: all 0.2s;
+}
+
+.keyword-tag:hover {
+  background: #667eea;
+  color: white;
+  transform: translateY(-2px);
+}
+
+/* 空状态 */
+.empty-state {
+  text-align: center;
+  padding: 80px 20px;
+}
+
+.empty-icon {
+  width: 120px;
+  height: 120px;
+  margin: 0 auto 30px;
+  color: #cbd5e1;
+}
+
+.empty-icon svg {
+  width: 100%;
+  height: 100%;
+}
+
+.empty-state h3 {
+  color: #1a202c;
+  font-size: 1.5rem;
   margin: 0 0 10px 0;
+}
+
+.empty-state p {
+  color: #64748b;
   font-size: 1rem;
 }
 
-.full-abstract p {
-  color: #555;
-  line-height: 1.7;
-  margin: 0 0 15px 0;
-}
-
-.keywords h4 {
-  margin: 15px 0 10px 0;
-}
-
-.empty-state {
-  text-align: center;
-  padding: 60px 0;
-}
-
+/* 分页 */
 .pagination-container {
   display: flex;
   justify-content: center;
-  margin: 40px 0;
+  margin: 60px 0 40px;
+}
+
+/* 列表过渡动画 */
+.list-enter-active,
+.list-leave-active {
+  transition: all 0.5s ease;
+}
+
+.list-enter-from {
+  opacity: 0;
+  transform: translateY(30px);
+}
+
+.list-leave-to {
+  opacity: 0;
+  transform: translateX(-30px);
+}
+
+/* 响应式设计 */
+@media (max-width: 992px) {
+  .publication-card {
+    flex-direction: column;
+  }
+
+  .card-visual {
+    width: 100%;
+    padding: 30px;
+    flex-direction: row;
+    justify-content: space-between;
+  }
+
+  .visual-placeholder {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+  }
+
+  .placeholder-icon {
+    width: 50px;
+    height: 50px;
+    margin: 0;
+  }
+
+  .publication-year {
+    font-size: 1.5rem;
+  }
+
+  .type-badge {
+    position: static;
+    margin-left: auto;
+  }
 }
 
 @media (max-width: 768px) {
+  .publications-header {
+    padding: 60px 0 40px;
+  }
+
   .publications-header h1 {
     font-size: 2rem;
   }
 
+  .header-icon {
+    width: 60px;
+    height: 60px;
+    padding: 15px;
+  }
+
+  .header-stats {
+    gap: 30px;
+  }
+
+  .stat-value {
+    font-size: 2rem;
+  }
+
   .filter-toolbar {
+    padding: 20px;
+  }
+
+  .search-wrapper {
+    width: 100%;
+  }
+
+  .filter-controls {
+    width: 100%;
+  }
+
+  .filter-select {
+    flex: 1;
+    min-width: 120px;
+  }
+
+  .content-header {
+    flex-direction: column;
+  }
+
+  .metrics {
+    width: 100%;
+  }
+
+  .card-actions {
+    flex-direction: column;
+  }
+
+  .action-btn {
+    width: 100%;
+    justify-content: center;
+  }
+}
+
+@media (max-width: 480px) {
+  .header-stats {
+    flex-direction: column;
+    gap: 20px;
+  }
+
+  .filter-controls {
+    flex-direction: column;
+  }
+
+  .filter-select {
+    width: 100%;
+  }
+
+  .card-visual {
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+  }
+
+  .visual-placeholder {
     flex-direction: column;
     gap: 15px;
   }
 
-  .filter-right {
-    flex-direction: column;
-    width: 100%;
-  }
-
-  .filter-right .el-select {
-    width: 100% !important;
-  }
-
-  .stats-section {
-    flex-direction: column;
-    gap: 20px;
-    text-align: center;
-  }
-
-  .publication-meta {
-    flex-direction: column;
-    gap: 8px;
-  }
-
-  .publication-actions {
-    flex-direction: column;
-  }
-
-  .publication-actions .el-button {
-    width: 100%;
+  .type-badge {
+    margin: 10px 0 0 0;
   }
 }
 </style>

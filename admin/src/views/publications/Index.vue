@@ -1,69 +1,132 @@
 <template>
   <div class="publications-container">
-    <!-- 页面标题 -->
+    <!-- 页面标题 - 美化 -->
     <div class="page-header">
-      <h2>论文发表管理</h2>
-      <p>管理实验室发表的学术论文</p>
-    </div>
-
-    <!-- 操作工具栏 -->
-    <div class="toolbar">
-      <div class="toolbar-left">
-        <el-button type="primary" @click="handleAdd">
+      <div class="header-left">
+        <div class="header-icon">
+          <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path
+              d="M9 11H7C6.44772 11 6 11.4477 6 12V19C6 19.5523 6.44772 20 7 20H9C9.55228 20 10 19.5523 10 19V12C10 11.4477 9.55228 11 9 11Z"
+              fill="currentColor" />
+            <path
+              d="M13 7C12.4477 7 12 7.44772 12 8V19C12 19.5523 12.4477 20 13 20H15C15.5523 20 16 19.5523 16 19V8C16 7.44772 15.5523 7 15 7H13Z"
+              fill="currentColor" />
+            <path
+              d="M17 4C17 3.44772 17.4477 3 18 3H20C20.5523 3 21 3.44772 21 4V19C21 19.5523 20.5523 20 20 20H18C17.4477 20 17 19.5523 17 19V4Z"
+              fill="currentColor" />
+          </svg>
+        </div>
+        <div>
+          <h2>论文发表管理</h2>
+          <p>管理实验室发表的学术论文和研究成果</p>
+        </div>
+      </div>
+      <div class="header-right">
+        <el-button type="primary" size="large" @click="handleAdd">
           <el-icon>
             <Plus />
           </el-icon>
           添加论文
         </el-button>
-        <el-button type="danger" :disabled="selectedIds.length === 0" @click="handleBatchDelete">
-          <el-icon>
-            <Delete />
-          </el-icon>
-          批量删除
-        </el-button>
-      </div>
-
-      <div class="toolbar-right">
-        <el-input v-model="filters.search" placeholder="搜索论文标题、作者、期刊..." style="width: 300px" clearable
-          @input="handleSearch">
-          <template #prefix>
-            <el-icon>
-              <Search />
-            </el-icon>
-          </template>
-        </el-input>
-
-        <el-select v-model="filters.type" placeholder="论文类型" clearable @change="loadData">
-          <el-option label="期刊论文" value="journal" />
-          <el-option label="会议论文" value="conference" />
-          <el-option label="专著章节" value="book_chapter" />
-          <el-option label="专利" value="patent" />
-          <el-option label="学位论文" value="thesis" />
-        </el-select>
-
-        <el-select v-model="filters.year" placeholder="发表年份" clearable @change="loadData">
-          <el-option v-for="year in years" :key="year" :label="year" :value="year" />
-        </el-select>
-
-        <el-button @click="resetFilters">重置</el-button>
       </div>
     </div>
 
-    <!-- 统计卡片 -->
-    <div class="stats-cards">
-      <div class="stats-card">
-        <div class="stats-number">{{ stats.total || 0 }}</div>
-        <div class="stats-label">总论文数</div>
+    <!-- 统计卡片 - 优化设计 -->
+    <div class="stats-section">
+      <div class="stats-card primary">
+        <div class="stats-icon">
+          <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path
+              d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+              stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+          </svg>
+        </div>
+        <div class="stats-info">
+          <div class="stats-number">{{ stats.total || 0 }}</div>
+          <div class="stats-label">总论文数</div>
+        </div>
       </div>
-      <div class="stats-card">
-        <div class="stats-number">{{ stats.totalCitations || 0 }}</div>
-        <div class="stats-label">总引用数</div>
+
+      <div class="stats-card success">
+        <div class="stats-icon">
+          <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path
+              d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z"
+              fill="currentColor" />
+          </svg>
+        </div>
+        <div class="stats-info">
+          <div class="stats-number">{{ stats.totalCitations || 0 }}</div>
+          <div class="stats-label">总引用数</div>
+        </div>
       </div>
-      <div class="stats-card">
-        <div class="stats-number">{{ stats.featuredCount || 0 }}</div>
-        <div class="stats-label">重点论文</div>
+
+      <div class="stats-card warning">
+        <div class="stats-icon">
+          <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M5 3v18l7-3 7 3V3H5z" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+              stroke-linejoin="round" />
+          </svg>
+        </div>
+        <div class="stats-info">
+          <div class="stats-number">{{ stats.featuredCount || 0 }}</div>
+          <div class="stats-label">重点论文</div>
+        </div>
       </div>
     </div>
+
+    <!-- 筛选工具栏 - 优化布局 -->
+    <el-card class="filter-card" shadow="never">
+      <div class="filter-toolbar">
+        <!-- 搜索栏 -->
+        <div class="filter-search">
+          <el-input v-model="filters.search" placeholder="🔍 搜索论文标题、作者、期刊、关键词..." size="large" class="search-input"
+            clearable @input="handleSearch">
+            <template #prefix>
+              <el-icon>
+                <Search />
+              </el-icon>
+            </template>
+          </el-input>
+        </div>
+
+        <!-- 筛选和操作区 -->
+        <div class="filter-controls">
+          <!-- 筛选组 -->
+          <div class="filter-group">
+            <span class="filter-label">筛选：</span>
+            <el-select v-model="filters.type" placeholder="论文类型" clearable @change="loadData" class="filter-select">
+              <el-option label="期刊论文" value="journal" />
+              <el-option label="会议论文" value="conference" />
+              <el-option label="专著章节" value="book_chapter" />
+              <el-option label="专利" value="patent" />
+              <el-option label="学位论文" value="thesis" />
+            </el-select>
+
+            <el-select v-model="filters.year" placeholder="发表年份" clearable @change="loadData" class="filter-select">
+              <el-option v-for="year in years" :key="year" :label="year" :value="year" />
+            </el-select>
+
+            <el-button @click="resetFilters">
+              <el-icon>
+                <RefreshLeft />
+              </el-icon>
+              重置
+            </el-button>
+          </div>
+
+          <!-- 操作组 -->
+          <div class="action-group">
+            <el-button type="danger" :disabled="selectedIds.length === 0" @click="handleBatchDelete">
+              <el-icon>
+                <Delete />
+              </el-icon>
+              批量删除{{ selectedIds.length > 0 ? ` (${selectedIds.length})` : '' }}
+            </el-button>
+          </div>
+        </div>
+      </div>
+    </el-card>
 
     <!-- 论文表格 -->
     <el-card class="table-card">
@@ -201,7 +264,7 @@
 import { ref, reactive, onMounted, computed } from 'vue'
 import { useRouter } from 'vue-router'
 import { ElMessage, ElMessageBox } from 'element-plus'
-import { Plus, Delete, Search, Document } from '@element-plus/icons-vue'
+import { Plus, Delete, Search, Document, RefreshLeft } from '@element-plus/icons-vue'
 import api from '@/utils/api'
 
 const router = useRouter()
@@ -419,17 +482,51 @@ onMounted(() => {
 
 <style scoped>
 .publications-container {
-  padding: 20px;
+  padding: 24px;
+  background: #f5f7fa;
+  min-height: 100vh;
 }
 
+/* 页面头部 */
 .page-header {
-  margin-bottom: 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+  padding: 24px;
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+}
+
+.header-left {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+.header-icon {
+  width: 60px;
+  height: 60px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  flex-shrink: 0;
+}
+
+.header-icon svg {
+  width: 32px;
+  height: 32px;
 }
 
 .page-header h2 {
   margin: 0 0 8px 0;
   color: #303133;
   font-size: 24px;
+  font-weight: 600;
 }
 
 .page-header p {
@@ -438,48 +535,80 @@ onMounted(() => {
   font-size: 14px;
 }
 
-.toolbar {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 20px;
-  padding: 16px;
-  background: white;
-  border-radius: 8px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-}
-
-.toolbar-left {
-  display: flex;
-  gap: 10px;
-}
-
-.toolbar-right {
-  display: flex;
-  gap: 10px;
-  align-items: center;
-}
-
-.stats-cards {
+/* 统计卡片 */
+.stats-section {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
   gap: 20px;
-  margin-bottom: 20px;
+  margin-bottom: 24px;
 }
 
 .stats-card {
   background: white;
-  padding: 20px;
-  border-radius: 8px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-  text-align: center;
+  padding: 24px;
+  border-radius: 12px;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.stats-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+}
+
+.stats-icon {
+  width: 56px;
+  height: 56px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.stats-icon svg {
+  width: 28px;
+  height: 28px;
+}
+
+.stats-card.primary .stats-icon {
+  background: #ecf5ff;
+  color: #409eff;
+}
+
+.stats-card.success .stats-icon {
+  background: #f0f9ff;
+  color: #67c23a;
+}
+
+.stats-card.warning .stats-icon {
+  background: #fdf6ec;
+  color: #e6a23c;
+}
+
+.stats-info {
+  flex: 1;
 }
 
 .stats-number {
-  font-size: 32px;
-  font-weight: bold;
+  font-size: 28px;
+  font-weight: 700;
+  margin-bottom: 4px;
+}
+
+.stats-card.primary .stats-number {
   color: #409eff;
-  margin-bottom: 8px;
+}
+
+.stats-card.success .stats-number {
+  color: #67c23a;
+}
+
+.stats-card.warning .stats-number {
+  color: #e6a23c;
 }
 
 .stats-label {
@@ -487,14 +616,106 @@ onMounted(() => {
   font-size: 14px;
 }
 
+/* 筛选卡片 */
+.filter-card {
+  margin-bottom: 20px;
+  border-radius: 12px;
+  border: none;
+}
+
+.filter-card :deep(.el-card__body) {
+  padding: 24px;
+}
+
+.filter-toolbar {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+/* 搜索栏 */
+.filter-search {
+  width: 100%;
+}
+
+.search-input {
+  width: 100%;
+}
+
+.search-input :deep(.el-input__wrapper) {
+  border-radius: 10px;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+  transition: all 0.3s;
+}
+
+.search-input :deep(.el-input__wrapper:hover) {
+  box-shadow: 0 4px 16px rgba(102, 126, 234, 0.15);
+}
+
+.search-input :deep(.el-input__wrapper.is-focus) {
+  box-shadow: 0 4px 16px rgba(102, 126, 234, 0.25);
+}
+
+/* 筛选和操作区 */
+.filter-controls {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 20px;
+  flex-wrap: wrap;
+}
+
+.filter-group {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  flex: 1;
+}
+
+.filter-label {
+  color: #606266;
+  font-size: 14px;
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+.filter-select {
+  min-width: 150px;
+}
+
+.action-group {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+/* 表格卡片 */
 .table-card {
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  border-radius: 12px;
+  border: none;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+}
+
+.table-card :deep(.el-card__body) {
+  padding: 20px;
+}
+
+.table-card :deep(.el-table) {
+  border-radius: 8px;
+}
+
+.table-card :deep(.el-table th) {
+  background: #f5f7fa;
+  font-weight: 600;
+  color: #606266;
 }
 
 .paper-title {
   display: flex;
   align-items: center;
   flex-wrap: wrap;
+  gap: 8px;
 }
 
 .pagination-container {
@@ -503,6 +724,7 @@ onMounted(() => {
   margin-top: 20px;
 }
 
+/* 详情对话框 */
 .paper-detail {
   max-height: 70vh;
   overflow-y: auto;
@@ -516,6 +738,7 @@ onMounted(() => {
   margin: 0 0 16px 0;
   color: #303133;
   font-size: 18px;
+  font-weight: 600;
   line-height: 1.4;
 }
 
@@ -523,11 +746,22 @@ onMounted(() => {
   margin: 0 0 12px 0;
   color: #606266;
   font-size: 16px;
+  font-weight: 600;
 }
 
 .paper-meta p {
   margin: 8px 0;
   line-height: 1.6;
+  color: #606266;
+}
+
+.paper-meta a {
+  color: #409eff;
+  text-decoration: none;
+}
+
+.paper-meta a:hover {
+  text-decoration: underline;
 }
 
 .abstract-text {
@@ -542,30 +776,76 @@ onMounted(() => {
   gap: 8px;
 }
 
-@media (max-width: 768px) {
-  .toolbar {
+/* 响应式设计 */
+@media (max-width: 992px) {
+  .page-header {
     flex-direction: column;
+    gap: 20px;
+  }
+
+  .header-left {
+    width: 100%;
+  }
+
+  .header-right {
+    width: 100%;
+  }
+
+  .header-right .el-button {
+    width: 100%;
+  }
+}
+
+@media (max-width: 768px) {
+  .publications-container {
+    padding: 16px;
+  }
+
+  .header-left {
+    flex-direction: column;
+    text-align: center;
+  }
+
+  .stats-section {
+    grid-template-columns: 1fr;
+  }
+
+  .filter-card :deep(.el-card__body) {
+    padding: 16px;
+  }
+
+  .filter-toolbar {
     gap: 16px;
   }
 
-  .toolbar-left,
-  .toolbar-right {
-    width: 100%;
-    justify-content: center;
-  }
-
-  .toolbar-right {
+  .filter-controls {
     flex-direction: column;
-    gap: 12px;
+    align-items: stretch;
   }
 
-  .toolbar-right .el-input,
-  .toolbar-right .el-select {
+  .filter-group {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .filter-label {
+    text-align: left;
+  }
+
+  .filter-select {
     width: 100%;
   }
 
-  .stats-cards {
-    grid-template-columns: 1fr;
+  .filter-group .el-button {
+    width: 100%;
+  }
+
+  .action-group {
+    width: 100%;
+  }
+
+  .action-group .el-button {
+    width: 100%;
   }
 }
 </style>
