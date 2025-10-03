@@ -9,7 +9,7 @@
         <div class="hero-pattern"></div>
       </div>
 
-    <div class="container">
+      <div class="container">
         <div class="breadcrumb">
           <router-link to="/" class="breadcrumb-link">
             <el-icon>
