@@ -158,9 +158,9 @@
           </el-col>
 
           <el-col :span="12">
-            <el-form-item label="截止日期">
-              <el-date-picker v-model="form.deadline" type="date" placeholder="选择申请截止日期" style="width: 100%"
-                format="YYYY-MM-DD" value-format="YYYY-MM-DD" />
+            <el-form-item label="截止日期时间">
+              <el-date-picker v-model="form.deadline" type="datetime" placeholder="选择截止日期和时间" style="width: 100%"
+                format="YYYY-MM-DD HH:mm:ss" value-format="YYYY-MM-DD HH:mm:ss" />
             </el-form-item>
 
             <el-form-item label="状态">
@@ -382,6 +382,10 @@ const handleSubmit = async () => {
     submitting.value = true
 
     const submitData = { ...form }
+    // 确保未修改截止时间时仍提交当前值，避免后端解析 undefined
+    if (!submitData.deadline && form.deadline) {
+      submitData.deadline = form.deadline
+    }
 
     if (dialogMode.value === 'create') {
       await recruitmentApi.create(submitData)
@@ -409,7 +413,11 @@ const resetForm = () => {
   form.attachment = null
   Object.keys(form).forEach(key => {
     if (key === 'status') {
-      form[key] = 'active'
+      form[key] = 'open'
+    } else if (key === 'positions') {
+      form[key] = 1
+    } else if (key === 'is_featured') {
+      form[key] = false
     } else if (key !== 'attachment') {
       form[key] = ''
     }

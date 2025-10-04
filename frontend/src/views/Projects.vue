@@ -543,7 +543,7 @@ const formatCurrencyForTemplate = (amount) => formatCurrency(amount)
 }
 
 .page-content {
-  padding: 50px 0 80px;
+  padding: 50px 0 15px;
 }
 
 .container {

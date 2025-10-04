@@ -393,6 +393,8 @@ onMounted(() => {
 .equipment-page {
   min-height: 100vh;
   background: #f8f9fa;
+  /* 防止最后一个子元素的 margin-bottom 与父元素合并，导致页脚上方出现空白 */
+  padding-bottom: 50px;
 }
 
 .equipment-header {
@@ -738,6 +740,11 @@ onMounted(() => {
   display: flex;
   justify-content: center;
   margin: 40px 0;
+}
+
+/* 移除页面容器内最后一个区块的底部外边距，避免与页脚之间出现空隙 */
+.equipment-page .container>*:last-child {
+  margin-bottom: 0 !important;
 }
 
 @media (max-width: 768px) {

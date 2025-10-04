@@ -7,6 +7,26 @@ const fs = require('fs');
 const db = require('../database/connection');
 const { verifyToken, verifyAdmin } = require('../middleware/auth');
 
+// 工具函数：将任意输入的日期/时间转换为 MySQL DATETIME 字符串
+function toMySQLDateTime(input) {
+    if (!input) return null;
+    const str = String(input).trim();
+    // 仅日期，默认当天 23:59:59（用户更易理解）
+    if (/^\d{4}-\d{2}-\d{2}$/.test(str)) {
+        return `${str} 23:59:59`;
+    }
+    const date = new Date(str);
+    if (isNaN(date.getTime())) return null;
+    const pad = (n) => String(n).padStart(2, '0');
+    const yyyy = date.getFullYear();
+    const mm = pad(date.getMonth() + 1);
+    const dd = pad(date.getDate());
+    const hh = pad(date.getHours());
+    const mi = pad(date.getMinutes());
+    const ss = pad(date.getSeconds());
+    return `${yyyy}-${mm}-${dd} ${hh}:${mi}:${ss}`;
+}
+
 // 文件上传配置
 const storage = multer.diskStorage({
     destination: (req, file, cb) => {
@@ -57,10 +77,11 @@ router.get('/list', async (req, res) => {
         let whereClause = 'WHERE 1=1';
         const params = [];
 
-        // 状态筛选
+        // 状态筛选（兼容 active => open）
         if (status) {
+            const normalizedStatus = status === 'active' ? 'open' : status;
             whereClause += ' AND status = ?';
-            params.push(status);
+            params.push(normalizedStatus);
         }
 
         // 类型筛选
@@ -84,12 +105,13 @@ router.get('/list', async (req, res) => {
 
         const total = countResult && countResult[0] && countResult[0].total ? countResult[0].total : 0;
 
-        // 获取招生信息列表
+        // 获取招生信息列表（过滤已过期的 open）
         const recruitment = await db.query(
             `SELECT id, title, type, positions, description, requirements,
                     contact_info, deadline, status, is_featured,
                     created_at, updated_at 
-             FROM recruitment ${whereClause} 
+             FROM recruitment ${whereClause}
+             AND (status <> 'open' OR deadline IS NULL OR deadline >= NOW())
              ORDER BY ${sort} ${order} 
              LIMIT ${parseInt(limit)} OFFSET ${parseInt(offset)}`,
             [...params]
@@ -120,7 +142,9 @@ router.get('/:id', async (req, res) => {
         const recruitmentId = req.params.id;
 
         const recruitment = await db.query(
-            'SELECT * FROM recruitment WHERE id = ? AND status = "active"',
+            `SELECT * FROM recruitment 
+             WHERE id = ? AND status = 'open' 
+             AND (deadline IS NULL OR deadline >= NOW())`,
             [recruitmentId]
         );
 
@@ -150,7 +174,7 @@ router.get('/stats/types', async (req, res) => {
         const stats = await db.query(
             `SELECT type, COUNT(*) as count 
              FROM recruitment 
-             WHERE status = "active" 
+             WHERE status = 'open' AND (deadline IS NULL OR deadline >= NOW())
              GROUP BY type 
              ORDER BY count DESC`
         );
@@ -268,7 +292,7 @@ router.post('/admin/create', verifyToken, verifyAdmin, upload.single('attachment
               deadline, attachment_url, status, created_at, updated_at)
              VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, NOW(), NOW())`,
             [title, type, description, requirements, benefits, contact_info,
-                deadline, attachment_url, status]
+                toMySQLDateTime(deadline), attachment_url, status === 'active' ? 'open' : status]
         );
 
         res.status(201).json({
@@ -324,7 +348,7 @@ router.put('/admin/update/:id', verifyToken, verifyAdmin, upload.single('attachm
              contact_info = ?, deadline = ?, attachment_url = ?, status = ?, updated_at = NOW()
              WHERE id = ?`,
             [title, type, description, requirements, benefits, contact_info,
-                deadline, attachment_url, status, recruitmentId]
+                toMySQLDateTime(deadline) ?? currentRecruitment.deadline, attachment_url, (status === 'active' ? 'open' : status) || currentRecruitment.status, recruitmentId]
         );
 
         res.json({
@@ -513,6 +537,16 @@ router.post('/admin', [
             attachment_url = `/uploads/recruitment/${req.file.filename}`;
         }
 
+        // 规范化与过期自动关闭
+        const mysqlDeadline = toMySQLDateTime(deadline);
+        let normalizedStatus = status === 'active' ? 'open' : status;
+        if (normalizedStatus === 'open' && mysqlDeadline) {
+            const deadlineDate = new Date(mysqlDeadline.replace(' ', 'T'));
+            if (!isNaN(deadlineDate.getTime()) && deadlineDate.getTime() < Date.now()) {
+                normalizedStatus = 'closed';
+            }
+        }
+
         const result = await db.query(
             `INSERT INTO recruitment (
                 title, type, positions, description, requirements,
@@ -520,7 +554,7 @@ router.post('/admin', [
             ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
             [
                 title, type, parseInt(positions) || 1, description, requirements,
-                contact_info, deadline, status, is_featured ? 1 : 0
+                contact_info, mysqlDeadline, normalizedStatus, is_featured ? 1 : 0
             ]
         );
 
@@ -573,6 +607,16 @@ router.put('/admin/:id', [
             attachment_url = `/uploads/recruitment/${req.file.filename}`;
         }
 
+        // 规范化与过期自动关闭
+        const mysqlDeadline = toMySQLDateTime(deadline) ?? existingRecruitment[0].deadline;
+        let normalizedStatus = status === 'active' ? 'open' : (status || existingRecruitment[0].status);
+        if (normalizedStatus === 'open' && mysqlDeadline) {
+            const deadlineDate = new Date(String(mysqlDeadline).replace(' ', 'T'));
+            if (!isNaN(deadlineDate.getTime()) && deadlineDate.getTime() < Date.now()) {
+                normalizedStatus = 'closed';
+            }
+        }
+
         await db.query(
             `UPDATE recruitment SET 
              title = ?, type = ?, positions = ?, description = ?, requirements = ?,
@@ -581,7 +625,7 @@ router.put('/admin/:id', [
              WHERE id = ?`,
             [
                 title, type, parseInt(positions) || 1, description, requirements,
-                contact_info, deadline, status, is_featured ? 1 : 0, recruitmentId
+                contact_info, mysqlDeadline, normalizedStatus, is_featured ? 1 : 0, recruitmentId
             ]
         );
 

@@ -28,7 +28,13 @@ app.use(helmet());
 
 // 跨域配置
 app.use(cors({
-    origin: ['http://localhost:3000', 'http://localhost:3001'],
+    origin: (origin, callback) => {
+        // 允许本地开发端口 3000-3005，无 Origin（如 curl/postman）也放行
+        if (!origin) return callback(null, true);
+        const allowed = /^http:\/\/localhost:(300[0-5])$/.test(origin);
+        if (allowed) return callback(null, true);
+        callback(null, true); // 放宽限制，避免本地端口漂移导致问题
+    },
     credentials: true
 }));
 

@@ -73,7 +73,7 @@ echo "🎯 启动所有服务..."
 trap 'kill $(jobs -p) 2>/dev/null' EXIT
 
 # 启动后端服务
-echo "🔧 启动后端服务 (端口: 8000)..."
+echo "🔧 启动后端服务 (端口: 5080)..."
 (cd backend && npm run dev) &
 BACKEND_PID=$!
 
@@ -81,12 +81,12 @@ BACKEND_PID=$!
 sleep 3
 
 # 启动前端服务
-echo "🖥️  启动前端服务 (端口: 3000)..."
+echo "🖥️  启动前端服务 (端口: 5173)..."
 (cd frontend && npm run dev) &
 FRONTEND_PID=$!
 
 # 启动管理端服务
-echo "⚙️  启动管理端服务 (端口: 3001)..."
+echo "⚙️  启动管理端服务 (端口: 5174)..."
 (cd admin && npm run dev) &
 ADMIN_PID=$!
 
@@ -98,9 +98,9 @@ echo ""
 echo "🎉 所有服务已启动！"
 echo ""
 echo "📍 访问地址:"
-echo "   前端网站:    http://localhost:3000"
-echo "   管理后台:    http://localhost:3001"
-echo "   后端API:     http://localhost:8000"
+echo "   前端网站:    http://localhost:5173"
+echo "   管理后台:    http://localhost:5174"
+echo "   后端API:     http://localhost:5080"
 echo ""
 echo "👤 默认管理员账号:"
 echo "   用户名: admin"

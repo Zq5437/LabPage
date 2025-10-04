@@ -9,21 +9,41 @@
     </div>
 
     <div class="container">
-      <!-- 快速导航 -->
-      <div class="quick-nav">
-        <el-button v-for="type in recruitmentTypes" :key="type.value"
-          :type="selectedType === type.value ? 'primary' : 'default'" @click="filterByType(type.value)">
-          {{ type.label }}
-        </el-button>
-        <el-button :type="selectedType === '' ? 'primary' : 'default'" @click="filterByType('')">
-          全部
-        </el-button>
+      <!-- 筛选工具栏 -->
+      <div class="filter-toolbar">
+        <div class="filter-left">
+          <el-input v-model="searchQuery" placeholder="搜索职位、导师、方向..." style="width: 300px" clearable
+            @input="handleSearch">
+            <template #prefix>
+              <el-icon>
+                <Search />
+              </el-icon>
+            </template>
+          </el-input>
+        </div>
+
+        <div class="filter-right">
+          <el-select v-model="selectedType" placeholder="选择类型" clearable style="width: 150px"
+            @change="handleFilterChange">
+            <el-option v-for="type in recruitmentTypes" :key="type.value" :label="type.label" :value="type.value" />
+          </el-select>
+
+          <el-select v-model="selectedStatus" placeholder="状态" clearable style="width: 120px"
+            @change="handleFilterChange">
+            <el-option v-for="opt in statusOptions" :key="opt.value" :label="opt.label" :value="opt.value" />
+          </el-select>
+
+          <el-select v-model="viewMode" style="width: 120px">
+            <el-option label="卡片视图" value="card" />
+            <el-option label="列表视图" value="list" />
+          </el-select>
+        </div>
       </div>
 
       <!-- 统计信息 -->
       <div class="stats-section" v-if="!loading">
         <div class="stats-item">
-          <span class="stats-number">{{ filteredRecruitments.length }}</span>
+          <span class="stats-number">{{ pagination.total }}</span>
           <span class="stats-label">个招生岗位</span>
         </div>
         <div class="stats-item">
@@ -37,81 +57,119 @@
       </div>
 
       <!-- 招生信息列表 -->
-      <div class="recruitment-list" v-loading="loading">
-        <div v-for="recruitment in filteredRecruitments" :key="recruitment.id" class="recruitment-card">
-          <div class="card-header">
-            <div class="header-left">
-              <h3 class="position-title">{{ recruitment.title }}</h3>
-              <div class="position-meta">
-                <el-tag :type="getTypeColor(recruitment.type)" size="small">
-                  {{ getTypeName(recruitment.type) }}
+      <div v-loading="loading">
+        <!-- 卡片视图 -->
+        <div v-if="viewMode === 'card'" class="recruitment-list">
+          <div v-for="recruitment in filteredRecruitments" :key="recruitment.id" class="recruitment-card">
+            <div class="card-header">
+              <div class="header-left">
+                <h3 class="position-title">{{ recruitment.title }}</h3>
+                <div class="position-meta">
+                  <el-tag :type="getTypeColor(recruitment.type)" size="small">
+                    {{ getTypeName(recruitment.type) }}
+                  </el-tag>
+                  <el-tag v-if="recruitment.is_featured" type="warning" size="small">推荐</el-tag>
+                  <span class="deadline" v-if="recruitment.deadline">
+                    截止：{{ formatDate(recruitment.deadline) }}
+                  </span>
+                  <el-tag v-if="recruitment.deadline && !isExpired(recruitment.deadline)"
+                    :type="getDeadlineTagType(recruitment.deadline)" size="small" class="time-left">
+                    剩余{{ daysUntilDeadline(recruitment.deadline) }}天
+                  </el-tag>
+                  <span class="positions" v-if="recruitment.positions">
+                    名额：{{ recruitment.positions }}人
+                  </span>
+                </div>
+              </div>
+              <div class="header-right">
+                <el-tag :type="getStatusColor(recruitment.status)" effect="dark">
+                  {{ getStatusText(recruitment.status) }}
                 </el-tag>
-                <span class="deadline" v-if="recruitment.deadline">
-                  截止：{{ formatDate(recruitment.deadline) }}
-                </span>
-                <span class="positions" v-if="recruitment.positions">
-                  名额：{{ recruitment.positions }}人
-                </span>
-              </div>
-            </div>
-            <div class="header-right">
-              <el-tag :type="getStatusColor(recruitment.status)" effect="dark">
-                {{ getStatusText(recruitment.status) }}
-              </el-tag>
-            </div>
-          </div>
-
-          <div class="card-content">
-            <p class="description">{{ recruitment.description }}</p>
-
-            <div class="requirements" v-if="recruitment.requirements">
-              <h4>申请要求</h4>
-              <div class="requirements-content">
-                {{ recruitment.requirements }}
               </div>
             </div>
 
-            <div class="details-grid">
-              <div class="detail-item" v-if="recruitment.supervisor">
-                <span class="label">导师：</span>
-                <span class="value">{{ recruitment.supervisor }}</span>
+            <div class="card-content">
+              <p class="description">{{ recruitment.description }}</p>
+
+              <div class="requirements" v-if="recruitment.requirements">
+                <h4>申请要求</h4>
+                <div class="requirements-content">
+                  {{ recruitment.requirements }}
+                </div>
               </div>
-              <div class="detail-item" v-if="recruitment.research_direction">
-                <span class="label">研究方向：</span>
-                <span class="value">{{ recruitment.research_direction }}</span>
+
+              <div class="details-grid">
+                <div class="detail-item" v-if="recruitment.supervisor">
+                  <span class="label">导师：</span>
+                  <span class="value">{{ recruitment.supervisor }}</span>
+                </div>
+                <div class="detail-item" v-if="recruitment.research_direction">
+                  <span class="label">研究方向：</span>
+                  <span class="value">{{ recruitment.research_direction }}</span>
+                </div>
+                <div class="detail-item" v-if="recruitment.degree_type">
+                  <span class="label">学位类型：</span>
+                  <span class="value">{{ recruitment.degree_type }}</span>
+                </div>
+                <div class="detail-item" v-if="recruitment.duration">
+                  <span class="label">培养周期：</span>
+                  <span class="value">{{ recruitment.duration }}</span>
+                </div>
               </div>
-              <div class="detail-item" v-if="recruitment.degree_type">
-                <span class="label">学位类型：</span>
-                <span class="value">{{ recruitment.degree_type }}</span>
-              </div>
-              <div class="detail-item" v-if="recruitment.duration">
-                <span class="label">培养周期：</span>
-                <span class="value">{{ recruitment.duration }}</span>
+
+              <div class="benefits" v-if="recruitment.benefits">
+                <h4>待遇福利</h4>
+                <div class="benefits-content">
+                  {{ recruitment.benefits }}
+                </div>
               </div>
             </div>
 
-            <div class="benefits" v-if="recruitment.benefits">
-              <h4>待遇福利</h4>
-              <div class="benefits-content">
-                {{ recruitment.benefits }}
-              </div>
+            <div class="card-actions">
+              <el-button @click="viewDetails(recruitment)">
+                查看详情
+              </el-button>
+              <el-button type="primary" :disabled="!isApplyEnabled(recruitment)" @click="applyPosition(recruitment)">
+                {{ getApplyButtonText(recruitment) }}
+              </el-button>
             </div>
           </div>
+        </div>
 
-          <div class="card-actions">
-            <el-button @click="viewDetails(recruitment)">
-              查看详情
-            </el-button>
-            <el-button type="primary" :disabled="recruitment.status !== 'active'" @click="applyPosition(recruitment)">
-              {{ recruitment.status === 'active' ? '申请职位' : '已截止' }}
-            </el-button>
+        <!-- 列表视图 -->
+        <div v-else class="recruitment-table">
+          <div v-for="recruitment in filteredRecruitments" :key="recruitment.id" class="recruitment-row">
+            <div class="row-left">
+              <h3 class="row-title">{{ recruitment.title }}</h3>
+              <div class="row-meta">
+                <el-tag size="small" :type="getTypeColor(recruitment.type)">{{ getTypeName(recruitment.type) }}</el-tag>
+                <el-tag v-if="recruitment.is_featured" size="small" type="warning">推荐</el-tag>
+                <span v-if="recruitment.deadline" class="row-deadline">截止：{{ formatDate(recruitment.deadline) }}</span>
+                <span v-if="recruitment.positions" class="row-positions">名额：{{ recruitment.positions }}人</span>
+              </div>
+              <p class="row-desc">{{ recruitment.description }}</p>
+            </div>
+            <div class="row-right">
+              <el-tag :type="getStatusColor(recruitment.status)" effect="dark">{{ getStatusText(recruitment.status)
+                }}</el-tag>
+              <el-button type="primary" size="small" :disabled="!isApplyEnabled(recruitment)"
+                @click="applyPosition(recruitment)">申请</el-button>
+              <el-button size="small" @click="viewDetails(recruitment)">详情</el-button>
+            </div>
           </div>
         </div>
 
         <!-- 空状态 -->
         <div v-if="!loading && filteredRecruitments.length === 0" class="empty-state">
-          <el-empty :description="selectedType ? '该类型暂无招生信息' : '暂无招生信息'" />
+          <el-empty description="暂无招生信息" />
         </div>
+      </div>
+
+      <!-- 分页 -->
+      <div class="pagination-container" v-if="pagination.total > 0">
+        <el-pagination v-model:current-page="pagination.page" v-model:page-size="pagination.limit"
+          :page-sizes="[6, 12, 18, 24]" :total="pagination.total" layout="total, sizes, prev, pager, next, jumper"
+          @size-change="loadRecruitments" @current-change="loadRecruitments" />
       </div>
 
       <!-- 申请流程 -->
@@ -235,9 +293,9 @@
 
       <template #footer>
         <el-button @click="detailVisible = false">关闭</el-button>
-        <el-button type="primary" :disabled="selectedRecruitment?.status !== 'open'"
+        <el-button type="primary" :disabled="!selectedRecruitment || !isApplyEnabled(selectedRecruitment)"
           @click="applyPosition(selectedRecruitment)">
-          申请职位
+          {{ selectedRecruitment ? getApplyButtonText(selectedRecruitment) : '申请职位' }}
         </el-button>
       </template>
     </el-dialog>
@@ -249,13 +307,16 @@ import { ref, reactive, computed, onMounted } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import api from '@/utils/api'
 import {
-  Phone, Message, Location
+  Phone, Message, Location, Search
 } from '@element-plus/icons-vue'
 
 // 响应式数据
 const loading = ref(false)
 const recruitments = ref([])
+const viewMode = ref('card')
 const selectedType = ref('')
+const selectedStatus = ref('')
+const searchQuery = ref('')
 const detailVisible = ref(false)
 const selectedRecruitment = ref(null)
 
@@ -265,6 +326,13 @@ const recruitmentTypes = [
   { label: '博士研究生', value: 'phd' },
   { label: '博士后', value: 'postdoc' },
   { label: '访问学者', value: 'visiting' }
+]
+
+// 状态筛选项
+const statusOptions = [
+  { label: '招生中', value: 'open' },
+  { label: '已满员', value: 'filled' },
+  { label: '已结束', value: 'closed' }
 ]
 
 // 申请流程
@@ -295,16 +363,18 @@ const applicationSteps = [
   }
 ]
 
-// 计算属性
-const filteredRecruitments = computed(() => {
-  if (!selectedType.value) {
-    return recruitments.value
-  }
-  return recruitments.value.filter(r => r.type === selectedType.value)
+// 分页信息
+const pagination = reactive({
+  page: 1,
+  limit: 12,
+  total: 0
 })
 
+// 列表直接使用服务端分页结果
+const filteredRecruitments = computed(() => recruitments.value)
+
 const availablePositions = computed(() => {
-  return recruitments.value.filter(r => r.status === 'open').length
+  return recruitments.value.filter(r => isApplyEnabled(r)).length
 })
 
 const uniqueTypes = computed(() => {
@@ -316,17 +386,24 @@ const uniqueTypes = computed(() => {
 const loadRecruitments = async () => {
   try {
     loading.value = true
-    const response = await api.get('/recruitment/list', {
-      params: {
-        sort: 'created_at',
-        order: 'DESC'
-      }
-    })
+    const params = {
+      page: pagination.page,
+      limit: pagination.limit,
+      sort: 'created_at',
+      order: 'DESC',
+      type: selectedType.value || undefined,
+      status: selectedStatus.value !== '' ? selectedStatus.value : '',
+      search: searchQuery.value || undefined
+    }
+    const response = await api.get('/recruitment/list', { params })
 
     if (response.data) {
       recruitments.value = response.data || []
-      console.log('招聘信息加载成功:', recruitments.value.length, '条记录')
-      console.log('招聘信息数据:', recruitments.value)
+    }
+    if (response.pagination) {
+      pagination.total = response.pagination.total
+      pagination.page = response.pagination.page
+      pagination.limit = response.pagination.limit
     }
   } catch (error) {
     console.error('加载招生信息失败:', error)
@@ -336,9 +413,22 @@ const loadRecruitments = async () => {
   }
 }
 
-// 按类型筛选
-const filterByType = (type) => {
-  selectedType.value = type
+// 搜索处理（防抖）
+let searchTimeout = null
+const handleSearch = () => {
+  if (searchTimeout) {
+    clearTimeout(searchTimeout)
+  }
+  searchTimeout = setTimeout(() => {
+    pagination.page = 1
+    loadRecruitments()
+  }, 500)
+}
+
+// 下拉筛选变更
+const handleFilterChange = () => {
+  pagination.page = 1
+  loadRecruitments()
 }
 
 // 查看详情
@@ -414,6 +504,7 @@ const getTypeColor = (type) => {
 const getStatusText = (status) => {
   const statusMap = {
     'open': '招生中',
+    'active': '招生中',
     'closed': '已结束',
     'filled': '已满员'
   }
@@ -424,10 +515,57 @@ const getStatusText = (status) => {
 const getStatusColor = (status) => {
   const colorMap = {
     'open': 'success',
+    'active': 'success',
     'closed': 'info',
     'filled': 'warning'
   }
   return colorMap[status] || 'default'
+}
+
+// 规范化状态值，处理后端可能返回的不同命名
+const normalizeStatus = (status) => {
+  if (status === 'active') return 'open'
+  return status
+}
+
+// 是否已过截止日期
+const isExpired = (deadline) => {
+  if (!deadline) return false
+  return new Date(deadline).getTime() < Date.now()
+}
+
+// 距截止剩余天数（向上取整）
+const daysUntilDeadline = (deadline) => {
+  if (!deadline) return null
+  const ms = new Date(deadline).getTime() - Date.now()
+  return ms > 0 ? Math.ceil(ms / (1000 * 60 * 60 * 24)) : 0
+}
+
+// 根据剩余天数给出标签颜色
+const getDeadlineTagType = (deadline) => {
+  const days = daysUntilDeadline(deadline)
+  if (days === null) return 'info'
+  if (days <= 0) return 'danger'
+  if (days <= 7) return 'warning'
+  return 'success'
+}
+
+// 是否可以申请
+const isApplyEnabled = (recruitment) => {
+  if (!recruitment) return false
+  const status = normalizeStatus(recruitment.status)
+  const noPositionsLeft = typeof recruitment.positions === 'number' && recruitment.positions <= 0
+  return status === 'open' && !isExpired(recruitment.deadline) && !noPositionsLeft
+}
+
+// 申请按钮文案
+const getApplyButtonText = (recruitment) => {
+  if (!recruitment) return '申请职位'
+  if (isExpired(recruitment.deadline)) return '已截止'
+  const status = normalizeStatus(recruitment.status)
+  if (status === 'filled') return '已满员'
+  if (!isApplyEnabled(recruitment)) return '不可申请'
+  return '申请职位'
 }
 
 // 格式化日期
@@ -450,6 +588,8 @@ onMounted(() => {
 .recruitment-page {
   min-height: 100vh;
   background: #f8f9fa;
+  /* 防止最后一个子元素的 margin-bottom 与父元素合并，导致页脚上方出现空白 */
+  padding-bottom: 50px;
 }
 
 .recruitment-header {
@@ -475,6 +615,23 @@ onMounted(() => {
   max-width: 1200px;
   margin: 0 auto;
   padding: 0 20px;
+}
+
+/* 顶部筛选工具栏 */
+.filter-toolbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin: 30px 0;
+  padding: 20px;
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.filter-right {
+  display: flex;
+  gap: 15px;
 }
 
 .quick-nav {
@@ -518,6 +675,7 @@ onMounted(() => {
   display: grid;
   gap: 20px;
   margin-bottom: 60px;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
 }
 
 .recruitment-card {
@@ -621,6 +779,10 @@ onMounted(() => {
   gap: 15px;
   padding-top: 15px;
   border-top: 1px solid #eee;
+}
+
+.time-left {
+  font-weight: 600;
 }
 
 .application-process {
@@ -801,6 +963,70 @@ onMounted(() => {
   padding: 80px 0;
 }
 
+/* 列表视图样式 */
+.recruitment-table {
+  background: white;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.recruitment-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px;
+  border-bottom: 1px solid #eee;
+}
+
+.recruitment-row:last-child {
+  border-bottom: none;
+}
+
+.row-left {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.row-title {
+  margin: 0;
+  font-size: 1.1rem;
+  color: #2c3e50;
+}
+
+.row-meta {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  color: #666;
+  font-size: 0.9rem;
+}
+
+.row-desc {
+  margin: 0;
+  color: #555;
+  font-size: 0.9rem;
+}
+
+.row-right {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
+.pagination-container {
+  display: flex;
+  justify-content: center;
+  margin: 40px 0;
+}
+
+/* 移除页面容器内最后一个区块的底部外边距，避免与页脚之间出现空隙 */
+.recruitment-page .container>*:last-child {
+  margin-bottom: 0 !important;
+}
+
 @media (max-width: 768px) {
   .recruitment-header h1 {
     font-size: 2.2rem;
@@ -813,6 +1039,20 @@ onMounted(() => {
   .quick-nav {
     flex-direction: column;
     align-items: center;
+  }
+
+  .filter-toolbar {
+    flex-direction: column;
+    gap: 15px;
+  }
+
+  .filter-right {
+    flex-direction: column;
+    width: 100%;
+  }
+
+  .filter-right .el-select {
+    width: 100% !important;
   }
 
   .stats-section {

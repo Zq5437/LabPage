@@ -190,7 +190,7 @@ CREATE TABLE IF NOT EXISTS recruitment (
     requirements TEXT COMMENT '招生要求',
     description TEXT COMMENT '详细说明',
     contact_info TEXT COMMENT '联系方式',
-    deadline DATE COMMENT '截止日期',
+    deadline DATETIME COMMENT '截止日期时间',
     status ENUM('open', 'closed', 'filled') DEFAULT 'open' COMMENT '招生状态',
     is_featured BOOLEAN DEFAULT FALSE COMMENT '是否重点推荐',
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
