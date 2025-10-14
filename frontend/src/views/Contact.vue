@@ -346,7 +346,7 @@ onMounted(() => {
 <style scoped>
 .contact-page {
   min-height: 100vh;
-  background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+  background: linear-gradient(135deg, #f8fbff 0%, #eef2ff 100%);
   position: relative;
 }
 
@@ -474,7 +474,7 @@ onMounted(() => {
 }
 
 section {
-  margin: 100px 0;
+  margin: 80px 0;
 }
 
 section h2 {
@@ -498,9 +498,22 @@ section h2 {
 
 .contact-cards {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
-  gap: 40px;
+  /* 桌面四列，平板两列，手机一列 */
+  grid-template-columns: repeat(4, 1fr);
+  gap: 24px;
   animation: fadeInUp 1s ease-out 0.6s both;
+}
+
+@media (max-width: 1200px) {
+  .contact-cards {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+@media (max-width: 992px) {
+  .contact-cards {
+    grid-template-columns: repeat(2, 1fr);
+  }
 }
 
 @keyframes fadeInUp {
@@ -516,14 +529,14 @@ section h2 {
 }
 
 .contact-card {
-  background: rgba(255, 255, 255, 0.95);
-  backdrop-filter: blur(20px);
-  padding: 50px 40px;
-  border-radius: 25px;
-  box-shadow: 0 15px 50px rgba(0, 0, 0, 0.1);
+  background: rgba(255, 255, 255, 0.98);
+  backdrop-filter: blur(16px);
+  padding: 32px 24px;
+  border-radius: 16px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
   text-align: center;
-  transition: all 0.4s ease;
-  border: 1px solid rgba(255, 255, 255, 0.8);
+  transition: transform 0.2s ease-out, box-shadow 0.2s ease-out, border-color 0.2s ease-out;
+  border: 1px solid rgba(229, 231, 235, 0.9);
   position: relative;
   overflow: hidden;
 }
@@ -536,25 +549,24 @@ section h2 {
   width: 100%;
   height: 100%;
   background: linear-gradient(90deg, transparent, rgba(102, 126, 234, 0.2), transparent);
-  transition: left 0.6s ease;
+  transition: none;
+  display: none;
 }
 
 .contact-card:hover {
-  transform: translateY(-15px) scale(1.03);
-  box-shadow: 0 25px 60px rgba(102, 126, 234, 0.3);
+  transform: translateY(-6px) scale(1.01);
+  box-shadow: 0 14px 28px rgba(102, 126, 234, 0.18);
 }
 
-.contact-card:hover::before {
-  left: 100%;
-}
+
 
 .card-glow {
   position: absolute;
   top: 50%;
   left: 50%;
-  width: 100px;
-  height: 100px;
-  background: radial-gradient(circle, rgba(102, 126, 234, 0.2) 0%, transparent 70%);
+  width: 88px;
+  height: 88px;
+  background: radial-gradient(circle, rgba(102, 126, 234, 0.12) 0%, transparent 70%);
   border-radius: 50%;
   transform: translate(-50%, -50%);
   opacity: 0;
@@ -562,22 +574,22 @@ section h2 {
 }
 
 .contact-card:hover .card-glow {
-  opacity: 1;
+  opacity: 0.35;
 }
 
 .contact-icon {
-  width: 100px;
-  height: 100px;
+  width: 72px;
+  height: 72px;
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   color: white;
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
-  margin: 0 auto 35px;
-  font-size: 2.5rem;
-  box-shadow: 0 10px 30px rgba(102, 126, 234, 0.4);
-  transition: all 0.4s ease;
+  margin: 0 auto 20px;
+  font-size: 1.6rem;
+  box-shadow: 0 8px 22px rgba(102, 126, 234, 0.35);
+  transition: all 0.3s ease;
   position: relative;
 }
 
@@ -596,8 +608,8 @@ section h2 {
 }
 
 .contact-card:hover .contact-icon {
-  transform: scale(1.15) rotate(10deg);
-  box-shadow: 0 15px 40px rgba(102, 126, 234, 0.5);
+  transform: scale(1.06);
+  box-shadow: 0 12px 32px rgba(102, 126, 234, 0.38);
 }
 
 .contact-card:hover .contact-icon::after {
@@ -606,10 +618,10 @@ section h2 {
 
 .contact-content h3 {
   color: #2c3e50;
-  margin: 0 0 20px 0;
-  font-size: 1.5rem;
-  font-weight: 800;
-  transition: color 0.3s ease;
+  margin: 0 0 6px 0;
+  font-size: 1.1rem;
+  font-weight: 700;
+  transition: color 0.2s ease;
 }
 
 .contact-card:hover .contact-content h3 {
@@ -617,11 +629,11 @@ section h2 {
 }
 
 .contact-content p {
-  color: #666;
+  color: #606266;
   margin: 0;
-  font-size: 1.1rem;
+  font-size: 0.95rem;
   line-height: 1.7;
-  transition: color 0.3s ease;
+  transition: color 0.2s ease;
 }
 
 .contact-card:hover .contact-content p {
@@ -630,12 +642,12 @@ section h2 {
 
 /* 实验室概览 */
 .lab-overview {
-  background: rgba(255, 255, 255, 0.95);
-  backdrop-filter: blur(20px);
-  border-radius: 30px;
-  padding: 70px;
-  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.1);
-  border: 1px solid rgba(255, 255, 255, 0.9);
+  background: rgba(255, 255, 255, 0.98);
+  backdrop-filter: blur(16px);
+  border-radius: 24px;
+  padding: 48px;
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.08);
+  border: 1px solid rgba(229, 231, 235, 0.9);
   animation: fadeInUp 1s ease-out 0.9s both;
   position: relative;
   overflow: hidden;
@@ -655,31 +667,31 @@ section h2 {
 
 .overview-content {
   display: grid;
-  grid-template-columns: 2fr 1fr;
-  gap: 60px;
+  grid-template-columns: 1.4fr 1fr;
+  gap: 40px;
   align-items: center;
 }
 
 .overview-text h2 {
-  font-size: 3.2rem;
-  margin: 0 0 20px 0;
+  font-size: 2.4rem;
+  margin: 0 0 12px 0;
   text-align: left;
-  font-weight: 900;
+  font-weight: 800;
 }
 
 .english-name {
   color: #666;
-  font-size: 1.3rem;
+  font-size: 1.1rem;
   font-weight: 400;
-  margin: 0 0 35px 0;
+  margin: 0 0 24px 0;
   font-style: italic;
 }
 
 .description {
   color: #555;
   line-height: 1.9;
-  font-size: 1.2rem;
-  margin-bottom: 35px;
+  font-size: 1.05rem;
+  margin-bottom: 24px;
 }
 
 .lab-details {
@@ -705,8 +717,8 @@ section h2 {
 
 .overview-image {
   width: 100%;
-  height: 350px;
-  border-radius: 20px;
+  height: 300px;
+  border-radius: 16px;
   overflow: hidden;
   background: #f5f5f5;
   position: relative;
@@ -738,14 +750,14 @@ section h2 {
   opacity: 1;
 }
 
-/* 联系表单 */
+/* 更新联系表单板块背景为更干净的白-浅蓝渐变 */
 .contact-form-section {
-  background: rgba(255, 255, 255, 0.95);
-  backdrop-filter: blur(20px);
-  border-radius: 30px;
-  padding: 70px;
-  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.1);
-  border: 1px solid rgba(255, 255, 255, 0.9);
+  background: linear-gradient(180deg, rgba(255, 255, 255, 1) 0%, rgba(242, 246, 255, 0.92) 100%);
+  backdrop-filter: blur(12px);
+  border-radius: 24px;
+  padding: 48px;
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.08);
+  border: 1px solid rgba(229, 231, 235, 0.8);
   animation: fadeInUp 1s ease-out 1.2s both;
   position: relative;
   overflow: hidden;
@@ -835,20 +847,21 @@ section h2 {
   border: 1px solid rgba(102, 126, 234, 0.1);
 }
 
+/* 轻化容器边框与阴影以配合细边风格 */
 .form-container {
-  max-width: 900px;
+  max-width: 820px;
   margin: 0 auto;
   background: #ffffff;
-  border-radius: 20px;
-  padding: 40px;
-  border: 1px solid #e0e0e0;
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+  border-radius: 16px;
+  padding: 32px;
+  border: 1px solid #e5e7eb;
+  box-shadow: 0 8px 22px rgba(0, 0, 0, 0.06);
 }
 
 .form-row {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 40px;
+  gap: 24px;
 }
 
 .form-item-half {
@@ -872,49 +885,52 @@ section h2 {
   margin-bottom: 12px;
 }
 
-:deep(.el-input__wrapper) {
-  border-radius: 8px;
-  border: 2px solid #d0d7de !important;
+/* 统一输入框（含选择框外层）的边框为细边，弱化 hover，统一 focus 外发光 */
+::deep(.el-input__wrapper) {
+  border-radius: 10px;
+  border: 1px solid #d7dde5 !important;
   background: #ffffff !important;
-  min-height: 48px;
+  min-height: 44px;
   position: relative;
   display: flex;
   align-items: center;
+  box-shadow: none !important;
 }
 
-:deep(.el-input__wrapper:hover) {
-  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.15);
+::deep(.el-input__wrapper:hover) {
+  border-color: #bfc8d8 !important;
+}
+
+::deep(.el-input__wrapper.is-focus) {
   border-color: #667eea !important;
+  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.15) !important;
 }
 
-:deep(.el-input__wrapper.is-focus) {
-  box-shadow: 0 6px 16px rgba(102, 126, 234, 0.25);
-  border-color: #667eea !important;
-}
-
-:deep(.el-textarea__inner) {
+/* 文本域与输入框风格保持一致 */
+::deep(.el-textarea__inner) {
   border-radius: 12px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-  border: 2px solid #d0d7de !important;
-  transition: all 0.3s ease;
+  box-shadow: none !important;
+  border: 1px solid #d7dde5 !important;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
   background: #ffffff !important;
   min-height: 120px;
 }
 
-:deep(.el-textarea__inner:hover) {
-  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.15);
-  border-color: #667eea !important;
+::deep(.el-textarea__inner:hover) {
+  border-color: #bfc8d8 !important;
 }
 
-:deep(.el-textarea__inner:focus) {
-  box-shadow: 0 6px 16px rgba(102, 126, 234, 0.25);
+::deep(.el-textarea__inner:focus) {
   border-color: #667eea !important;
+  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.15) !important;
 }
 
-:deep(.el-select .el-input__wrapper) {
-  border-radius: 12px;
-  border: 2px solid #d0d7de !important;
+/* 选择框外层与输入框同款细边与高度 */
+::deep(.el-select .el-input__wrapper) {
+  border-radius: 10px;
+  border: 1px solid #d7dde5 !important;
   background: #ffffff !important;
+  min-height: 44px;
 }
 
 /* 确保输入框内文字可见 */
@@ -1010,22 +1026,34 @@ section h2 {
 /* 快速链接 */
 .links-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-  gap: 30px;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 24px;
   animation: fadeInUp 1s ease-out 1.5s both;
 }
 
+@media (max-width: 1200px) {
+  .links-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+@media (max-width: 992px) {
+  .links-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
 .link-card {
-  background: rgba(255, 255, 255, 0.95);
-  backdrop-filter: blur(20px);
-  padding: 40px 30px;
-  border-radius: 20px;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+  background: rgba(255, 255, 255, 0.98);
+  backdrop-filter: blur(16px);
+  padding: 28px 22px;
+  border-radius: 16px;
+  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.08);
   text-align: center;
   text-decoration: none;
   color: inherit;
-  transition: all 0.4s ease;
-  border: 1px solid rgba(255, 255, 255, 0.8);
+  transition: all 0.3s ease;
+  border: 1px solid rgba(229, 231, 235, 0.9);
   position: relative;
   overflow: hidden;
 }
@@ -1038,17 +1066,17 @@ section h2 {
 }
 
 .link-icon {
-  width: 80px;
-  height: 80px;
+  width: 64px;
+  height: 64px;
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   color: white;
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
-  margin: 0 auto 25px;
-  font-size: 2rem;
-  transition: all 0.4s ease;
+  margin: 0 auto 16px;
+  font-size: 1.4rem;
+  transition: all 0.3s ease;
 }
 
 .link-card:hover .link-icon {
@@ -1058,10 +1086,10 @@ section h2 {
 
 .link-card h3 {
   color: #2c3e50;
-  margin: 0 0 15px 0;
-  font-size: 1.3rem;
+  margin: 0 0 8px 0;
+  font-size: 1.05rem;
   font-weight: 700;
-  transition: color 0.3s ease;
+  transition: color 0.2s ease;
 }
 
 .link-card:hover h3 {
@@ -1070,8 +1098,8 @@ section h2 {
 
 .link-card p {
   color: #666;
-  margin: 0 0 20px 0;
-  font-size: 1rem;
+  margin: 0 0 12px 0;
+  font-size: 0.95rem;
   line-height: 1.6;
 }
 
@@ -1097,12 +1125,12 @@ section h2 {
 
   .contact-cards {
     grid-template-columns: 1fr;
-    gap: 25px;
+    gap: 16px;
   }
 
   .overview-content {
     grid-template-columns: 1fr;
-    gap: 40px;
+    gap: 24px;
   }
 
   .overview-text h2 {
@@ -1111,30 +1139,30 @@ section h2 {
   }
 
   .overview-image {
-    height: 250px;
+    height: 220px;
   }
 
   .form-row {
     grid-template-columns: 1fr;
-    gap: 20px;
+    gap: 16px;
   }
 
   .links-grid {
     grid-template-columns: 1fr;
-    gap: 20px;
+    gap: 16px;
   }
 
   .lab-overview,
   .contact-form-section {
-    padding: 40px 30px;
+    padding: 28px 22px;
   }
 
   .form-container {
-    padding: 30px 20px;
+    padding: 22px 16px;
   }
 
   .form-header h2 {
-    font-size: 2.2rem;
+    font-size: 2rem;
   }
 
   .form-header h2::after {
@@ -1148,13 +1176,18 @@ section h2 {
   }
 
   .submit-button {
-    min-width: 180px;
-    padding: 16px 40px;
-    font-size: 1.1rem;
+    min-width: 160px;
+    padding: 14px 28px;
+    font-size: 1rem;
   }
 
   section h2 {
-    font-size: 2rem;
+    font-size: 1.8rem;
   }
+}
+
+/* 底部留白修复：最后一个 section 下方增加内边距并与背景渐变过渡协调 */
+.contact-page {
+  padding-bottom: 40px;
 }
 </style>
