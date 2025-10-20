@@ -13,6 +13,7 @@ CREATE TABLE IF NOT EXISTS admins (
     role ENUM('super_admin', 'admin') DEFAULT 'admin' COMMENT '角色',
     status ENUM('active', 'inactive') DEFAULT 'active' COMMENT '状态',
     last_login TIMESTAMP NULL COMMENT '最后登录时间',
+    avatar VARCHAR(500) COMMENT '头像图片路径',
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 ) COMMENT='管理员表';
@@ -31,6 +32,7 @@ CREATE TABLE IF NOT EXISTS lab_info (
     logo VARCHAR(500) COMMENT 'Logo图片路径',
     banner VARCHAR(500) COMMENT '横幅图片路径',
     established_year YEAR COMMENT '成立年份',
+    introduction TEXT COMMENT '实验室详细介绍',
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 ) COMMENT='实验室基本信息表';
@@ -150,6 +152,7 @@ CREATE TABLE IF NOT EXISTS research_areas (
     name VARCHAR(100) NOT NULL COMMENT '研究方向名称',
     name_en VARCHAR(100) COMMENT '英文名称',
     description TEXT COMMENT '方向描述',
+    keywords VARCHAR(500) COMMENT '关键词',
     icon VARCHAR(500) COMMENT '图标路径',
     cover_image VARCHAR(500) COMMENT '封面图片',
     sort_order INT DEFAULT 0 COMMENT '排序权重',

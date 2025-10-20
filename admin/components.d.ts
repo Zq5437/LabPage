@@ -55,7 +55,6 @@ declare module 'vue' {
     RecentNewsList: typeof import('./src/components/dashboard/RecentNewsList.vue')['default']
     RouterLink: typeof import('vue-router')['RouterLink']
     RouterView: typeof import('vue-router')['RouterView']
-    TodoList: typeof import('./src/components/dashboard/TodoList.vue')['default']
     VisitTrendChart: typeof import('./src/components/charts/VisitTrendChart.vue')['default']
   }
   export interface ComponentCustomProperties {
