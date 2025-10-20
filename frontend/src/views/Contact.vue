@@ -40,7 +40,7 @@
           <div class="overview-text" data-aos="fade-right">
             <h2 data-aos="fade-up">{{ labInfo.name }}</h2>
             <h3 v-if="labInfo.name_en" class="english-name" data-aos="fade-up" data-aos-delay="100">{{ labInfo.name_en
-              }}</h3>
+            }}</h3>
             <div class="description" data-aos="fade-up" data-aos-delay="200">
               {{ labInfo.description || '暂无实验室描述信息' }}
             </div>

@@ -1,42 +1,25 @@
 <template>
   <div class="research-page">
-    <!-- 背景装饰元素 -->
-    <div class="bg-decorations">
-      <div class="bg-circle bg-circle-1"></div>
-      <div class="bg-circle bg-circle-2"></div>
-      <div class="bg-circle bg-circle-3"></div>
-      <div class="bg-wave bg-wave-1"></div>
-      <div class="bg-wave bg-wave-2"></div>
-    </div>
-
     <!-- 页面头部 - 带动态背景 -->
     <div class="research-header">
       <div class="header-background">
-        <div class="animated-shapes">
-          <div class="shape shape-1"></div>
-          <div class="shape shape-2"></div>
-          <div class="shape shape-3"></div>
-          <div class="shape shape-4"></div>
-        </div>
+        <div class="gradient-orb orb-1"></div>
+        <div class="gradient-orb orb-2"></div>
+        <div class="gradient-orb orb-3"></div>
       </div>
       <div class="container">
         <div class="header-content">
-          <div class="header-icon">
-            <el-icon>
-              <TrendCharts />
-            </el-icon>
-          </div>
-          <h1>研究方向</h1>
-          <p class="subtitle">探索前沿科技，引领学术创新</p>
-          <div class="header-divider"></div>
-          <p class="description">致力于突破性研究，推动科技进步与产业创新</p>
+          <div class="hero-badge" data-aos="fade-down">探索 · 创新 · 突破</div>
+          <h1 data-aos="fade-up" data-aos-delay="100">研究方向</h1>
+          <p class="subtitle" data-aos="fade-up" data-aos-delay="200">探索前沿科技，引领学术创新</p>
+          <p class="description" data-aos="fade-up" data-aos-delay="300">致力于突破性研究，推动科技进步与产业创新</p>
         </div>
       </div>
     </div>
 
     <div class="container">
       <!-- 搜索与过滤区域 -->
-      <div class="search-section">
+      <div class="search-section" data-aos="fade-up">
         <div class="search-wrapper">
           <el-input v-model="searchQuery" placeholder="搜索研究方向、关键词..." size="large" clearable @input="handleSearch">
             <template #prefix>
@@ -54,8 +37,8 @@
 
       <!-- 统计信息卡片 -->
       <div class="stats-overview" v-if="!loading">
-        <div class="stats-item stats-item-1">
-          <div class="stats-icon">
+        <div class="stats-item stats-item-1" data-aos="fade-up" data-aos-delay="100">
+          <div class="stats-icon" data-aos="zoom-in" data-aos-delay="300">
             <el-icon>
               <TrendCharts />
             </el-icon>
@@ -66,8 +49,8 @@
           </div>
           <div class="stats-decoration"></div>
         </div>
-        <div class="stats-item stats-item-2">
-          <div class="stats-icon">
+        <div class="stats-item stats-item-2" data-aos="fade-up" data-aos-delay="200">
+          <div class="stats-icon" data-aos="zoom-in" data-aos-delay="400">
             <el-icon>
               <DataAnalysis />
             </el-icon>
@@ -78,8 +61,8 @@
           </div>
           <div class="stats-decoration"></div>
         </div>
-        <div class="stats-item stats-item-3">
-          <div class="stats-icon">
+        <div class="stats-item stats-item-3" data-aos="fade-up" data-aos-delay="300">
+          <div class="stats-icon" data-aos="zoom-in" data-aos-delay="500">
             <el-icon>
               <Compass />
             </el-icon>
@@ -94,15 +77,15 @@
 
       <!-- 研究方向列表 -->
       <div class="research-areas" v-loading="loading">
-        <div v-for="(area, index) in filteredAreas" :key="area.id" class="research-area-card"
-          :class="{ 'animate-in': true }" :style="{ animationDelay: `${index * 0.1}s` }">
+        <div v-for="(area, index) in filteredAreas" :key="area.id" class="research-area-card" data-aos="fade-up"
+          :data-aos-delay="index * 100">
 
           <!-- 卡片标记 -->
-          <div class="card-badge">
+          <div class="card-badge" data-aos="fade-right" :data-aos-delay="index * 100 + 200">
             <span>NO.{{ index + 1 }}</span>
           </div>
 
-          <div class="area-image">
+          <div class="area-image" data-aos="zoom-in" :data-aos-delay="index * 100 + 300">
             <img v-if="area.image_url" :src="area.image_url" :alt="area.title"
               @error="e => handleImageError(e, area)" />
             <img v-else :src="getPlaceholderImage(index)" :alt="area.title" class="placeholder-image" />
@@ -170,16 +153,17 @@
 
       <!-- 研究亮点部分 - 增强版 -->
       <div v-if="!searchQuery && researchAreas.length > 0" class="research-highlights">
-        <div class="section-header">
+        <div class="section-header" data-aos="fade-up">
           <div class="section-decoration"></div>
           <h2>🌟 研究亮点</h2>
           <div class="section-decoration"></div>
         </div>
-        <p class="section-subtitle">聚焦核心研究领域，突破关键技术难题</p>
+        <p class="section-subtitle" data-aos="fade-up" data-aos-delay="100">聚焦核心研究领域，突破关键技术难题</p>
 
         <div class="highlights-grid">
           <div v-for="(area, idx) in (researchAreas || []).slice(0, 3)" :key="`highlight-${area.id}`"
-            class="highlight-card" :class="`highlight-card-${idx + 1}`">
+            class="highlight-card" :class="`highlight-card-${idx + 1}`" data-aos="fade-up"
+            :data-aos-delay="idx * 100 + 200">
             <div class="highlight-number">{{ idx + 1 }}</div>
             <div class="highlight-icon">
               <el-icon>
@@ -563,139 +547,16 @@ onMounted(() => {
 <style scoped>
 .research-page {
   min-height: 100vh;
-  background: linear-gradient(180deg, #f8f9fa 0%, #e9ecef 100%);
+  background: linear-gradient(180deg, #f8fafb 0%, #ffffff 100%);
   position: relative;
   overflow-x: hidden;
-}
-
-.research-page::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background-image:
-    radial-gradient(circle at 20% 50%, rgba(102, 126, 234, 0.03) 0%, transparent 50%),
-    radial-gradient(circle at 80% 80%, rgba(118, 75, 162, 0.03) 0%, transparent 50%),
-    radial-gradient(circle at 40% 90%, rgba(79, 172, 254, 0.03) 0%, transparent 50%);
-  pointer-events: none;
-}
-
-.research-page::after {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background-image:
-    url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23667eea' fill-opacity='0.02'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
-  opacity: 0.4;
-  pointer-events: none;
-}
-
-/* 背景装饰元素 */
-.bg-decorations {
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  overflow: hidden;
-  pointer-events: none;
-  z-index: 0;
-}
-
-.bg-circle {
-  position: absolute;
-  border-radius: 50%;
-  opacity: 0.05;
-  animation: floatCircle 30s infinite ease-in-out;
-}
-
-.bg-circle-1 {
-  width: 400px;
-  height: 400px;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  top: 20%;
-  left: -100px;
-  animation-delay: 0s;
-}
-
-.bg-circle-2 {
-  width: 300px;
-  height: 300px;
-  background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
-  top: 60%;
-  right: -80px;
-  animation-delay: 10s;
-}
-
-.bg-circle-3 {
-  width: 250px;
-  height: 250px;
-  background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
-  bottom: 10%;
-  left: 40%;
-  animation-delay: 20s;
-}
-
-@keyframes floatCircle {
-
-  0%,
-  100% {
-    transform: translate(0, 0) scale(1);
-  }
-
-  33% {
-    transform: translate(30px, -30px) scale(1.1);
-  }
-
-  66% {
-    transform: translate(-20px, 20px) scale(0.9);
-  }
-}
-
-.bg-wave {
-  position: absolute;
-  left: 0;
-  width: 100%;
-  height: 200px;
-  opacity: 0.03;
-}
-
-.bg-wave-1 {
-  top: 30%;
-  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1200 120' preserveAspectRatio='none'%3E%3Cpath d='M321.39,56.44c58-10.79,114.16-30.13,172-41.86,82.39-16.72,168.19-17.73,250.45-.39C823.78,31,906.67,72,985.66,92.83c70.05,18.48,146.53,26.09,214.34,3V0H0V27.35A600.21,600.21,0,0,0,321.39,56.44Z' fill='%23667eea'/%3E%3C/svg%3E") no-repeat;
-  background-size: cover;
-  animation: waveMove 20s ease-in-out infinite;
-}
-
-.bg-wave-2 {
-  bottom: 20%;
-  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1200 120' preserveAspectRatio='none'%3E%3Cpath d='M985.66,92.83C906.67,72,823.78,31,743.84,14.19c-82.26-17.34-168.06-16.33-250.45.39-57.84,11.73-114,31.07-172,41.86A600.21,600.21,0,0,1,0,27.35V120H1200V95.8C1132.19,118.92,1055.71,111.31,985.66,92.83Z' fill='%23764ba2'/%3E%3C/svg%3E") no-repeat;
-  background-size: cover;
-  animation: waveMove 25s ease-in-out infinite reverse;
-}
-
-@keyframes waveMove {
-
-  0%,
-  100% {
-    transform: translateX(0) scaleX(1);
-  }
-
-  50% {
-    transform: translateX(-50px) scaleX(1.05);
-  }
 }
 
 /* 页面头部样式 */
 .research-header {
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   color: white;
-  padding: 100px 0 80px;
+  padding: 120px 0 100px;
   text-align: center;
   position: relative;
   overflow: hidden;
@@ -708,109 +569,98 @@ onMounted(() => {
   right: 0;
   bottom: 0;
   overflow: hidden;
+  opacity: 0.15;
 }
 
-.animated-shapes {
+.gradient-orb {
   position: absolute;
-  width: 100%;
-  height: 100%;
-}
-
-.shape {
-  position: absolute;
-  background: rgba(255, 255, 255, 0.1);
   border-radius: 50%;
+  filter: blur(60px);
   animation: float 20s infinite ease-in-out;
 }
 
-.shape-1 {
-  width: 300px;
-  height: 300px;
-  top: -150px;
+.orb-1 {
+  width: 400px;
+  height: 400px;
+  background: #fff;
+  top: -200px;
   left: -100px;
   animation-delay: 0s;
 }
 
-.shape-2 {
-  width: 200px;
-  height: 200px;
+.orb-2 {
+  width: 300px;
+  height: 300px;
+  background: #4facfe;
   top: 50%;
-  right: -50px;
-  animation-delay: 5s;
+  right: -150px;
+  animation-delay: 7s;
 }
 
-.shape-3 {
-  width: 150px;
-  height: 150px;
-  bottom: -75px;
-  left: 30%;
-  animation-delay: 10s;
-}
-
-.shape-4 {
-  width: 250px;
-  height: 250px;
-  top: 20%;
-  right: 20%;
-  animation-delay: 15s;
+.orb-3 {
+  width: 350px;
+  height: 350px;
+  background: #f093fb;
+  bottom: -150px;
+  left: 50%;
+  animation-delay: 14s;
 }
 
 @keyframes float {
 
   0%,
   100% {
-    transform: translate(0, 0) rotate(0deg);
+    transform: translate(0, 0) scale(1);
   }
 
-  25% {
-    transform: translate(20px, -20px) rotate(90deg);
+  33% {
+    transform: translate(30px, -50px) scale(1.1);
   }
 
-  50% {
-    transform: translate(-20px, 20px) rotate(180deg);
-  }
-
-  75% {
-    transform: translate(20px, 20px) rotate(270deg);
+  66% {
+    transform: translate(-20px, 20px) scale(0.9);
   }
 }
 
 .header-content {
   position: relative;
-  z-index: 2;
+  z-index: 1;
 }
 
-.header-icon {
-  font-size: 4rem;
-  margin-bottom: 20px;
-  animation: bounce 2s infinite;
-}
-
-@keyframes bounce {
-
-  0%,
-  100% {
-    transform: translateY(0);
-  }
-
-  50% {
-    transform: translateY(-10px);
-  }
+.hero-badge {
+  display: inline-block;
+  padding: 8px 24px;
+  background: rgba(255, 255, 255, 0.2);
+  backdrop-filter: blur(10px);
+  border-radius: 50px;
+  font-size: 0.9rem;
+  font-weight: 500;
+  letter-spacing: 2px;
+  margin-bottom: 24px;
+  border: 1px solid rgba(255, 255, 255, 0.3);
 }
 
 .research-header h1 {
   font-size: 3.5rem;
-  margin: 0 0 20px 0;
+  margin: 0 0 16px 0;
   font-weight: 800;
-  letter-spacing: 2px;
-  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
+  letter-spacing: -1px;
 }
 
 .research-header .subtitle {
   font-size: 1.5rem;
-  margin: 0 0 20px 0;
+  margin: 0 0 12px 0;
   opacity: 0.95;
   font-weight: 300;
+}
+
+.research-header .description {
+  font-size: 1.1rem;
+  margin: 0;
+  opacity: 0.85;
+  max-width: 600px;
+  margin-left: auto;
+  margin-right: auto;
 }
 
 .header-divider {
