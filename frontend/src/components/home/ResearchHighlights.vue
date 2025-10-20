@@ -1,53 +1,48 @@
 <template>
-  <section class="researchhighlights-section" ref="sectionRef">
+  <section class="researchhighlights-section">
     <div class="container">
       <div class="section-header" data-aos="fade-up">
-        <div class="header-content">
-          <h2>研究方向</h2>
-          <p class="header-subtitle">探索前沿科技，推动创新发展</p>
-        </div>
-        <router-link to="/research" class="more-link hover-scale">
-          查看全部
-          <span class="arrow">→</span>
-        </router-link>
+        <h2>研究方向</h2>
+        <p class="header-subtitle">探索前沿科技，推动创新发展</p>
       </div>
 
-      <div class="areas-list">
+      <div class="areas-showcase">
         <div v-for="(area, index) in areasToShow" :key="area.id" class="area-item"
-          :class="{ 'reverse': index % 2 === 1 }" :data-aos="index % 2 === 0 ? 'fade-right' : 'fade-left'"
-          :data-aos-delay="index * 100">
-          <div class="area-media">
-            <div class="media-wrapper hover-scale">
+          :class="{ 'reverse': index % 2 === 1 }" data-aos="fade-up">
+          <div class="item-media" data-aos="fade-right" :data-aos-delay="index * 100">
+            <div class="media-wrapper">
               <img v-if="area.cover_image" :src="area.cover_image" :alt="area.name" class="area-image" />
               <div v-else class="default-image">
                 <span class="icon" v-if="area.icon">{{ area.icon }}</span>
                 <span v-else>🔬</span>
               </div>
             </div>
-            <div class="number-badge" data-aos="zoom-in" :data-aos-delay="index * 100 + 200">
-              {{ String(index + 1).padStart(2, '0') }}
-            </div>
           </div>
 
-          <div class="area-content">
+          <div class="item-content" data-aos="fade-left" :data-aos-delay="index * 100 + 100">
             <div class="content-inner">
-              <h3 class="area-title" data-aos="fade-up" :data-aos-delay="index * 100 + 300">{{ area.name }}</h3>
-              <p class="area-description" data-aos="fade-up" :data-aos-delay="index * 100 + 400">{{ area.description }}
-              </p>
-              <div class="area-actions" data-aos="fade-up" :data-aos-delay="index * 100 + 500">
-                <router-link :to="`/research#area-${area.id}`" class="learn-more hover-scale">
-                  了解更多 <span class="arrow-icon">→</span>
-                </router-link>
+              <div class="area-tags" v-if="area.keywords">
+                <span v-for="keyword in area.keywords.split(',')" :key="keyword" class="tag">
+                  {{ keyword.trim() }}
+                </span>
               </div>
+              <h3 class="area-title">{{ area.name }}</h3>
+              <p class="area-description">{{ area.description }}</p>
+              <router-link :to="`/research#area-${area.id}`" class="learn-more">
+                了解更多 <span class="arrow-icon">→</span>
+              </router-link>
             </div>
           </div>
         </div>
       </div>
-    </div>
 
-    <!-- 装饰性背景元素 -->
-    <div class="bg-decoration decoration-1"></div>
-    <div class="bg-decoration decoration-2"></div>
+      <div class="section-footer" data-aos="fade-up">
+        <router-link to="/research" class="view-all-btn">
+          查看全部研究方向
+          <span class="btn-icon">→</span>
+        </router-link>
+      </div>
+    </div>
   </section>
 </template>
 
@@ -68,49 +63,24 @@ export default {
 }
 </script>
 
-<style scoped>
+<style lang="scss" scoped>
 .researchhighlights-section {
   padding: 100px 0;
-  background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+  background: #fff;
   position: relative;
   overflow: hidden;
-}
 
-/* 装饰性背景元素 */
-.bg-decoration {
-  position: absolute;
-  border-radius: 50%;
-  opacity: 0.1;
-  pointer-events: none;
-}
-
-.decoration-1 {
-  width: 400px;
-  height: 400px;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  top: -100px;
-  right: -100px;
-  animation: float 20s infinite ease-in-out;
-}
-
-.decoration-2 {
-  width: 300px;
-  height: 300px;
-  background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
-  bottom: -50px;
-  left: -50px;
-  animation: float 15s infinite ease-in-out reverse;
-}
-
-@keyframes float {
-
-  0%,
-  100% {
-    transform: translateY(0) rotate(0deg);
-  }
-
-  50% {
-    transform: translateY(-20px) rotate(10deg);
+  &::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 300px;
+    background: linear-gradient(180deg,
+        rgba(102, 126, 234, 0.05) 0%,
+        rgba(255, 255, 255, 0) 100%);
+    pointer-events: none;
   }
 }
 
@@ -118,307 +88,238 @@ export default {
   max-width: 1200px;
   margin: 0 auto;
   padding: 0 20px;
-  position: relative;
-  z-index: 1;
 }
 
 .section-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
+  text-align: center;
+  margin-bottom: 80px;
+
+  h2 {
+    font-size: 2.5rem;
+    font-weight: 700;
+    margin: 0 0 16px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .header-subtitle {
+    font-size: 1.2rem;
+    color: #666;
+    margin: 0;
+  }
+}
+
+.areas-showcase {
   margin-bottom: 60px;
-  opacity: 0;
-  transform: translateY(30px);
-  transition: opacity 0.8s ease, transform 0.8s ease;
-}
-
-.section-header.visible {
-  opacity: 1;
-  transform: translateY(0);
-}
-
-.header-content h2 {
-  font-size: 2.5rem;
-  margin: 0 0 8px 0;
-  color: #2c3e50;
-  font-weight: 700;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-}
-
-.header-subtitle {
-  margin: 0;
-  color: #666;
-  font-size: 1.1rem;
-}
-
-.more-link {
-  color: #667eea;
-  text-decoration: none;
-  font-size: 1.1rem;
-  font-weight: 500;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  transition: all 0.3s ease;
-  padding: 10px 20px;
-  border-radius: 25px;
-  background: rgba(102, 126, 234, 0.1);
-}
-
-.more-link:hover {
-  background: rgba(102, 126, 234, 0.2);
-  transform: translateX(5px);
-}
-
-.more-link .arrow {
-  transition: transform 0.3s ease;
-}
-
-.more-link:hover .arrow {
-  transform: translateX(5px);
-}
-
-.areas-list {
-  display: flex;
-  flex-direction: column;
-  gap: 60px;
 }
 
 .area-item {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: 1fr 1.2fr;
   gap: 60px;
   align-items: center;
-  opacity: 0;
-  transform: translateY(60px);
-  transition: opacity 0.8s cubic-bezier(0.4, 0, 0.2, 1), transform 0.8s cubic-bezier(0.4, 0, 0.2, 1);
-}
+  padding: 40px 0;
 
-.area-item.visible {
-  opacity: 1;
-  transform: translateY(0);
-}
+  &.reverse {
+    grid-template-columns: 1.2fr 1fr;
+    direction: rtl;
 
-.area-item.reverse {
-  direction: rtl;
-}
+    .item-content {
+      direction: ltr;
+    }
 
-.area-item.reverse>* {
-  direction: ltr;
-}
-
-.area-media {
-  position: relative;
-}
-
-.media-wrapper {
-  position: relative;
-  overflow: hidden;
-  border-radius: 20px;
-  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
-  transition: box-shadow 0.5s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-.area-item:hover .media-wrapper {
-  box-shadow: 0 30px 80px rgba(0, 0, 0, 0.25);
-}
-
-.area-image {
-  width: 100%;
-  height: 360px;
-  object-fit: cover;
-  display: block;
-  transition: transform 0.7s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-.area-item:hover .area-image {
-  transform: scale(1.1);
-}
-
-.default-image {
-  width: 100%;
-  height: 360px;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 4rem;
-  transition: transform 0.7s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-.area-item:hover .default-image {
-  transform: scale(1.1);
-}
-
-.number-badge {
-  position: absolute;
-  top: -15px;
-  right: -15px;
-  width: 60px;
-  height: 60px;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  color: #fff;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 1.5rem;
-  font-weight: 700;
-  box-shadow: 0 10px 30px rgba(102, 126, 234, 0.4);
-}
-
-.area-content {
-  padding: 20px;
-}
-
-.content-inner {
-  background: #fff;
-  padding: 40px;
-  border-radius: 20px;
-  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.08);
-  transition: all 0.4s ease;
-  position: relative;
-  overflow: hidden;
-}
-
-.content-inner::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 5px;
-  height: 100%;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  transform: scaleY(0);
-  transition: transform 0.4s ease;
-}
-
-.area-item:hover .content-inner::before {
-  transform: scaleY(1);
-}
-
-.area-item:hover .content-inner {
-  box-shadow: 0 15px 50px rgba(0, 0, 0, 0.15);
-}
-
-.area-title {
-  font-size: 2rem;
-  margin: 0 0 20px 0;
-  color: #2c3e50;
-  font-weight: 700;
-  line-height: 1.3;
-  position: relative;
-  padding-bottom: 15px;
-}
-
-.area-title::after {
-  content: '';
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  width: 60px;
-  height: 4px;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  border-radius: 2px;
-  transition: width 0.4s ease;
-}
-
-.area-item:hover .area-title::after {
-  width: 120px;
-}
-
-.area-description {
-  line-height: 1.9;
-  color: #555;
-  margin: 0 0 24px 0;
-  font-size: 1.05rem;
-}
-
-.area-actions {
-  margin-top: 24px;
-}
-
-.learn-more {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  color: #667eea;
-  text-decoration: none;
-  font-weight: 600;
-  font-size: 1.05rem;
-  transition: all 0.3s ease;
-  padding: 12px 24px;
-  border-radius: 25px;
-  background: rgba(102, 126, 234, 0.1);
-}
-
-.learn-more:hover {
-  background: rgba(102, 126, 234, 0.2);
-  transform: translateX(5px);
-}
-
-.arrow-icon {
-  transition: transform 0.3s ease;
-  font-size: 1.2rem;
-}
-
-.learn-more:hover .arrow-icon {
-  transform: translateX(5px);
-}
-
-@media (max-width: 968px) {
-  .area-item {
-    grid-template-columns: 1fr;
-    gap: 30px;
+    .item-media {
+      direction: ltr;
+    }
   }
 
-  .area-item.reverse {
-    direction: ltr;
+  &:not(:last-child) {
+    border-bottom: 1px solid rgba(102, 126, 234, 0.1);
+  }
+}
+
+.item-media {
+  .media-wrapper {
+    position: relative;
+    border-radius: 20px;
+    overflow: hidden;
+    box-shadow: 0 20px 40px rgba(102, 126, 234, 0.15);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+
+    &:hover {
+      transform: translateY(-10px);
+      box-shadow: 0 30px 60px rgba(102, 126, 234, 0.2);
+    }
   }
 
-  .area-image,
+  .area-image {
+    width: 100%;
+    aspect-ratio: 16/9;
+    object-fit: cover;
+    display: block;
+    transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
   .default-image {
-    height: 280px;
+    width: 100%;
+    aspect-ratio: 16/9;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 3rem;
+    color: #fff;
+  }
+}
+
+.item-content {
+  .content-inner {
+    max-width: 480px;
   }
 
-  .content-inner {
-    padding: 30px;
+  .area-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-bottom: 16px;
+
+    .tag {
+      padding: 6px 12px;
+      background: rgba(102, 126, 234, 0.1);
+      color: #667eea;
+      border-radius: 20px;
+      font-size: 0.9rem;
+      font-weight: 500;
+      transition: all 0.3s ease;
+
+      &:hover {
+        background: rgba(102, 126, 234, 0.2);
+        transform: translateY(-2px);
+      }
+    }
   }
 
   .area-title {
-    font-size: 1.6rem;
+    font-size: 1.8rem;
+    font-weight: 600;
+    margin: 0 0 16px;
+    color: #2c3e50;
+    line-height: 1.3;
+  }
+
+  .area-description {
+    font-size: 1.1rem;
+    line-height: 1.8;
+    color: #666;
+    margin-bottom: 24px;
+  }
+
+  .learn-more {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    color: #667eea;
+    text-decoration: none;
+    font-weight: 500;
+    font-size: 1rem;
+    padding: 12px 24px;
+    border-radius: 25px;
+    background: rgba(102, 126, 234, 0.1);
+    transition: all 0.3s ease;
+
+    &:hover {
+      background: rgba(102, 126, 234, 0.2);
+      transform: translateX(5px);
+
+      .arrow-icon {
+        transform: translateX(3px);
+      }
+    }
+
+    .arrow-icon {
+      transition: transform 0.3s ease;
+    }
+  }
+}
+
+.section-footer {
+  text-align: center;
+  margin-top: 40px;
+
+  .view-all-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 16px 32px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: #fff;
+    text-decoration: none;
+    border-radius: 25px;
+    font-weight: 500;
+    font-size: 1.1rem;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+
+    &:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+
+      .btn-icon {
+        transform: translateX(5px);
+      }
+    }
+
+    .btn-icon {
+      transition: transform 0.3s ease;
+    }
+  }
+}
+
+@media (max-width: 1024px) {
+  .area-item {
+    grid-template-columns: 1fr !important;
+    gap: 30px;
+    direction: ltr !important;
+    padding: 30px 0;
+
+    .item-content {
+      direction: ltr !important;
+
+      .content-inner {
+        max-width: none;
+      }
+    }
+  }
+
+  .item-media .media-wrapper {
+    max-width: 600px;
+    margin: 0 auto;
   }
 }
 
 @media (max-width: 768px) {
   .section-header {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 20px;
+    margin-bottom: 40px;
+
+    h2 {
+      font-size: 2rem;
+    }
+
+    .header-subtitle {
+      font-size: 1.1rem;
+    }
   }
 
-  .header-content h2 {
-    font-size: 2rem;
-  }
+  .item-content {
+    .area-title {
+      font-size: 1.5rem;
+    }
 
-  .areas-list {
-    gap: 40px;
-  }
-
-  .area-image,
-  .default-image {
-    height: 220px;
-  }
-
-  .number-badge {
-    width: 50px;
-    height: 50px;
-    font-size: 1.2rem;
-    top: -10px;
-    right: -10px;
+    .area-description {
+      font-size: 1rem;
+    }
   }
 }
 </style>
