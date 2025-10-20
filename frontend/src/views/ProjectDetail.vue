@@ -257,13 +257,13 @@
                 </div>
               </div>
 
-              <!-- 相关项目 -->
+              <!-- 其他项目 -->
               <div v-if="relatedProjects.length > 0" class="related-projects-card">
                 <div class="card-header">
                   <el-icon class="card-icon">
                     <Link />
                   </el-icon>
-                  <h3 class="card-title">相关项目</h3>
+                  <h3 class="card-title">其他项目</h3>
                 </div>
                 <div class="related-list">
                   <div v-for="relatedProject in relatedProjects" :key="relatedProject.id" class="related-item"
@@ -321,7 +321,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
 import {
@@ -357,12 +357,27 @@ const loading = ref(false)
 const project = ref(null)
 const relatedProjects = ref([])
 
-// 生命周期
-onMounted(() => {
+// 加载项目数据
+const loadProjectData = () => {
   const projectId = route.params.id
   if (projectId) {
     loadProjectDetail(projectId)
     loadRelatedProjects(projectId)
+  }
+}
+
+// 生命周期
+onMounted(() => {
+  loadProjectData()
+})
+
+// 监听路由变化
+watch(() => route.params.id, (newId, oldId) => {
+  if (newId && newId !== oldId) {
+    // 滚动到页面顶部
+    window.scrollTo({ top: 0, behavior: 'smooth' })
+    // 重新加载数据
+    loadProjectData()
   }
 })
 
@@ -383,7 +398,7 @@ const loadProjectDetail = async (id) => {
   }
 }
 
-// 加载相关项目
+// 加载其他项目
 const loadRelatedProjects = async (currentId) => {
   try {
     const response = await api.get('/projects', {
@@ -396,11 +411,11 @@ const loadRelatedProjects = async (currentId) => {
       relatedProjects.value = response.data.projects || []
     }
   } catch (error) {
-    console.error('加载相关项目失败:', error)
+    console.error('加载其他项目失败:', error)
   }
 }
 
-// 查看相关项目
+// 查看其他项目
 const viewRelatedProject = (relatedProject) => {
   router.push(`/projects/${relatedProject.id}`)
 }
@@ -1003,7 +1018,7 @@ const formatCurrency = (amount) => {
   color: #1f2937;
 }
 
-/* ========== 相关项目 ========== */
+/* ========== 其他项目 ========== */
 .related-list {
   display: flex;
   flex-direction: column;
@@ -1066,6 +1081,7 @@ const formatCurrency = (amount) => {
   line-height: 1.4;
   display: -webkit-box;
   -webkit-line-clamp: 2;
+  line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow: hidden;
 }

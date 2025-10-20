@@ -332,7 +332,7 @@ router.post('/logout', authenticateToken, (req, res) => {
 router.put('/profile', [
     authenticateToken,
     body('name').optional().isLength({ min: 1 }).withMessage('姓名不能为空'),
-    body('email').optional().isEmail().withMessage('邮箱格式不正确')
+    body('email').optional({ nullable: true, checkFalsy: true }).isEmail().withMessage('邮箱格式不正确')
 ], async (req, res) => {
     try {
         const errors = validationResult(req);

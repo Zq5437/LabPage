@@ -155,14 +155,31 @@
         </el-form-item>
 
         <el-form-item label="封面图片">
-          <el-upload class="cover-uploader" :action="uploadUrl" :headers="uploadHeaders" :show-file-list="false"
-            name="cover_image" :before-upload="beforeCoverUpload" :on-success="handleCoverSuccess"
-            :on-error="handleUploadError">
-            <img v-if="formData.cover_image" :src="formData.cover_image" class="cover-image" />
-            <el-icon v-else class="cover-uploader-icon">
-              <Plus />
-            </el-icon>
-          </el-upload>
+          <div class="cover-upload-container">
+            <el-upload class="cover-uploader" :action="uploadUrl" :headers="uploadHeaders" :show-file-list="false"
+              name="cover_image" :before-upload="beforeCoverUpload" :on-success="handleCoverSuccess"
+              :on-error="handleUploadError">
+              <div v-if="formData.cover_image" class="cover-preview">
+                <img :src="getCoverImageUrl(formData.cover_image)" class="cover-image" />
+                <div class="cover-mask">
+                  <el-icon class="cover-icon">
+                    <View />
+                  </el-icon>
+                  <span class="cover-text">点击重新上传</span>
+                </div>
+              </div>
+              <div v-else class="cover-upload-placeholder">
+                <el-icon class="upload-icon">
+                  <Plus />
+                </el-icon>
+                <div class="upload-text">点击上传封面</div>
+                <div class="upload-hint">支持 jpg、png、gif 格式，不超过 5MB</div>
+              </div>
+            </el-upload>
+            <div v-if="formData.cover_image" class="cover-actions">
+              <el-button type="danger" size="small" :icon="Delete" @click="removeCoverImage">删除封面</el-button>
+            </div>
+          </div>
         </el-form-item>
 
         <el-form-item label="新闻内容" prop="content">
@@ -200,7 +217,7 @@
 <script setup>
 import { ref, reactive, onMounted, computed } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
-import { Plus, Search, Edit, Delete } from '@element-plus/icons-vue'
+import { Plus, Search, Edit, Delete, View } from '@element-plus/icons-vue'
 import api from '@/utils/api'
 import { useAuthStore } from '@/stores/auth'
 
@@ -434,8 +451,29 @@ const handleCoverSuccess = (response) => {
   }
 }
 
-const handleUploadError = () => {
-  ElMessage.error('封面上传失败')
+const handleUploadError = (error) => {
+  console.error('封面上传失败:', error)
+  ElMessage.error('封面上传失败，请重试')
+}
+
+// 删除封面图片
+const removeCoverImage = () => {
+  formData.cover_image = ''
+  ElMessage.success('已删除封面图片')
+}
+
+// 获取封面图片URL
+const getCoverImageUrl = (coverImage) => {
+  if (!coverImage) return ''
+  // 如果已经是完整URL，直接返回
+  if (coverImage.startsWith('http://') || coverImage.startsWith('https://')) {
+    return coverImage
+  }
+  // 直接返回相对路径，Vite会通过代理转发到后端
+  if (coverImage.startsWith('/')) {
+    return coverImage
+  }
+  return `/${coverImage}`
 }
 
 // 工具函数
@@ -522,35 +560,110 @@ onMounted(() => {
   margin-top: 20px;
 }
 
-.cover-uploader .cover-image {
-  width: 200px;
-  height: 120px;
-  border-radius: 6px;
-  display: block;
-  object-fit: cover;
+.cover-upload-container {
+  width: 100%;
 }
 
-.cover-uploader .el-upload {
-  border: 1px dashed var(--el-border-color);
-  border-radius: 6px;
+.cover-uploader :deep(.el-upload) {
+  border: 2px dashed var(--el-border-color);
+  border-radius: 8px;
   cursor: pointer;
   position: relative;
   overflow: hidden;
-  transition: var(--el-transition-duration-fast);
-  width: 200px;
-  height: 120px;
+  transition: all 0.3s ease;
+  width: 100%;
+  max-width: 400px;
+  height: 240px;
   display: flex;
   align-items: center;
   justify-content: center;
+  background-color: #fafafa;
 }
 
-.cover-uploader .el-upload:hover {
+.cover-uploader :deep(.el-upload:hover) {
   border-color: var(--el-color-primary);
+  background-color: #f5f7fa;
 }
 
-.cover-uploader-icon {
-  font-size: 28px;
+/* 上传占位符样式 */
+.cover-upload-placeholder {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
   color: #8c939d;
+}
+
+.upload-icon {
+  font-size: 48px;
+  margin-bottom: 12px;
+  color: #c0c4cc;
+}
+
+.upload-text {
+  font-size: 14px;
+  font-weight: 500;
+  color: #606266;
+  margin-bottom: 8px;
+}
+
+.upload-hint {
+  font-size: 12px;
+  color: #909399;
+}
+
+/* 封面预览样式 */
+.cover-preview {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+}
+
+.cover-preview .cover-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.cover-mask {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.6);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  color: white;
+}
+
+.cover-preview:hover .cover-mask {
+  opacity: 1;
+}
+
+.cover-icon {
+  font-size: 32px;
+  margin-bottom: 8px;
+}
+
+.cover-text {
+  font-size: 14px;
+  font-weight: 500;
+}
+
+/* 操作按钮区域 */
+.cover-actions {
+  margin-top: 12px;
+  display: flex;
+  gap: 10px;
 }
 
 @media (max-width: 768px) {
@@ -563,6 +676,19 @@ onMounted(() => {
   .filter-right {
     width: 100%;
     justify-content: flex-start;
+  }
+
+  .cover-uploader :deep(.el-upload) {
+    max-width: 100%;
+    height: 200px;
+  }
+
+  .upload-icon {
+    font-size: 36px;
+  }
+
+  .cover-icon {
+    font-size: 28px;
   }
 }
 </style>

@@ -257,7 +257,6 @@ router.get('/admin/list', [
 router.post('/admin', [
     authenticateToken,
     requireAdmin,
-    upload.single('cover_image'),
     body('title').notEmpty().withMessage('标题不能为空'),
     body('content').notEmpty().withMessage('内容不能为空'),
     body('category').isIn(['news', 'announcement', 'achievement', 'activity']).withMessage('分类无效'),
@@ -273,8 +272,7 @@ router.post('/admin', [
             });
         }
 
-        const { title, summary, content, author, category, status = 'draft', is_top = false } = req.body;
-        const cover_image = req.file ? `/uploads/news/${req.file.filename}` : null;
+        const { title, summary, content, author, category, cover_image, status = 'draft', is_top = false } = req.body;
         const publish_time = status === 'published' ? new Date() : null;
 
         // 确保is_top为布尔值
@@ -343,7 +341,6 @@ router.post('/upload-cover', [
 router.put('/admin/:id', [
     authenticateToken,
     requireAdmin,
-    upload.single('cover_image'),
     body('title').optional().notEmpty().withMessage('标题不能为空'),
     body('content').optional().notEmpty().withMessage('内容不能为空'),
     body('category').optional().isIn(['news', 'announcement', 'achievement', 'activity']).withMessage('分类无效'),
@@ -370,14 +367,11 @@ router.put('/admin/:id', [
             });
         }
 
-        const { title, summary, content, author, category, status, is_top } = req.body;
-        let cover_image = existingNews[0].cover_image;
+        const { title, summary, content, author, category, status, is_top, cover_image } = req.body;
         let publish_time = existingNews[0].publish_time;
 
-        // 如果上传了新图片
-        if (req.file) {
-            cover_image = `/uploads/news/${req.file.filename}`;
-        }
+        // 使用提交的封面图片URL，如果没有提交则保持原值
+        const finalCoverImage = cover_image !== undefined ? cover_image : existingNews[0].cover_image;
 
         // 如果状态改为发布且之前未发布，设置发布时间
         if (status === 'published' && existingNews[0].status !== 'published') {
@@ -393,7 +387,7 @@ router.put('/admin/:id', [
              category = ?, status = ?, is_top = ?, cover_image = ?, 
              publish_time = ?, updated_at = NOW() 
              WHERE id = ?`,
-            [title, summary, content, author, category, status, isTop, cover_image, publish_time, newsId]
+            [title, summary, content, author, category, status, isTop, finalCoverImage, publish_time, newsId]
         );
 
         res.json({

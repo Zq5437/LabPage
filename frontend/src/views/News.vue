@@ -67,7 +67,7 @@
             :style="{ animationDelay: `${index * 0.1}s` }" @click="viewNewsDetail(news)">
             <div class="news-image-wrapper">
               <div class="news-image">
-                <img v-if="news.cover_image" :src="news.cover_image" :alt="news.title" @error="handleImageError" />
+                <img v-if="news.cover_image" :src="getCoverImageUrl(news.cover_image)" :alt="news.title" @error="handleImageError" />
                 <div v-else class="default-image">
                   <svg class="default-icon" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
                     <defs>
@@ -147,7 +147,7 @@
             :style="{ animationDelay: `${index * 0.05}s` }" @click="viewNewsDetail(news)">
             <div class="news-image-wrapper">
               <div class="news-image">
-                <img v-if="news.cover_image" :src="news.cover_image" :alt="news.title" @error="handleImageError" />
+                <img v-if="news.cover_image" :src="getCoverImageUrl(news.cover_image)" :alt="news.title" @error="handleImageError" />
                 <div v-else class="default-image">
                   <svg class="default-icon" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
                     <defs>
@@ -361,6 +361,20 @@ const formatDate = (dateString) => {
 // 图片加载错误处理
 const handleImageError = (e) => {
   e.target.style.display = 'none'
+}
+
+// 获取封面图片URL
+const getCoverImageUrl = (coverImage) => {
+  if (!coverImage) return ''
+  // 如果已经是完整URL，直接返回
+  if (coverImage.startsWith('http://') || coverImage.startsWith('https://')) {
+    return coverImage
+  }
+  // 直接返回相对路径，Vite会通过代理转发到后端
+  if (coverImage.startsWith('/')) {
+    return coverImage
+  }
+  return `/${coverImage}`
 }
 
 // 初始化

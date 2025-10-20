@@ -298,7 +298,12 @@ const loadPublication = async (id) => {
               } else {
                 form[key] = []
               }
-            } else {
+            }
+            // 特殊处理 year 字段：确保是字符串格式
+            else if (key === 'year' && data[key]) {
+              form[key] = String(data[key])
+            }
+            else {
               form[key] = data[key]
             }
           }

@@ -154,11 +154,9 @@ html, body {
   border-radius: 8px;
   
   .el-dialog__header {
-    background: #fafafa;
     margin: 0;
     padding: 20px 20px 15px;
     border-bottom: 1px solid var(--admin-border-lighter);
-    border-radius: 8px 8px 0 0;
     
     .el-dialog__title {
       font-size: 16px;
@@ -174,8 +172,6 @@ html, body {
   .el-dialog__footer {
     padding: 15px 20px 20px;
     border-top: 1px solid var(--admin-border-lighter);
-    background: #fafafa;
-    border-radius: 0 0 8px 8px;
   }
 }
 

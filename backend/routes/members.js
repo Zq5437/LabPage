@@ -207,7 +207,7 @@ router.post('/', [
     upload.single('avatar'),
     body('name').notEmpty().withMessage('姓名不能为空'),
     body('category').isIn(['faculty', 'postdoc', 'phd', 'master', 'undergraduate', 'alumni']).withMessage('成员类别无效'),
-    body('email').optional().isEmail().withMessage('邮箱格式不正确')
+    body('email').optional({ nullable: true, checkFalsy: true }).isEmail().withMessage('邮箱格式不正确')
 ], async (req, res) => {
     try {
         const errors = validationResult(req);
@@ -219,13 +219,27 @@ router.post('/', [
             });
         }
 
-        const {
+        let {
             name, name_en, title, category, email, phone, office, bio,
             research_interests, education, homepage, google_scholar, orcid,
             join_date, graduation_date, sort_order = 0, status = 'active'
         } = req.body;
 
         const avatar = req.file ? `/uploads/avatars/${req.file.filename}` : null;
+
+        // 处理日期格式转换（将 ISO 8601 格式转换为 MySQL DATE 格式）
+        if (join_date) {
+            const date = new Date(join_date);
+            if (!isNaN(date.getTime())) {
+                join_date = date.toISOString().split('T')[0];
+            }
+        }
+        if (graduation_date) {
+            const date = new Date(graduation_date);
+            if (!isNaN(date.getTime())) {
+                graduation_date = date.toISOString().split('T')[0];
+            }
+        }
 
         const result = await db.query(
             `INSERT INTO members (
@@ -266,7 +280,7 @@ router.put('/:id', [
     upload.single('avatar'),
     body('name').optional().notEmpty().withMessage('姓名不能为空'),
     body('category').optional().isIn(['faculty', 'postdoc', 'phd', 'master', 'undergraduate', 'alumni']).withMessage('成员类别无效'),
-    body('email').optional().isEmail().withMessage('邮箱格式不正确')
+    body('email').optional({ nullable: true, checkFalsy: true }).isEmail().withMessage('邮箱格式不正确')
 ], async (req, res) => {
     try {
         const errors = validationResult(req);
@@ -285,6 +299,18 @@ router.put('/:id', [
         if (req.file) {
             updates.avatar = `/uploads/avatars/${req.file.filename}`;
         }
+
+        // 处理日期格式转换（将 ISO 8601 格式转换为 MySQL DATE 格式）
+        const dateFields = ['join_date', 'graduation_date', 'expected_graduation_date'];
+        dateFields.forEach(field => {
+            if (updates[field]) {
+                // 如果是 ISO 8601 格式，转换为 YYYY-MM-DD
+                const date = new Date(updates[field]);
+                if (!isNaN(date.getTime())) {
+                    updates[field] = date.toISOString().split('T')[0];
+                }
+            }
+        });
 
         // 构建更新SQL
         const updateFields = Object.keys(updates).map(key => `${key} = ?`).join(', ');

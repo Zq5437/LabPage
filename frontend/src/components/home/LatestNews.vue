@@ -9,7 +9,7 @@
       <div class="news-list" v-loading="loading">
         <div v-for="item in news" :key="item.id" class="news-item" @click="goDetail(item)">
           <div class="news-media">
-            <img v-if="item.cover_image" :src="item.cover_image" :alt="item.title" class="news-image" />
+            <img v-if="item.cover_image" :src="getCoverImageUrl(item.cover_image)" :alt="item.title" class="news-image" />
             <div v-else class="default-image">📰</div>
             <div class="badge" v-if="item.is_top === 1">置顶</div>
           </div>
@@ -80,9 +80,22 @@ export default {
       return date.toLocaleDateString('zh-CN', { year: 'numeric', month: '2-digit', day: '2-digit' })
     }
 
+    const getCoverImageUrl = (coverImage) => {
+      if (!coverImage) return ''
+      // 如果已经是完整URL，直接返回
+      if (coverImage.startsWith('http://') || coverImage.startsWith('https://')) {
+        return coverImage
+      }
+      // 直接返回相对路径，Vite会通过代理转发到后端
+      if (coverImage.startsWith('/')) {
+        return coverImage
+      }
+      return `/${coverImage}`
+    }
+
     onMounted(loadNews)
 
-    return { news, loading, goDetail, getCategoryText, getCategoryTagType, formatDate }
+    return { news, loading, goDetail, getCategoryText, getCategoryTagType, formatDate, getCoverImageUrl }
   }
 }
 </script>

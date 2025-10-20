@@ -83,7 +83,7 @@
           <!-- 封面图片 -->
           <div class="article-cover-wrapper">
             <div v-if="news.cover_image" class="article-cover">
-              <img :src="news.cover_image" :alt="news.title" />
+              <img :src="getCoverImageUrl(news.cover_image)" :alt="news.title" />
               <div class="cover-overlay"></div>
             </div>
             <div v-else class="article-cover default-cover">
@@ -173,7 +173,7 @@
             <div v-for="(item, index) in relatedNews" :key="item.id" class="related-item animate-slide-up"
               :style="{ animationDelay: `${index * 0.1}s` }" @click="viewRelatedNews(item)">
               <div class="related-image">
-                <img v-if="item.cover_image" :src="item.cover_image" :alt="item.title" @error="handleImageError" />
+                <img v-if="item.cover_image" :src="getCoverImageUrl(item.cover_image)" :alt="item.title" @error="handleImageError" />
                 <div v-else class="related-default-image">
                   <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
                     <defs>
@@ -358,6 +358,20 @@ const formatContent = (content) => {
 // 图片加载错误处理
 const handleImageError = (e) => {
   e.target.style.display = 'none'
+}
+
+// 获取封面图片URL
+const getCoverImageUrl = (coverImage) => {
+  if (!coverImage) return ''
+  // 如果已经是完整URL，直接返回
+  if (coverImage.startsWith('http://') || coverImage.startsWith('https://')) {
+    return coverImage
+  }
+  // 直接返回相对路径，Vite会通过代理转发到后端
+  if (coverImage.startsWith('/')) {
+    return coverImage
+  }
+  return `/${coverImage}`
 }
 
 // 监听路由变化
