@@ -41,8 +41,6 @@ router.post('/submit', async (req, res) => {
             [name, email, phone || null, subject, message]
         );
 
-        console.log('收到新的联系留言:', { name, email, subject });
-
         res.json({
             success: true,
             message: '留言提交成功！我们会尽快回复您。'
@@ -115,8 +113,6 @@ router.get('/messages', verifyToken, verifyAdmin, async (req, res) => {
         const allowedSortFields = ['id', 'name', 'email', 'subject', 'status', 'created_at', 'updated_at', 'status_priority'];
         const sortField = allowedSortFields.includes(sortParam) ? sortParam : 'created_at';
         const sortOrder = orderParam === 'ASC' ? 'ASC' : 'DESC';
-
-        console.log('查询参数:', { page, limit, offset, sort: sortField, order: sortOrder });
 
         // 筛选条件
         let whereClause = '';

@@ -58,25 +58,25 @@ if not exist "backend\node_modules" (
     echo ✅ 所有依赖安装完成
 )
 
-:: 检查数据库配置
-if not exist "backend\config.js" (
-    echo ⚠️  警告: 未找到数据库配置文件
-    echo    请将 backend\config.example.js 复制为 backend\config.js 并修改数据库配置
-    copy "backend\config.example.js" "backend\config.js" >nul
-    echo    已创建默认配置文件，请修改其中的数据库密码
+:: 检查环境变量配置
+if not exist "backend\.env" (
+    echo ⚠️  警告: 未找到环境变量配置文件
+    echo    请将 backend\.env.example 复制为 backend\.env 并修改配置
+    copy "backend\.env.example" "backend\.env" >nul
+    echo    已创建默认配置文件，请修改 backend\.env 中的数据库密码和JWT密钥
 )
 
 echo.
-echo 📋 数据库初始化步骤：
+echo 📋 初始化步骤：
 echo    1. 确保MySQL服务已启动
-echo    2. 修改 backend\config.js 中的数据库配置
+echo    2. 修改 backend\.env 中的数据库密码和JWT密钥
 echo    3. 执行: mysql -u root -p ^< database\schema.sql
 echo.
 
 echo 🎯 启动所有服务...
 
 :: 启动后端服务
-echo 🔧 启动后端服务 (端口: 8000)...
+echo 🔧 启动后端服务 (端口: 5080)...
 cd backend
 start "后端服务" cmd /k "npm run dev"
 cd ..
@@ -85,13 +85,13 @@ cd ..
 timeout /t 3 /nobreak >nul
 
 :: 启动前端服务
-echo 🖥️  启动前端服务 (端口: 3000)...
+echo 🖥️  启动前端服务 (端口: 5173)...
 cd frontend
 start "前端服务" cmd /k "npm run dev"
 cd ..
 
 :: 启动管理端服务
-echo ⚙️  启动管理端服务 (端口: 3001)...
+echo ⚙️  启动管理端服务 (端口: 5174)...
 cd admin
 start "管理端服务" cmd /k "npm run dev"
 cd ..
@@ -104,9 +104,9 @@ echo.
 echo 🎉 所有服务已启动！
 echo.
 echo 📍 访问地址:
-echo    前端网站:    http://localhost:3000
-echo    管理后台:    http://localhost:3001
-echo    后端API:     http://localhost:8000
+echo    前端网站:    http://localhost:5173
+echo    管理后台:    http://localhost:5174
+echo    后端API:     http://localhost:5080
 echo.
 echo 👤 默认管理员账号:
 echo    用户名: admin
@@ -120,9 +120,9 @@ echo.
 
 :: 打开浏览器
 echo 🌐 正在打开浏览器...
-start http://localhost:3000
+start http://localhost:5173
 timeout /t 2 /nobreak >nul
-start http://localhost:3001
+start http://localhost:5174
 
 echo 按任意键退出启动器...
 pause >nul

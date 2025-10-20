@@ -475,10 +475,6 @@ router.post('/upload-cover', [
     upload.single('cover_image')
 ], async (req, res) => {
     try {
-        console.log('收到封面上传请求');
-        console.log('Request file:', req.file);
-        console.log('Request body:', req.body);
-
         if (!req.file) {
             return res.status(400).json({
                 success: false,
@@ -487,7 +483,6 @@ router.post('/upload-cover', [
         }
 
         const coverUrl = `/uploads/projects/${req.file.filename}`;
-        console.log('生成的封面URL:', coverUrl);
 
         res.json({
             success: true,
@@ -536,9 +531,6 @@ router.post('/admin', [
         if (req.file) {
             finalCoverImage = `/uploads/projects/${req.file.filename}`;
         }
-
-        console.log('创建项目 - 收到的封面URL:', cover_image);
-        console.log('最终使用的封面URL:', finalCoverImage);
 
         const result = await db.query(
             `INSERT INTO projects (
@@ -613,9 +605,6 @@ router.put('/admin/:id', [
         if (req.file) {
             finalCoverImage = `/uploads/projects/${req.file.filename}`;
         }
-
-        console.log('更新项目 - 收到的封面URL:', cover_image);
-        console.log('最终使用的封面URL:', finalCoverImage);
 
         await db.query(
             `UPDATE projects SET 

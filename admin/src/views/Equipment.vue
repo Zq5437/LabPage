@@ -361,7 +361,12 @@ const handleEdit = (row) => {
   // 填充表单数据
   Object.keys(form).forEach(key => {
     if (key in row) {
-      form[key] = row[key]
+      if (key === 'price' || key === 'sort_order') {
+        // 将字符串转换为数字，如果为空或无效则设为 null
+        form[key] = row[key] ? parseFloat(row[key]) : null
+      } else {
+        form[key] = row[key]
+      }
     }
   })
 

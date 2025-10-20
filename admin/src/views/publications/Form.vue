@@ -153,7 +153,33 @@
 
         <!-- 文件上传 -->
         <div class="form-section">
-          <h3>PDF文件</h3>
+          <h3>文件上传</h3>
+
+          <el-form-item label="封面图片" prop="cover_image">
+            <div class="upload-section">
+              <el-upload ref="coverUploadRef" :auto-upload="false" :show-file-list="true" :limit="1"
+                accept="image/jpeg,image/jpg,image/png,image/gif,image/webp" :on-change="handleCoverImageChange"
+                :on-remove="handleCoverImageRemove" :before-upload="beforeCoverImageUpload" list-type="picture-card">
+                <el-icon>
+                  <Plus />
+                </el-icon>
+                <template #tip>
+                  <div class="upload-tip">
+                    建议上传论文框架图、Demo图或效果图，支持 JPG、PNG、GIF、WebP 格式，不超过10MB
+                  </div>
+                </template>
+              </el-upload>
+
+              <!-- 当前封面图片显示 -->
+              <div v-if="currentCoverImage && !uploadCoverImage" class="current-cover-preview">
+                <img :src="`/uploads/publications/${currentCoverImage}`" alt="当前封面" />
+                <div class="preview-actions">
+                  <el-button type="text" @click="viewCurrentCover">查看大图</el-button>
+                  <el-button type="text" @click="removeCurrentCover">删除</el-button>
+                </div>
+              </div>
+            </div>
+          </el-form-item>
 
           <el-form-item label="PDF文件" prop="pdf_file">
             <div class="upload-section">
@@ -195,7 +221,7 @@
 import { ref, reactive, onMounted, nextTick, watch } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { ElMessage, ElMessageBox } from 'element-plus'
-import { ArrowLeft, Check, Upload, Document, InfoFilled } from '@element-plus/icons-vue'
+import { ArrowLeft, Check, Upload, Document, InfoFilled, Plus } from '@element-plus/icons-vue'
 import api from '@/utils/api'
 
 const router = useRouter()
@@ -204,11 +230,14 @@ const route = useRoute()
 // 响应式数据
 const formRef = ref()
 const uploadRef = ref()
+const coverUploadRef = ref()
 const saving = ref(false)
 const isEdit = ref(false)
 const publicationId = ref(null)
 const uploadFile = ref(null)
+const uploadCoverImage = ref(null)
 const currentPdfFile = ref('')
+const currentCoverImage = ref('')
 const allMembers = ref([])
 const membersLoading = ref(false)
 const matchResult = reactive({
@@ -303,6 +332,10 @@ const loadPublication = async (id) => {
             else if (key === 'year' && data[key]) {
               form[key] = String(data[key])
             }
+            // 特殊处理数值字段：确保是数字类型（el-input-number 组件要求）
+            else if (['impact_factor', 'citations'].includes(key) && data[key] !== null) {
+              form[key] = Number(data[key])
+            }
             else {
               form[key] = data[key]
             }
@@ -313,6 +346,11 @@ const loadPublication = async (id) => {
         if (data.pdf_path) {
           currentPdfFile.value = data.pdf_path.split('/').pop()
         }
+
+        // 处理封面图片信息
+        if (data.cover_image) {
+          currentCoverImage.value = data.cover_image.split('/').pop()
+        }
       }
     }
   } catch (error) {
@@ -322,23 +360,49 @@ const loadPublication = async (id) => {
   }
 }
 
-// 文件选择处理
+// PDF文件选择处理
 const handleFileChange = (file) => {
   uploadFile.value = file
 }
 
-// 文件移除处理
+// PDF文件移除处理
 const handleFileRemove = () => {
   uploadFile.value = null
 }
 
-// 文件上传前验证
+// PDF文件上传前验证
 const beforeUpload = (file) => {
   const isValidType = ['application/pdf', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'].includes(file.type)
   const isLt10M = file.size / 1024 / 1024 < 10
 
   if (!isValidType) {
     ElMessage.error('只能上传PDF、DOC、DOCX格式的文件!')
+    return false
+  }
+  if (!isLt10M) {
+    ElMessage.error('上传文件大小不能超过10MB!')
+    return false
+  }
+  return true
+}
+
+// 封面图片选择处理
+const handleCoverImageChange = (file) => {
+  uploadCoverImage.value = file
+}
+
+// 封面图片移除处理
+const handleCoverImageRemove = () => {
+  uploadCoverImage.value = null
+}
+
+// 封面图片上传前验证
+const beforeCoverImageUpload = (file) => {
+  const isValidType = file.type.startsWith('image/')
+  const isLt10M = file.size / 1024 / 1024 < 10
+
+  if (!isValidType) {
+    ElMessage.error('只能上传图片格式的文件!')
     return false
   }
   if (!isLt10M) {
@@ -370,6 +434,28 @@ const removeCurrentPDF = async () => {
   }
 }
 
+// 查看当前封面图片
+const viewCurrentCover = () => {
+  if (currentCoverImage.value) {
+    const url = `/uploads/publications/${currentCoverImage.value}`
+    window.open(url, '_blank')
+  }
+}
+
+// 删除当前封面图片
+const removeCurrentCover = async () => {
+  try {
+    await ElMessageBox.confirm('确定要删除当前封面图片吗？', '删除确认', {
+      confirmButtonText: '确定',
+      cancelButtonText: '取消',
+      type: 'warning'
+    })
+    currentCoverImage.value = ''
+  } catch (error) {
+    // 用户取消
+  }
+}
+
 // 保存表单
 const handleSave = async () => {
   try {
@@ -393,9 +479,14 @@ const handleSave = async () => {
       }
     })
 
-    // 添加文件
+    // 添加PDF文件
     if (uploadFile.value) {
       formData.append('pdf_file', uploadFile.value.raw)
+    }
+
+    // 添加封面图片
+    if (uploadCoverImage.value) {
+      formData.append('cover_image', uploadCoverImage.value.raw)
     }
 
     // 发送请求
@@ -651,6 +742,27 @@ onMounted(() => {
 
 :deep(.el-upload-dragger) {
   width: 100%;
+}
+
+.current-cover-preview {
+  margin-top: 15px;
+  padding: 12px;
+  background: #f5f7fa;
+  border-radius: 8px;
+  border: 1px solid #e4e7ed;
+}
+
+.current-cover-preview img {
+  max-width: 200px;
+  max-height: 200px;
+  border-radius: 4px;
+  display: block;
+  margin-bottom: 10px;
+}
+
+.preview-actions {
+  display: flex;
+  gap: 10px;
 }
 
 @media (max-width: 768px) {

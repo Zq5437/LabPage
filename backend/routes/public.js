@@ -300,11 +300,9 @@ router.get('/statistics', async (req, res) => {
 router.get('/admin/statistics', [authenticateToken, requireAdmin], async (req, res) => {
     try {
         const days = parseInt(req.query.days) || 30;
-        console.log('获取访问统计请求，days:', days);
 
         // 获取总访问量
         const totalVisitsResult = await db.query('SELECT COUNT(*) as total FROM site_statistics');
-        console.log('总访问量查询结果:', totalVisitsResult);
         const totalVisits = totalVisitsResult.length > 0 ? totalVisitsResult[0].total : 0;
 
         // 获取最近N天的访问量

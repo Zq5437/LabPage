@@ -363,6 +363,9 @@ const editProject = (project) => {
   Object.keys(formData).forEach(key => {
     if (key === 'start_date' || key === 'end_date') {
       formData[key] = project[key] ? new Date(project[key]) : ''
+    } else if (key === 'funding_amount') {
+      // 将字符串转换为数字，如果为空或无效则设为 null
+      formData[key] = project[key] ? parseFloat(project[key]) : null
     } else {
       formData[key] = project[key] || ''
     }
@@ -405,9 +408,6 @@ const saveProject = async () => {
     Object.keys(submitData).forEach(key => {
       if (submitData[key] === '') submitData[key] = null
     })
-
-    console.log('保存项目数据:', submitData)
-    console.log('封面图片URL:', submitData.cover_image)
 
     if (editingProject.value) {
       await api.put(`/projects/admin/${editingProject.value.id}`, submitData)
@@ -453,7 +453,6 @@ const deleteProject = async (project) => {
 
 // 上传处理
 const beforeCoverUpload = (file) => {
-  console.log('准备上传文件:', file)
   const isImage = file.type.startsWith('image/')
   const isLt2M = file.size / 1024 / 1024 < 2
 
@@ -471,7 +470,6 @@ const beforeCoverUpload = (file) => {
 }
 
 const handleCoverSuccess = (response) => {
-  console.log('上传成功响应:', response)
   if (response && response.success) {
     formData.cover_image = response.data.cover_url
     ElMessage.success('封面上传成功')

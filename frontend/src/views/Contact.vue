@@ -40,7 +40,7 @@
           <div class="overview-text" data-aos="fade-right">
             <h2 data-aos="fade-up">{{ labInfo.name }}</h2>
             <h3 v-if="labInfo.name_en" class="english-name" data-aos="fade-up" data-aos-delay="100">{{ labInfo.name_en
-            }}</h3>
+              }}</h3>
             <div class="description" data-aos="fade-up" data-aos-delay="200">
               {{ labInfo.description || '暂无实验室描述信息' }}
             </div>
@@ -237,13 +237,10 @@ const quickLinks = [
 const loadLabInfo = async () => {
   try {
     loading.value = true
-    console.log('开始加载实验室信息...')
     const response = await contactApi.getLabInfo()
-    console.log('实验室信息响应:', response)
 
     if (response.data) {
       labInfo.value = response.data || {}
-      console.log('实验室信息加载成功:', labInfo.value)
     } else {
       console.warn('实验室信息响应中没有data字段')
       labInfo.value = {}
@@ -263,9 +260,6 @@ const loadLabInfo = async () => {
 
 // 提交联系表单
 const submitForm = async () => {
-  console.log('contactFormRef.value:', contactFormRef.value)
-  console.log('contactFormRef类型:', typeof contactFormRef.value)
-
   if (!contactFormRef.value) {
     console.error('表单引用不存在')
     ElMessage.error('表单初始化失败，请刷新页面重试')
@@ -273,19 +267,14 @@ const submitForm = async () => {
   }
 
   try {
-    console.log('开始验证表单...')
-    console.log('validate方法存在吗:', typeof contactFormRef.value?.validate)
-
     // 使用Element Plus表单验证
     if (contactFormRef.value && typeof contactFormRef.value.validate === 'function') {
       const valid = await contactFormRef.value.validate()
       if (!valid) {
-        console.log('表单验证失败')
         return
       }
     } else {
       // 回退到手动验证
-      console.log('Element Plus表单验证不可用，使用手动验证')
       if (!contactForm.name || !contactForm.email || !contactForm.subject || !contactForm.message) {
         ElMessage.error('请填写所有必填字段')
         return
@@ -297,12 +286,10 @@ const submitForm = async () => {
       }
     }
 
-    console.log('表单验证通过，准备提交数据:', contactForm)
     submitting.value = true
 
     // 提交联系表单到后端
     const response = await contactApi.submit(contactForm)
-    console.log('提交成功，服务器响应:', response)
 
     ElMessage.success('留言发送成功！我们会尽快回复您。')
 

@@ -92,49 +92,63 @@ cd ../frontend && npm install
 cd ../admin && npm install
 ```
 
-#### 3. 数据库配置
+#### 3. 环境变量配置
+```bash
+# 复制环境变量模板文件
+cp backend/.env.example backend/.env
+
+# 编辑 backend/.env 文件，修改数据库密码等配置
+# 主要需要修改：
+# - DB_PASSWORD: 你的MySQL密码
+# - JWT_SECRET: JWT密钥（建议使用随机字符串）
+```
+
+#### 4. 数据库初始化
 ```bash
 # 1. 启动MySQL服务
 # 2. 创建数据库并导入结构
 mysql -u root -p < database/schema.sql
-
-# 3. 修改数据库配置
-cp backend/config.example.js backend/config.js
-# 编辑 backend/config.js 文件，修改数据库连接信息
 ```
 
-#### 4. 启动服务
+#### 5. 启动服务
 ```bash
-# 启动后端服务 (端口: 8000)
+# 启动后端服务 (端口: 5080)
 cd backend && npm run dev
 
-# 启动前端服务 (端口: 3000)  
+# 启动前端服务 (端口: 5173)
 cd frontend && npm run dev
 
-# 启动管理端服务 (端口: 3001)
+# 启动管理端服务 (端口: 5174)
 cd admin && npm run dev
 ```
 
 ## 🌐 访问地址
-- **前端网站**: http://localhost:3000
-- **管理后台**: http://localhost:3001  
-- **后端API**: http://localhost:8000
+- **前端网站**: http://localhost:5173
+- **管理后台**: http://localhost:5174
+- **后端API**: http://localhost:5080
 
 ## 👤 默认账号
 - **用户名**: admin
 - **密码**: admin123
 
-## 📋 数据库配置
-修改 `backend/config.js` 文件中的数据库配置：
-```javascript
-database: {
-  host: 'localhost',
-  port: 3306,
-  database: 'lab_website',
-  user: 'root',
-  password: '你的MySQL密码'  // 修改为你的密码
-}
+## 📋 环境变量配置
+创建 `backend/.env` 文件并配置以下环境变量：
+```bash
+# 数据库配置
+DB_HOST=localhost
+DB_PORT=3306
+DB_DATABASE=lab_website
+DB_USER=root
+DB_PASSWORD=你的MySQL密码  # 修改为你的实际密码
+
+# JWT配置
+JWT_SECRET=你的JWT密钥  # 建议使用长随机字符串
+
+# 服务器端口
+SERVER_PORT=5080
 ```
+
+**注意：** `.env` 文件已在 `.gitignore` 中配置，不会被提交到Git仓库
 
 ## 🔧 开发说明
 
@@ -207,7 +221,7 @@ database: {
 ## 🛠️ 故障排除
 
 ### 常见问题
-1. **端口占用**: 确保3000、3001、8000端口未被占用
+1. **端口占用**: 确保5173、5174、5080端口未被占用
 2. **数据库连接失败**: 检查MySQL服务状态和配置信息
 3. **依赖安装失败**: 尝试清除node_modules后重新安装
 4. **权限问题**: 确保有文件读写权限

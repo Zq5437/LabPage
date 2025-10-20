@@ -48,8 +48,8 @@
               <div class="avatar-wrapper">
                 <div class="avatar-ring"></div>
                 <img v-if="member.avatar" :src="member.avatar" :alt="member.name" class="avatar" />
-                <div v-else class="default-avatar">
-                  <img :src="getDefaultAvatar(member.category)" :alt="member.name" />
+                <div v-else class="default-avatar" :class="`${member.category}-default`">
+                  <span class="avatar-text">{{ getCategoryLabel(member.category) }}</span>
                 </div>
                 <div class="status-indicator" :class="member.status">
                   <span class="status-dot"></span>
@@ -473,18 +473,7 @@ const getStatusLabel = (status) => {
   return statusMap[status] || status
 }
 
-// 获取默认头像
-const getDefaultAvatar = (category) => {
-  const avatarMap = {
-    faculty: 'https://via.placeholder.com/400x400/667eea/ffffff?text=Professor',
-    postdoc: 'https://via.placeholder.com/400x400/f39c12/ffffff?text=Postdoc',
-    phd: 'https://via.placeholder.com/400x400/3498db/ffffff?text=PhD',
-    master: 'https://via.placeholder.com/400x400/9b59b6/ffffff?text=Master',
-    undergraduate: 'https://via.placeholder.com/400x400/2ecc71/ffffff?text=UG',
-    alumni: 'https://via.placeholder.com/400x400/95a5a6/ffffff?text=Alumni'
-  }
-  return avatarMap[category] || 'https://via.placeholder.com/400x400/95a5a6/ffffff?text=Member'
-}
+// 默认头像现在使用CSS渐变背景和文字，不再需要外部图片服务
 
 // 初始化
 onMounted(() => {
@@ -788,12 +777,43 @@ onMounted(() => {
   box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
   position: relative;
   z-index: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
 }
 
-.default-avatar img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
+.default-avatar .avatar-text {
+  font-size: 2rem;
+  font-weight: 700;
+  color: white;
+  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+  user-select: none;
+}
+
+/* 不同类别的默认头像颜色 */
+.faculty-default {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+}
+
+.postdoc-default {
+  background: linear-gradient(135deg, #f39c12 0%, #e67e22 100%);
+}
+
+.phd-default {
+  background: linear-gradient(135deg, #3498db 0%, #2980b9 100%);
+}
+
+.master-default {
+  background: linear-gradient(135deg, #9b59b6 0%, #8e44ad 100%);
+}
+
+.undergraduate-default {
+  background: linear-gradient(135deg, #2ecc71 0%, #27ae60 100%);
+}
+
+.alumni-default {
+  background: linear-gradient(135deg, #95a5a6 0%, #7f8c8d 100%);
 }
 
 .status-indicator {

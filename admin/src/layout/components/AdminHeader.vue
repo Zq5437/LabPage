@@ -11,7 +11,7 @@
 
       <!-- 面包屑导航 -->
       <el-breadcrumb separator="/" class="breadcrumb">
-        <el-breadcrumb-item v-for="item in breadcrumbItems" :key="item.path" :to="item.path">
+        <el-breadcrumb-item v-for="(item, index) in breadcrumbItems" :key="item.key || index" :to="item.path">
           {{ item.title }}
         </el-breadcrumb-item>
       </el-breadcrumb>
@@ -152,15 +152,17 @@ const breadcrumbItems = computed(() => {
   // 添加首页
   if (route.path !== '/dashboard') {
     items.push({
+      key: 'dashboard',
       path: '/dashboard',
       title: '首页'
     })
   }
 
   // 添加匹配的路由
-  matched.forEach(item => {
+  matched.forEach((item, index) => {
     if (item.path !== '/') {
       items.push({
+        key: item.name || `${item.path}-${index}`, // 使用路由名称或路径+索引作为唯一key
         path: item.path,
         title: item.meta.title
       })

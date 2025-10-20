@@ -111,7 +111,31 @@
             :style="{ animationDelay: `${index * 0.1}s` }">
             <!-- 左侧视觉区域 -->
             <div class="card-visual">
-              <div class="visual-placeholder">
+              <!-- 如果有封面图片，显示图片 -->
+              <div v-if="publication.cover_image_url" class="visual-image">
+                <el-image :src="publication.cover_image_url" :alt="publication.title" fit="cover"
+                  :preview-src-list="[publication.cover_image_url]" :initial-index="0" :preview-teleported="true">
+                  <template #error>
+                    <div class="image-error">
+                      <el-icon>
+                        <Picture />
+                      </el-icon>
+                      <span>加载失败</span>
+                    </div>
+                  </template>
+                </el-image>
+                <div class="image-overlay">
+                  <div class="view-hint">
+                    <el-icon>
+                      <ZoomIn />
+                    </el-icon>
+                    <span>点击查看大图</span>
+                  </div>
+                  <div class="publication-year">{{ publication.year || publication.publish_date }}</div>
+                </div>
+              </div>
+              <!-- 否则显示占位符 -->
+              <div v-else class="visual-placeholder">
                 <div class="placeholder-icon">
                   <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                     <path
@@ -119,7 +143,7 @@
                       stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
                   </svg>
                 </div>
-                <div class="publication-year">{{ new Date(publication.publish_date).getFullYear() }}</div>
+                <div class="publication-year">{{ publication.year || publication.publish_date }}</div>
               </div>
 
               <!-- 类型标签 -->
@@ -254,7 +278,7 @@ import { ref, reactive, computed, onMounted } from 'vue'
 import { ElMessage } from 'element-plus'
 import api from '@/utils/api'
 import {
-  Search, Star, Document, Link, Reading, Opportunity
+  Search, Star, Document, Link, Reading, Opportunity, Picture, ZoomIn
 } from '@element-plus/icons-vue'
 
 // 响应式数据
@@ -396,13 +420,20 @@ const getTypeLabel = (type) => {
 }
 
 // 格式化日期
-const formatDate = (date) => {
-  if (!date) return ''
-  return new Date(date).toLocaleDateString('zh-CN', {
+const formatDate = (yearOrDate) => {
+  if (!yearOrDate) return ''
+  // 如果是纯数字（年份），直接格式化
+  if (typeof yearOrDate === 'number' || /^\d{4}$/.test(String(yearOrDate))) {
+    return `${yearOrDate}年`
+  }
+  // 否则作为日期处理
+  return new Date(yearOrDate).toLocaleDateString('zh-CN', {
     year: 'numeric',
     month: 'long'
   })
 }
+
+// Element Plus的图片组件会自动处理预览，无需额外代码
 
 // 初始化
 onMounted(() => {
@@ -700,31 +731,154 @@ onMounted(() => {
 /* 卡片视觉区域 */
 .card-visual {
   position: relative;
-  width: 200px;
+  width: 280px;
+  height: 180px;
   flex-shrink: 0;
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  overflow: hidden;
+}
+
+/* 图片遮罩层 - 增强边缘对比度 */
+.card-visual:has(.visual-image)::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background:
+    linear-gradient(to bottom, rgba(0, 0, 0, 0.2) 0%, transparent 35%),
+    linear-gradient(to top, rgba(0, 0, 0, 0.15) 0%, transparent 25%),
+    linear-gradient(to right, rgba(0, 0, 0, 0.1) 0%, transparent 15%),
+    linear-gradient(to left, rgba(0, 0, 0, 0.1) 0%, transparent 15%);
+  pointer-events: none;
+  z-index: 1;
+}
+
+.visual-placeholder {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  padding: 30px 20px;
-}
-
-.visual-placeholder {
   text-align: center;
   color: white;
+  padding: 20px;
 }
 
 .placeholder-icon {
-  width: 80px;
-  height: 80px;
-  margin: 0 auto 20px;
+  width: 70px;
+  height: 70px;
+  margin: 0 auto 15px;
   opacity: 0.9;
 }
 
 .placeholder-icon svg {
   width: 100%;
   height: 100%;
+}
+
+/* 封面图片样式 */
+.visual-image {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  cursor: pointer;
+}
+
+.visual-image :deep(.el-image) {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+.visual-image :deep(.el-image__inner) {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+  transition: transform 0.3s ease;
+  display: block;
+  filter: brightness(0.95) contrast(1.05);
+}
+
+.visual-image :deep(.el-image__wrapper) {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+.publication-card:hover .visual-image :deep(.el-image__inner) {
+  transform: scale(1.05);
+}
+
+.image-error {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  gap: 10px;
+}
+
+.image-error .el-icon {
+  font-size: 2rem;
+}
+
+.image-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(to top, rgba(0, 0, 0, 0.7), transparent);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-between;
+  padding: 15px;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  pointer-events: none;
+  /* 允许点击穿透到下层的图片 */
+}
+
+.visual-image:hover .image-overlay {
+  opacity: 1;
+}
+
+.view-hint {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: white;
+  font-size: 0.9rem;
+  font-weight: 500;
+  background: rgba(0, 0, 0, 0.7);
+  padding: 8px 16px;
+  border-radius: 20px;
+  backdrop-filter: blur(10px);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+}
+
+.view-hint .el-icon {
+  font-size: 1.2rem;
+}
+
+.image-overlay .publication-year {
+  color: white;
+  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.5);
+  font-size: 1.8rem;
+  font-weight: 700;
 }
 
 .publication-year {
@@ -735,15 +889,21 @@ onMounted(() => {
 
 .type-badge {
   position: absolute;
-  top: 15px;
-  right: 15px;
-  background: rgba(255, 255, 255, 0.25);
-  color: white;
-  padding: 4px 12px;
-  border-radius: 12px;
+  top: 12px;
+  right: 12px;
+  background: rgba(255, 255, 255, 0.85);
+  color: #667eea;
+  padding: 6px 14px;
+  border-radius: 14px;
   font-size: 0.75rem;
   font-weight: 600;
-  backdrop-filter: blur(10px);
+  backdrop-filter: blur(12px) saturate(180%);
+  box-shadow:
+    0 4px 12px rgba(0, 0, 0, 0.2),
+    0 0 0 1px rgba(102, 126, 234, 0.15),
+    inset 0 1px 0 rgba(255, 255, 255, 0.8);
+  z-index: 2;
+  text-shadow: 0 1px 1px rgba(255, 255, 255, 0.5);
 }
 
 /* 卡片内容区域 */
@@ -1039,11 +1199,6 @@ onMounted(() => {
   .publication-year {
     font-size: 1.5rem;
   }
-
-  .type-badge {
-    position: static;
-    margin-left: auto;
-  }
 }
 
 @media (max-width: 768px) {
@@ -1109,6 +1264,41 @@ onMounted(() => {
     width: 100%;
     justify-content: center;
   }
+
+  .publication-card {
+    flex-direction: column;
+  }
+
+  .card-visual {
+    width: 100%;
+    height: 160px;
+    padding: 25px;
+    flex-direction: row;
+    justify-content: space-between;
+  }
+
+  .type-badge {
+    top: 10px;
+    right: 10px;
+    padding: 5px 12px;
+    font-size: 0.7rem;
+  }
+
+  .visual-placeholder {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+  }
+
+  .placeholder-icon {
+    width: 50px;
+    height: 50px;
+    margin: 0;
+  }
+
+  .publication-year {
+    font-size: 1.5rem;
+  }
 }
 
 @media (max-width: 480px) {
@@ -1130,18 +1320,33 @@ onMounted(() => {
   }
 
   .card-visual {
+    height: 140px;
     flex-direction: column;
     align-items: center;
     text-align: center;
+    padding: 15px;
   }
 
   .visual-placeholder {
     flex-direction: column;
-    gap: 15px;
+    gap: 10px;
+  }
+
+  .placeholder-icon {
+    width: 40px;
+    height: 40px;
+    margin: 0 auto 8px;
+  }
+
+  .publication-year {
+    font-size: 1.3rem;
   }
 
   .type-badge {
-    margin: 10px 0 0 0;
+    top: 10px;
+    right: 10px;
+    padding: 5px 12px;
+    font-size: 0.7rem;
   }
 }
 </style>

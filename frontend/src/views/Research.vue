@@ -547,7 +547,7 @@ const getPlaceholderImage = (index) => {
 }
 
 // 获取随机标签类型
-const tagTypes = ['', 'success', 'info', 'warning', 'danger']
+const tagTypes = ['primary', 'success', 'info', 'warning', 'danger']
 let tagIndex = 0
 const getRandomTagType = () => {
   const type = tagTypes[tagIndex % tagTypes.length]

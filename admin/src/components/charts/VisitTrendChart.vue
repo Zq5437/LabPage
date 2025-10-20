@@ -70,10 +70,7 @@ const processData = () => {
     // 优先使用传入的data，否则使用内部获取的dailyStats
     const sourceData = props.data.length > 0 ? props.data : dailyStats.value
 
-    console.log('processData - sourceData:', sourceData)
-
     if (!sourceData || sourceData.length === 0) {
-        console.log('processData - 数据为空')
         chartData.value = []
         return
     }
@@ -85,8 +82,6 @@ const processData = () => {
             ...item,
             formattedDate: formatDate(item.date)
         }))
-
-    console.log('processData - 处理后的chartData:', chartData.value)
 }
 
 // 格式化日期
@@ -97,10 +92,7 @@ const formatDate = (dateString) => {
 
 // 初始化ECharts
 const initChart = () => {
-    console.log('initChart called - container:', !!chartContainer.value, 'data length:', chartData.value.length)
-
     if (!chartContainer.value || chartData.value.length === 0) {
-        console.log('initChart - 跳过：容器不存在或数据为空')
         return
     }
 
@@ -188,19 +180,16 @@ const initChart = () => {
     }
 
     chartInstance.setOption(option)
-    console.log('initChart - ECharts图表创建完成')
 }
 
 // 监听数据变化
 watch(() => props.data, (newData) => {
-    console.log('props.data changed:', newData)
     processData()
     nextTick(() => {
         initChart()
         // 如果第一次初始化失败，延迟重试
         if (!chartInstance && chartData.value.length > 0) {
             setTimeout(() => {
-                console.log('延迟重试初始化图表')
                 initChart()
             }, 100)
         }
@@ -230,13 +219,10 @@ const handleResize = () => {
 }
 
 onMounted(() => {
-    console.log('VisitTrendChart mounted, props.data.length:', props.data.length)
-
     // 注意：由于添加了 immediate: true 的 watch，数据处理会自动触发
     // 这里只需要处理没有外部数据的情况
     if (props.data.length === 0 && props.period) {
         // 只有在没有外部数据且有period参数时才获取数据（用于Dashboard）
-        console.log('获取内部数据，period:', props.period)
         fetchData()
     }
 

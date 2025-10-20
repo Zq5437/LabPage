@@ -171,11 +171,6 @@ router.get('/admin/list', verifyToken, verifyAdmin, async (req, res) => {
 
         whereClause = conditions.length > 0 ? 'WHERE ' + conditions.join(' AND ') : '';
 
-        console.log('研究方向查询参数:', {
-            page, limit, offset, sortField, sortOrder,
-            status, search, whereClause, params
-        });
-
         // 获取总数
         const countSql = `SELECT COUNT(*) as total FROM research_areas ${whereClause}`;
         const countResult = await db.query(countSql, params);
@@ -189,9 +184,6 @@ router.get('/admin/list', verifyToken, verifyAdmin, async (req, res) => {
                         LIMIT ${parseInt(limit)} OFFSET ${parseInt(offset)}`;
 
         const dataParams = [...params];
-
-        console.log('执行SQL:', dataSql);
-        console.log('参数:', dataParams);
 
         const researchAreas = await db.query(dataSql, dataParams);
 

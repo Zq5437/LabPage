@@ -6,7 +6,6 @@ export const logPageVisit = async (pageUrl, referer = '') => {
     try {
         // 避免在开发环境记录访问
         if (import.meta.env.DEV) {
-            console.log('开发环境，跳过访问统计:', pageUrl)
             return
         }
 

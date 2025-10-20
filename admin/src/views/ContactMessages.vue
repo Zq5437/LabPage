@@ -196,20 +196,24 @@
                                         </el-icon>
                                     </el-button>
                                 </el-tooltip>
-                                <el-tooltip v-if="row.status === 'unread'" content="标记已读" placement="top">
-                                    <el-button size="small" type="primary" @click="markAsRead(row)" circle>
-                                        <el-icon>
-                                            <Check />
-                                        </el-icon>
-                                    </el-button>
-                                </el-tooltip>
-                                <el-tooltip v-else content="标记未读" placement="top">
-                                    <el-button size="small" type="warning" @click="markAsUnread(row)" circle>
-                                        <el-icon>
-                                            <Bell />
-                                        </el-icon>
-                                    </el-button>
-                                </el-tooltip>
+                                <template v-if="row.status === 'unread'">
+                                    <el-tooltip content="标记已读" placement="top">
+                                        <el-button size="small" type="primary" @click="markAsRead(row)" circle>
+                                            <el-icon>
+                                                <Check />
+                                            </el-icon>
+                                        </el-button>
+                                    </el-tooltip>
+                                </template>
+                                <template v-else>
+                                    <el-tooltip content="标记未读" placement="top">
+                                        <el-button size="small" type="warning" @click="markAsUnread(row)" circle>
+                                            <el-icon>
+                                                <Bell />
+                                            </el-icon>
+                                        </el-button>
+                                    </el-tooltip>
+                                </template>
                                 <el-tooltip content="回复留言" placement="top">
                                     <el-button size="small" type="success" @click="replyMessage(row)" circle>
                                         <el-icon>
@@ -219,13 +223,11 @@
                                 </el-tooltip>
                                 <el-popconfirm title="确定要删除这条留言吗？" @confirm="deleteMessage(row.id)">
                                     <template #reference>
-                                        <el-tooltip content="删除留言" placement="top">
-                                            <el-button size="small" type="danger" circle>
-                                                <el-icon>
-                                                    <Delete />
-                                                </el-icon>
-                                            </el-button>
-                                        </el-tooltip>
+                                        <el-button size="small" type="danger" circle>
+                                            <el-icon>
+                                                <Delete />
+                                            </el-icon>
+                                        </el-button>
                                     </template>
                                 </el-popconfirm>
                             </div>

@@ -17,7 +17,9 @@ const storage = multer.diskStorage({
     },
     filename: function (req, file, cb) {
         const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
-        cb(null, 'publication-' + uniqueSuffix + path.extname(file.originalname));
+        // 根据字段名区分文件类型
+        const prefix = file.fieldname === 'cover_image' ? 'cover-' : 'publication-';
+        cb(null, prefix + uniqueSuffix + path.extname(file.originalname));
     }
 });
 
@@ -25,6 +27,29 @@ const upload = multer({
     storage: storage,
     limits: {
         fileSize: 10 * 1024 * 1024 // 10MB限制
+    },
+    fileFilter: function (req, file, cb) {
+        // PDF文件检查
+        if (file.fieldname === 'pdf_file') {
+            const allowedTypes = /pdf|doc|docx/;
+            const extname = allowedTypes.test(path.extname(file.originalname).toLowerCase());
+            const mimetype = allowedTypes.test(file.mimetype);
+            if (extname && mimetype) {
+                return cb(null, true);
+            }
+            return cb(new Error('PDF文件只允许pdf, doc, docx格式'));
+        }
+        // 封面图片检查
+        if (file.fieldname === 'cover_image') {
+            const allowedTypes = /jpeg|jpg|png|gif|webp/;
+            const extname = allowedTypes.test(path.extname(file.originalname).toLowerCase());
+            const mimetype = /image/.test(file.mimetype);
+            if (extname && mimetype) {
+                return cb(null, true);
+            }
+            return cb(new Error('封面图片只允许 jpg, png, gif, webp 格式'));
+        }
+        cb(null, true);
     }
 });
 
@@ -84,7 +109,7 @@ router.get('/list', async (req, res) => {
         // 查询数据（将 LIMIT/OFFSET 以安全整数直接写入SQL，避免占位符导致错误）
         const dataQuery = `
       SELECT id, title, authors, member_ids, journal, volume, issue, pages, year, 
-             year as publish_date, doi, url, pdf_path, abstract, keywords, 
+             year as publish_date, doi, url, pdf_path, cover_image, abstract, keywords, 
              type, impact_factor, citations as citation_count, is_featured,
              created_at, updated_at
       FROM publications 
@@ -95,10 +120,13 @@ router.get('/list', async (req, res) => {
 
         const publications = await db.query(dataQuery, params);
 
-        // 处理PDF路径
+        // 处理PDF路径和封面图片路径
         publications.forEach(pub => {
             if (pub.pdf_path) {
                 pub.pdf_url = `/uploads/publications/${path.basename(pub.pdf_path)}`;
+            }
+            if (pub.cover_image) {
+                pub.cover_image_url = `/uploads/publications/${path.basename(pub.cover_image)}`;
             }
         });
 
@@ -191,7 +219,7 @@ router.get('/:id', async (req, res) => {
 
         const query = `
       SELECT id, title, authors, member_ids, journal, volume, issue, pages, year, doi, url, 
-             pdf_path, abstract, keywords, type, impact_factor, citations, is_featured,
+             pdf_path, cover_image, abstract, keywords, type, impact_factor, citations, is_featured,
              created_at, updated_at
       FROM publications 
       WHERE id = ?
@@ -212,6 +240,11 @@ router.get('/:id', async (req, res) => {
         // 处理PDF路径
         if (publication.pdf_path) {
             publication.pdf_url = `/uploads/publications/${path.basename(publication.pdf_path)}`;
+        }
+
+        // 处理封面图片路径
+        if (publication.cover_image) {
+            publication.cover_image_url = `/uploads/publications/${path.basename(publication.cover_image)}`;
         }
 
         res.json({
@@ -320,7 +353,10 @@ router.get('/admin/list', authenticateToken, async (req, res) => {
 });
 
 // 创建论文
-router.post('/admin/create', authenticateToken, upload.single('pdf_file'), async (req, res) => {
+router.post('/admin/create', authenticateToken, upload.fields([
+    { name: 'pdf_file', maxCount: 1 },
+    { name: 'cover_image', maxCount: 1 }
+]), async (req, res) => {
     try {
         const {
             title, authors, member_ids, journal, volume, issue, pages, year, doi, url,
@@ -337,8 +373,15 @@ router.post('/admin/create', authenticateToken, upload.single('pdf_file'), async
         }
 
         let pdf_path = null;
-        if (req.file) {
-            pdf_path = req.file.path;
+        let cover_image = null;
+
+        if (req.files) {
+            if (req.files['pdf_file'] && req.files['pdf_file'][0]) {
+                pdf_path = req.files['pdf_file'][0].path;
+            }
+            if (req.files['cover_image'] && req.files['cover_image'][0]) {
+                cover_image = req.files['cover_image'][0].path;
+            }
         }
 
         // 处理 member_ids：确保是有效的 JSON
@@ -354,13 +397,13 @@ router.post('/admin/create', authenticateToken, upload.single('pdf_file'), async
         const query = `
       INSERT INTO publications (
         title, authors, member_ids, journal, volume, issue, pages, year, doi, url,
-        pdf_path, abstract, keywords, type, impact_factor, citations, is_featured
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        pdf_path, cover_image, abstract, keywords, type, impact_factor, citations, is_featured
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     `;
 
         const values = [
             title, authors, memberIdsValue, journal || null, volume || null, issue || null,
-            pages || null, year, doi || null, url || null, pdf_path,
+            pages || null, year, doi || null, url || null, pdf_path, cover_image,
             abstract || null, keywords || null, type || 'journal',
             impact_factor || null, citations || 0, is_featured === 'true' || is_featured === true
         ];
@@ -392,7 +435,10 @@ router.post('/admin/create', authenticateToken, upload.single('pdf_file'), async
 });
 
 // 更新论文
-router.put('/admin/update/:id', authenticateToken, upload.single('pdf_file'), async (req, res) => {
+router.put('/admin/update/:id', authenticateToken, upload.fields([
+    { name: 'pdf_file', maxCount: 1 },
+    { name: 'cover_image', maxCount: 1 }
+]), async (req, res) => {
     try {
         const { id } = req.params;
         const {
@@ -422,14 +468,24 @@ router.put('/admin/update/:id', authenticateToken, upload.single('pdf_file'), as
         }
 
         let pdf_path = existing[0].pdf_path;
+        let cover_image = existing[0].cover_image;
 
         // 如果有新文件上传
-        if (req.file) {
-            // 删除旧文件
-            if (pdf_path && fs.existsSync(pdf_path)) {
-                fs.unlinkSync(pdf_path);
+        if (req.files) {
+            if (req.files['pdf_file'] && req.files['pdf_file'][0]) {
+                // 删除旧PDF文件
+                if (pdf_path && fs.existsSync(pdf_path)) {
+                    fs.unlinkSync(pdf_path);
+                }
+                pdf_path = req.files['pdf_file'][0].path;
             }
-            pdf_path = req.file.path;
+            if (req.files['cover_image'] && req.files['cover_image'][0]) {
+                // 删除旧封面图片
+                if (cover_image && fs.existsSync(cover_image)) {
+                    fs.unlinkSync(cover_image);
+                }
+                cover_image = req.files['cover_image'][0].path;
+            }
         }
 
         // 处理 member_ids：确保是有效的 JSON
@@ -445,7 +501,7 @@ router.put('/admin/update/:id', authenticateToken, upload.single('pdf_file'), as
         const updateQuery = `
       UPDATE publications SET 
         title = ?, authors = ?, member_ids = ?, journal = ?, volume = ?, issue = ?, 
-        pages = ?, year = ?, doi = ?, url = ?, pdf_path = ?,
+        pages = ?, year = ?, doi = ?, url = ?, pdf_path = ?, cover_image = ?,
         abstract = ?, keywords = ?, type = ?, impact_factor = ?, 
         citations = ?, is_featured = ?, updated_at = CURRENT_TIMESTAMP
       WHERE id = ?
@@ -453,7 +509,7 @@ router.put('/admin/update/:id', authenticateToken, upload.single('pdf_file'), as
 
         const values = [
             title, authors, memberIdsValue, journal || null, volume || null, issue || null,
-            pages || null, year, doi || null, url || null, pdf_path,
+            pages || null, year, doi || null, url || null, pdf_path, cover_image,
             abstract || null, keywords || null, type || 'journal',
             impact_factor || null, citations || 0,
             is_featured === 'true' || is_featured === true, id

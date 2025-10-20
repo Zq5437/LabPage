@@ -193,7 +193,7 @@ const userRoleText = computed(() => {
 
 // 菜单选择处理
 const handleMenuSelect = (index) => {
-  console.log('Selected menu:', index)
+  // 菜单选择事件处理
 }
 </script>
 

@@ -50,19 +50,19 @@ if [ ! -f "backend/node_modules/.package-lock.json" ] || [ ! -f "frontend/node_m
     echo "✅ 所有依赖安装完成"
 fi
 
-# 检查数据库配置
-if [ ! -f "backend/config.js" ]; then
-    echo "⚠️  警告: 未找到数据库配置文件"
-    echo "   请将 backend/config.example.js 复制为 backend/config.js 并修改数据库配置"
-    cp backend/config.example.js backend/config.js
-    echo "   已创建默认配置文件，请修改其中的数据库密码"
+# 检查环境变量配置
+if [ ! -f "backend/.env" ]; then
+    echo "⚠️  警告: 未找到环境变量配置文件"
+    echo "   请将 backend/.env.example 复制为 backend/.env 并修改配置"
+    cp backend/.env.example backend/.env
+    echo "   已创建默认配置文件，请修改 backend/.env 中的数据库密码和JWT密钥"
 fi
 
 # 提示数据库初始化
 echo ""
-echo "📋 数据库初始化步骤："
+echo "📋 初始化步骤："
 echo "   1. 确保MySQL服务已启动"
-echo "   2. 修改 backend/config.js 中的数据库配置"
+echo "   2. 修改 backend/.env 中的数据库密码和JWT密钥"
 echo "   3. 执行: mysql -u root -p < database/schema.sql"
 echo ""
 

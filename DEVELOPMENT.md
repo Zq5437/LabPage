@@ -65,9 +65,9 @@ LabPage/
 # 1. 安装依赖
 npm run install-all
 
-# 2. 配置数据库
-cp backend/config.example.js backend/config.js
-# 编辑 backend/config.js，修改数据库连接信息
+# 2. 配置环境变量
+cp backend/.env.example backend/.env
+# 编辑 backend/.env，修改数据库密码和JWT密钥
 
 # 3. 初始化数据库
 mysql -u root -p < database/schema.sql
@@ -134,14 +134,15 @@ cd admin && npm run build
 
 ## 🔐 安全配置
 
-### 1. 数据库配置安全
-- ✅ `backend/config.js` 已添加到 `.gitignore`
-- ✅ 提供了 `config.example.js` 作为模板
-- ⚠️ 生产环境请使用环境变量或更安全的配置管理
+### 1. 环境变量配置安全
+- ✅ `backend/.env` 已添加到 `.gitignore`
+- ✅ 提供了 `.env.example` 作为模板
+- ✅ 使用 dotenv 包管理环境变量
+- 🔒 敏感信息（数据库密码、JWT密钥）存储在 `.env` 中
 
 ### 2. JWT密钥
-- ⚠️ 修改 `backend/config.js` 中的 `jwt.secret`
-- 🔒 生产环境使用强随机密钥
+- ✅ 在 `backend/.env` 中配置 `JWT_SECRET`
+- 🔒 生产环境使用强随机密钥（建议32位以上）
 
 ### 3. 文件上传安全
 - ✅ 已配置文件类型限制
@@ -151,13 +152,13 @@ cd admin && npm run build
 ## 📁 文件说明
 
 ### 🔒 敏感文件（已忽略）
-- `backend/config.js` - 数据库配置
-- `backend/.env` - 环境变量
+- `backend/.env` - 环境变量（数据库密码、JWT密钥等）
 - `*/node_modules/` - 依赖包
 - `backend/uploads/*` - 用户上传文件
 
 ### 📋 配置文件
-- `backend/config.example.js` - 配置模板
+- `backend/.env.example` - 环境变量模板
+- `backend/config.js` - 配置加载文件（从环境变量读取）
 - `*/package.json` - 项目依赖配置
 - `*/vite.config.js` - 前端构建配置
 
@@ -180,8 +181,9 @@ kill -9 PID
 
 ### 2. 数据库连接失败
 - 检查MySQL服务是否启动
-- 检查 `backend/config.js` 中的数据库配置
+- 检查 `backend/.env` 中的数据库配置
 - 确认数据库 `lab_website` 已创建
+- 确认 `.env` 文件中的密码正确
 
 ### 3. 依赖安装失败
 ```bash
@@ -211,13 +213,16 @@ ls -la backend/uploads/
 - 配置数据库备份
 
 ### 2. 环境变量
+在生产环境中，请在 `backend/.env` 中配置：
 ```bash
-# 生产环境变量示例
 NODE_ENV=production
 DB_HOST=localhost
+DB_PORT=3306
+DB_DATABASE=lab_website
 DB_USER=lab_user
 DB_PASSWORD=secure_password
-JWT_SECRET=your_secure_jwt_secret
+JWT_SECRET=your_secure_random_jwt_secret_min_32_chars
+SERVER_PORT=5080
 ```
 
 ### 3. 构建部署
