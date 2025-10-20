@@ -1,37 +1,41 @@
 <template>
   <section class="researchhighlights-section" ref="sectionRef">
     <div class="container">
-      <div class="section-header" :class="{ 'visible': isVisible }">
+      <div class="section-header" data-aos="fade-up">
         <div class="header-content">
           <h2>研究方向</h2>
           <p class="header-subtitle">探索前沿科技，推动创新发展</p>
         </div>
-        <router-link to="/research" class="more-link">
+        <router-link to="/research" class="more-link hover-scale">
           查看全部
           <span class="arrow">→</span>
         </router-link>
       </div>
 
       <div class="areas-list">
-        <div v-for="(area, index) in areasToShow" :key="area.id" :ref="el => setItemRef(el, index)" class="area-item"
-          :class="{ 'reverse': index % 2 === 1, 'visible': visibleItems[index] }">
+        <div v-for="(area, index) in areasToShow" :key="area.id" class="area-item"
+          :class="{ 'reverse': index % 2 === 1 }" :data-aos="index % 2 === 0 ? 'fade-right' : 'fade-left'"
+          :data-aos-delay="index * 100">
           <div class="area-media">
-            <div class="media-wrapper">
+            <div class="media-wrapper hover-scale">
               <img v-if="area.cover_image" :src="area.cover_image" :alt="area.name" class="area-image" />
               <div v-else class="default-image">
                 <span class="icon" v-if="area.icon">{{ area.icon }}</span>
                 <span v-else>🔬</span>
               </div>
             </div>
-            <div class="number-badge">{{ String(index + 1).padStart(2, '0') }}</div>
+            <div class="number-badge" data-aos="zoom-in" :data-aos-delay="index * 100 + 200">
+              {{ String(index + 1).padStart(2, '0') }}
+            </div>
           </div>
 
           <div class="area-content">
             <div class="content-inner">
-              <h3 class="area-title">{{ area.name }}</h3>
-              <p class="area-description">{{ area.description }}</p>
-              <div class="area-actions">
-                <router-link :to="`/research#area-${area.id}`" class="learn-more">
+              <h3 class="area-title" data-aos="fade-up" :data-aos-delay="index * 100 + 300">{{ area.name }}</h3>
+              <p class="area-description" data-aos="fade-up" :data-aos-delay="index * 100 + 400">{{ area.description }}
+              </p>
+              <div class="area-actions" data-aos="fade-up" :data-aos-delay="index * 100 + 500">
+                <router-link :to="`/research#area-${area.id}`" class="learn-more hover-scale">
                   了解更多 <span class="arrow-icon">→</span>
                 </router-link>
               </div>
@@ -48,7 +52,7 @@
 </template>
 
 <script>
-import { computed, ref, onMounted, onUnmounted, reactive, nextTick, watch } from 'vue'
+import { computed } from 'vue'
 import { useSiteStore } from '@/stores/site'
 
 export default {
@@ -57,130 +61,8 @@ export default {
     const siteStore = useSiteStore()
     const areasToShow = computed(() => (siteStore.researchAreas || []).slice(0, 4))
 
-    const sectionRef = ref(null)
-    const isVisible = ref(false)
-    const itemRefs = ref([])
-    const visibleItems = reactive({})
-
-    let sectionObserver = null
-    let itemObservers = []
-    let isObserversInitialized = ref(false)
-
-    const setItemRef = (el, index) => {
-      if (el) {
-        itemRefs.value[index] = el
-      }
-    }
-
-    const cleanupObservers = () => {
-      // 清理观察器
-      if (sectionObserver) {
-        sectionObserver.disconnect()
-        sectionObserver = null
-      }
-      itemObservers.forEach((observer) => {
-        if (observer) {
-          observer.disconnect()
-        }
-      })
-      itemObservers = []
-      isObserversInitialized.value = false
-    }
-
-    const initObservers = async () => {
-      // 如果已经初始化过，先清理
-      if (isObserversInitialized.value) {
-        cleanupObservers()
-      }
-
-      // 等待 DOM 完全渲染
-      await nextTick()
-
-      // 再次确认元素存在
-      if (!sectionRef.value || itemRefs.value.length === 0) {
-        return
-      }
-
-      // 监听整个区块的标题
-      sectionObserver = new IntersectionObserver(
-        (entries) => {
-          entries.forEach((entry) => {
-            if (entry.isIntersecting) {
-              isVisible.value = true
-              if (sectionObserver && entry.target) {
-                sectionObserver.unobserve(entry.target)
-              }
-            }
-          })
-        },
-        {
-          threshold: 0.1,
-          rootMargin: '0px 0px -100px 0px'
-        }
-      )
-
-      if (sectionRef.value) {
-        sectionObserver.observe(sectionRef.value)
-      }
-
-      // 为每个卡片单独创建观察器
-      itemRefs.value.forEach((item, index) => {
-        if (item && item instanceof Element) {
-          const observer = new IntersectionObserver(
-            (entries) => {
-              entries.forEach((entry) => {
-                if (entry.isIntersecting) {
-                  visibleItems[index] = true
-                  if (observer && entry.target) {
-                    observer.unobserve(entry.target)
-                  }
-                }
-              })
-            },
-            {
-              threshold: 0.1, // 当10%的卡片可见时触发
-              rootMargin: '0px 0px 50px 0px' // 在元素即将进入视口时就触发
-            }
-          )
-          observer.observe(item)
-          itemObservers.push(observer)
-        }
-      })
-
-      isObserversInitialized.value = true
-    }
-
-    // 监听数据变化，当数据加载完成后初始化观察器
-    watch(
-      () => areasToShow.value.length,
-      (newLength) => {
-        if (newLength > 0 && !isObserversInitialized.value) {
-          // 延迟一下，确保 DOM 已经渲染
-          setTimeout(() => {
-            initObservers()
-          }, 100)
-        }
-      },
-      { immediate: true }
-    )
-
-    onMounted(() => {
-      // 如果数据已经存在，立即初始化
-      if (areasToShow.value.length > 0) {
-        initObservers()
-      }
-    })
-
-    onUnmounted(() => {
-      cleanupObservers()
-    })
-
     return {
-      areasToShow,
-      sectionRef,
-      isVisible,
-      visibleItems,
-      setItemRef
+      areasToShow
     }
   }
 }
