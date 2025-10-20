@@ -57,12 +57,13 @@ router.post('/submit', async (req, res) => {
     }
 });
 
-// 获取联系统计信息
-router.get('/stats', async (req, res) => {
+// 获取联系统计信息（管理员）
+router.get('/stats', verifyToken, verifyAdmin, async (req, res) => {
     try {
         const stats = await db.query(`
             SELECT 
                 COUNT(*) as total_messages,
+                COUNT(CASE WHEN status = 'unread' THEN 1 END) as unread_messages,
                 COUNT(CASE WHEN DATE(created_at) = CURDATE() THEN 1 END) as today_messages,
                 COUNT(CASE WHEN WEEK(created_at) = WEEK(NOW()) THEN 1 END) as week_messages,
                 COUNT(CASE WHEN MONTH(created_at) = MONTH(NOW()) THEN 1 END) as month_messages
@@ -83,6 +84,7 @@ router.get('/stats', async (req, res) => {
             data: {
                 overview: stats[0] || {
                     total_messages: 0,
+                    unread_messages: 0,
                     today_messages: 0,
                     week_messages: 0,
                     month_messages: 0
@@ -106,16 +108,59 @@ router.get('/messages', verifyToken, verifyAdmin, async (req, res) => {
         const page = parseInt(req.query.page) || 1;
         const limit = parseInt(req.query.limit) || 20;
         const offset = (page - 1) * limit;
+        const sortParam = req.query.sort || 'created_at';
+        const orderParam = (req.query.order || 'DESC').toUpperCase();
 
-        console.log('查询参数:', { page, limit, offset });
+        // 允许的排序字段白名单
+        const allowedSortFields = ['id', 'name', 'email', 'subject', 'status', 'created_at', 'updated_at', 'status_priority'];
+        const sortField = allowedSortFields.includes(sortParam) ? sortParam : 'created_at';
+        const sortOrder = orderParam === 'ASC' ? 'ASC' : 'DESC';
+
+        console.log('查询参数:', { page, limit, offset, sort: sortField, order: sortOrder });
+
+        // 筛选条件
+        let whereClause = '';
+        let params = [];
+
+        if (req.query.status) {
+            whereClause = 'WHERE status = ?';
+            params.push(req.query.status);
+        }
+        if (req.query.subject) {
+            whereClause += (whereClause ? ' AND ' : 'WHERE ') + 'subject = ?';
+            params.push(req.query.subject);
+        }
+        if (req.query.keyword) {
+            const keyword = `%${req.query.keyword}%`;
+            whereClause += (whereClause ? ' AND ' : 'WHERE ') + '(name LIKE ? OR email LIKE ? OR message LIKE ?)';
+            params.push(keyword, keyword, keyword);
+        }
 
         // 获取总数
-        const countResult = await db.query('SELECT COUNT(*) as total FROM contact_messages');
+        const countResult = await db.query(
+            `SELECT COUNT(*) as total FROM contact_messages ${whereClause}`,
+            params
+        );
         const total = countResult[0].total;
 
-        // 获取列表数据  
+        // 构建排序语句（特殊处理status_priority）
+        let orderByClause;
+        if (sortField === 'status_priority') {
+            // 使用CASE语句自定义排序：未读(unread)优先，然后是已读(read)，最后是已回复(replied)
+            orderByClause = `CASE 
+                WHEN status = 'unread' THEN 1 
+                WHEN status = 'read' THEN 2 
+                WHEN status = 'replied' THEN 3 
+                ELSE 4 
+            END ${sortOrder}, created_at DESC`;
+        } else {
+            orderByClause = `${sortField} ${sortOrder}, created_at DESC`;
+        }
+
+        // 获取列表数据（支持排序）
         const messages = await db.query(
-            `SELECT * FROM contact_messages ORDER BY created_at DESC LIMIT ${limit} OFFSET ${offset}`
+            `SELECT * FROM contact_messages ${whereClause} ORDER BY ${orderByClause} LIMIT ${limit} OFFSET ${offset}`,
+            params
         );
 
         res.json({
@@ -158,6 +203,30 @@ router.put('/messages/:id/read', verifyToken, verifyAdmin, async (req, res) => {
         res.status(500).json({
             success: false,
             message: '标记已读失败'
+        });
+    }
+});
+
+// 标记留言为未读（管理员）
+router.put('/messages/:id/unread', verifyToken, verifyAdmin, async (req, res) => {
+    try {
+        const { id } = req.params;
+
+        await db.query(
+            'UPDATE contact_messages SET status = ?, updated_at = NOW() WHERE id = ?',
+            ['unread', id]
+        );
+
+        res.json({
+            success: true,
+            message: '已标记为未读'
+        });
+
+    } catch (error) {
+        console.error('标记未读错误:', error);
+        res.status(500).json({
+            success: false,
+            message: '标记未读失败'
         });
     }
 });

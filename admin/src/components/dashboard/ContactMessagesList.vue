@@ -46,6 +46,7 @@
                                     <el-dropdown-item command="view">查看详情</el-dropdown-item>
                                     <el-dropdown-item v-if="message.status === 'unread'"
                                         command="read">标记已读</el-dropdown-item>
+                                    <el-dropdown-item v-else command="unread">标记未读</el-dropdown-item>
                                     <el-dropdown-item command="reply">回复留言</el-dropdown-item>
                                 </el-dropdown-menu>
                             </template>
@@ -132,18 +133,36 @@ const loading = ref(false)
 const messages = ref([])
 const viewDialogVisible = ref(false)
 const currentMessage = ref(null)
+const stats = ref({
+    unread_messages: 0,
+    today_messages: 0
+})
 
 // 计算属性
 const unreadCount = computed(() => {
-    return messages.value.filter(msg => msg.status === 'unread').length
+    return stats.value.unread_messages || 0
 })
 
 const todayCount = computed(() => {
-    const today = dayjs().format('YYYY-MM-DD')
-    return messages.value.filter(msg => {
-        return dayjs(msg.created_at).format('YYYY-MM-DD') === today
-    }).length
+    return stats.value.today_messages || 0
 })
+
+// 加载统计信息
+const loadStats = async () => {
+    try {
+        const response = await contactApi.getStats()
+        if (response.data?.overview) {
+            stats.value = response.data.overview
+            // 发射统计信息给父组件
+            emit('stats-update', {
+                unreadCount: stats.value.unread_messages || 0,
+                todayCount: stats.value.today_messages || 0
+            })
+        }
+    } catch (error) {
+        console.error('加载统计信息失败:', error)
+    }
+}
 
 // 加载最新留言
 const loadMessages = async () => {
@@ -152,22 +171,16 @@ const loadMessages = async () => {
         const response = await contactApi.getMessages({
             page: 1,
             limit: 8, // 只显示最新8条
-            sort: 'created_at',
-            order: 'desc'
+            sort: 'status_priority', // 使用自定义排序，未读优先
+            order: 'asc'
         })
 
         if (response.data) {
             messages.value = response.data || []
-            // 发射统计信息给父组件
-            emit('stats-update', {
-                unreadCount: unreadCount.value,
-                todayCount: todayCount.value
-            })
         }
     } catch (error) {
         console.error('加载联系留言失败:', error)
         messages.value = []
-        emit('stats-update', { unreadCount: 0, todayCount: 0 })
     } finally {
         loading.value = false
     }
@@ -192,11 +205,8 @@ const markAsRead = async (message, showMessage = true) => {
         // 更新本地状态
         message.status = 'read'
 
-        // 重新发射统计信息
-        emit('stats-update', {
-            unreadCount: unreadCount.value,
-            todayCount: todayCount.value
-        })
+        // 重新加载统计信息以获取最新的未读数
+        await loadStats()
 
         if (showMessage) {
             ElMessage.success('已标记为已读')
@@ -209,6 +219,24 @@ const markAsRead = async (message, showMessage = true) => {
     }
 }
 
+// 标记为未读
+const markAsUnread = async (message) => {
+    try {
+        await contactApi.markAsUnread(message.id)
+
+        // 更新本地状态
+        message.status = 'unread'
+
+        // 重新加载统计信息以获取最新的未读数
+        await loadStats()
+
+        ElMessage.success('已标记为未读')
+    } catch (error) {
+        console.error('标记未读失败:', error)
+        ElMessage.error('标记未读失败')
+    }
+}
+
 // 处理下拉菜单命令
 const handleCommand = (command, message) => {
     switch (command) {
@@ -217,6 +245,9 @@ const handleCommand = (command, message) => {
             break
         case 'read':
             markAsRead(message)
+            break
+        case 'unread':
+            markAsUnread(message)
             break
         case 'reply':
             goToContactMessages(message.id)
@@ -275,6 +306,7 @@ defineExpose({
 })
 
 onMounted(() => {
+    loadStats()
     loadMessages()
 })
 </script>

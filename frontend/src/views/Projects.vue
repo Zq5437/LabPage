@@ -639,9 +639,25 @@ const formatCurrencyForTemplate = (amount) => formatCurrency(amount)
   left: 0;
   right: 0;
   height: 4px;
-  background: linear-gradient(90deg, #667eea, #764ba2);
   transform: scaleX(0);
   transition: transform 0.3s ease;
+}
+
+/* 为每个统计卡片设置不同的顶部条颜色 */
+.stat-primary::before {
+  background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+}
+
+.stat-success::before {
+  background: linear-gradient(90deg, #10b981 0%, #34d399 100%);
+}
+
+.stat-info::before {
+  background: linear-gradient(90deg, #3b82f6 0%, #60a5fa 100%);
+}
+
+.stat-warning::before {
+  background: linear-gradient(90deg, #f59e0b 0%, #fbbf24 100%);
 }
 
 .stat-item:hover {

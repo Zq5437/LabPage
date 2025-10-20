@@ -173,7 +173,8 @@
             <div v-for="(item, index) in relatedNews" :key="item.id" class="related-item animate-slide-up"
               :style="{ animationDelay: `${index * 0.1}s` }" @click="viewRelatedNews(item)">
               <div class="related-image">
-                <img v-if="item.cover_image" :src="getCoverImageUrl(item.cover_image)" :alt="item.title" @error="handleImageError" />
+                <img v-if="item.cover_image" :src="getCoverImageUrl(item.cover_image)" :alt="item.title"
+                  @error="handleImageError" />
                 <div v-else class="related-default-image">
                   <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
                     <defs>
@@ -264,8 +265,7 @@ const loadNewsDetail = async () => {
 
     if (response && response.data) {
       news.value = response.data
-      // 增加浏览量
-      incrementViews(newsId)
+      // 浏览量已由后端在GET详情中自增，这里不再额外调用
       // 加载相关新闻
       loadRelatedNews()
     }
@@ -277,14 +277,8 @@ const loadNewsDetail = async () => {
   }
 }
 
-// 增加浏览量
-const incrementViews = async (newsId) => {
-  try {
-    await api.post(`/news/${newsId}/view`)
-  } catch (error) {
-    console.error('增加浏览量失败:', error)
-  }
-}
+// 备注：浏览量自增现已在后端GET /news/:id完成，这里保留空实现用于兼容（如后续需要埋点可复用）
+const incrementViews = async (_newsId) => { }
 
 // 加载相关新闻
 const loadRelatedNews = async () => {

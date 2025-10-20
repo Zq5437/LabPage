@@ -505,12 +505,12 @@ section h2 {
 
 .contact-card {
   background: #fff;
-  padding: 40px 30px;
-  border-radius: 20px;
-  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.08);
+  padding: 36px 28px;
+  border-radius: 16px;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
   text-align: center;
-  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-  border: 1px solid transparent;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  border: 1px solid rgba(0, 0, 0, 0.06);
   position: relative;
   overflow: hidden;
 }
@@ -521,21 +521,36 @@ section h2 {
   top: 0;
   left: 0;
   right: 0;
-  height: 4px;
+  height: 3px;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+/* 为每个联系卡片设置不同的顶部渐变条颜色 */
+.contact-card:nth-child(1)::before {
   background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
-  transform: scaleX(0);
-  transform-origin: left;
-  transition: transform 0.4s ease;
+}
+
+.contact-card:nth-child(2)::before {
+  background: linear-gradient(90deg, #f093fb 0%, #f5576c 100%);
+}
+
+.contact-card:nth-child(3)::before {
+  background: linear-gradient(90deg, #4facfe 0%, #00f2fe 100%);
+}
+
+.contact-card:nth-child(4)::before {
+  background: linear-gradient(90deg, #43e97b 0%, #38f9d7 100%);
 }
 
 .contact-card:hover::before {
-  transform: scaleX(1);
+  opacity: 1;
 }
 
 .contact-card:hover {
-  transform: translateY(-10px);
-  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.12);
-  border-color: #e2e8f0;
+  transform: translateY(-8px);
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.12);
+  border-color: rgba(102, 126, 234, 0.2);
 }
 
 .card-glow {
@@ -543,28 +558,46 @@ section h2 {
 }
 
 .contact-icon {
-  width: 80px;
-  height: 80px;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  width: 72px;
+  height: 72px;
   color: white;
-  border-radius: 16px;
+  border-radius: 14px;
   display: flex;
   align-items: center;
   justify-content: center;
-  margin: 0 auto 24px;
-  font-size: 2rem;
+  margin: 0 auto 20px;
+  font-size: 1.8rem;
   transition: all 0.3s ease;
   position: relative;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+}
+
+/* 为每个联系卡片设置不同的渐变色 */
+.contact-card:nth-child(1) .contact-icon {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+}
+
+.contact-card:nth-child(2) .contact-icon {
+  background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+}
+
+.contact-card:nth-child(3) .contact-icon {
+  background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+}
+
+.contact-card:nth-child(4) .contact-icon {
+  background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
 }
 
 .contact-card:hover .contact-icon {
-  transform: scale(1.1) rotate(5deg);
+  transform: scale(1.08) rotate(3deg);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
 }
 
 .contact-content h3 {
-  color: #1a202c;
-  margin: 0 0 12px 0;
-  font-size: 1.2rem;
+  color: #1f2937;
+  margin: 0 0 10px 0;
+  font-size: 1.125rem;
   font-weight: 600;
   transition: color 0.3s ease;
 }
@@ -574,18 +607,19 @@ section h2 {
 }
 
 .contact-content p {
-  color: #718096;
+  color: #6b7280;
   margin: 0;
-  font-size: 0.95rem;
+  font-size: 0.9375rem;
   line-height: 1.6;
 }
 
 /* 实验室概览 */
 .lab-overview {
   background: #fff;
-  border-radius: 24px;
-  padding: 60px;
-  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.06);
+  border-radius: 20px;
+  padding: 56px;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
+  border: 1px solid rgba(0, 0, 0, 0.04);
   position: relative;
   overflow: hidden;
 }
@@ -662,9 +696,11 @@ section h2 {
   transition: transform 0.4s ease;
 }
 
+/*
 .overview-image:hover img {
   transform: scale(1.08);
 }
+*/
 
 .image-overlay {
   position: absolute;
@@ -679,9 +715,10 @@ section h2 {
 /* 联系表单 */
 .contact-form-section {
   background: #fff;
-  border-radius: 24px;
-  padding: 60px;
-  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.06);
+  border-radius: 20px;
+  padding: 56px;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
+  border: 1px solid rgba(0, 0, 0, 0.04);
   position: relative;
   overflow: hidden;
 }
@@ -800,14 +837,14 @@ section h2 {
 
 .link-card {
   background: #fff;
-  padding: 35px 25px;
-  border-radius: 20px;
-  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.06);
+  padding: 32px 24px;
+  border-radius: 16px;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
   text-align: center;
   text-decoration: none;
   color: inherit;
-  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-  border: 1px solid transparent;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  border: 1px solid rgba(0, 0, 0, 0.06);
   position: relative;
   overflow: hidden;
 }
@@ -818,46 +855,79 @@ section h2 {
   top: 0;
   left: 0;
   right: 0;
-  height: 4px;
+  height: 3px;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+/* 为每个快速链接卡片设置不同的顶部渐变条颜色 */
+.link-card:nth-child(1)::before {
+  background: linear-gradient(90deg, #fa709a 0%, #fee140 100%);
+}
+
+.link-card:nth-child(2)::before {
   background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
-  transform: scaleX(0);
-  transform-origin: left;
-  transition: transform 0.4s ease;
+}
+
+.link-card:nth-child(3)::before {
+  background: linear-gradient(90deg, #f093fb 0%, #f5576c 100%);
+}
+
+.link-card:nth-child(4)::before {
+  background: linear-gradient(90deg, #fccb90 0%, #d57eeb 100%);
 }
 
 .link-card:hover::before {
-  transform: scaleX(1);
+  opacity: 1;
 }
 
 .link-card:hover {
-  transform: translateY(-10px);
-  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.12);
-  border-color: #e2e8f0;
+  transform: translateY(-8px);
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.12);
+  border-color: rgba(102, 126, 234, 0.2);
   text-decoration: none;
 }
 
 .link-icon {
-  width: 70px;
-  height: 70px;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  width: 64px;
+  height: 64px;
   color: white;
-  border-radius: 16px;
+  border-radius: 14px;
   display: flex;
   align-items: center;
   justify-content: center;
-  margin: 0 auto 20px;
-  font-size: 1.8rem;
+  margin: 0 auto 18px;
+  font-size: 1.7rem;
   transition: all 0.3s ease;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+}
+
+/* 为每个快速链接卡片设置不同的渐变色 */
+.link-card:nth-child(1) .link-icon {
+  background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
+}
+
+.link-card:nth-child(2) .link-icon {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+}
+
+.link-card:nth-child(3) .link-icon {
+  background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+}
+
+.link-card:nth-child(4) .link-icon {
+  background: linear-gradient(135deg, #fccb90 0%, #d57eeb 100%);
 }
 
 .link-card:hover .link-icon {
-  transform: scale(1.1) rotate(5deg);
+  transform: scale(1.08) rotate(3deg);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
 }
 
 .link-card h3 {
-  color: #1a202c;
-  margin: 0 0 12px 0;
-  font-size: 1.2rem;
+  color: #1f2937;
+  margin: 0 0 10px 0;
+  font-size: 1.125rem;
   font-weight: 600;
   transition: color 0.3s ease;
 }
@@ -867,9 +937,9 @@ section h2 {
 }
 
 .link-card p {
-  color: #718096;
-  margin: 0 0 16px 0;
-  font-size: 0.95rem;
+  color: #6b7280;
+  margin: 0 0 14px 0;
+  font-size: 0.9375rem;
   line-height: 1.6;
 }
 

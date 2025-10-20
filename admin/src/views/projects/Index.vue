@@ -45,7 +45,7 @@
 
       <!-- 数据表格 -->
       <el-table :data="projectsList" v-loading="loading" style="width: 100%" @sort-change="handleSort">
-        <el-table-column prop="id" label="ID" width="60" sortable="custom" />
+        <el-table-column prop="id" label="ID" width="80" sortable="custom" />
 
         <el-table-column prop="title" label="项目标题" min-width="200" sortable="custom">
           <template #default="{ row }">

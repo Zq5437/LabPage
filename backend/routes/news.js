@@ -114,13 +114,13 @@ router.get('/:id', async (req, res) => {
     try {
         const newsId = req.params.id;
 
-        // 获取新闻详情
-        const news = await db.query(
+        // 先检查新闻是否存在且为已发布
+        const existing = await db.query(
             'SELECT * FROM news WHERE id = ? AND status = "published"',
             [newsId]
         );
 
-        if (news.length === 0) {
+        if (existing.length === 0) {
             return res.status(404).json({
                 success: false,
                 message: '新闻不存在或未发布'
@@ -130,6 +130,12 @@ router.get('/:id', async (req, res) => {
         // 增加浏览次数
         await db.query(
             'UPDATE news SET views = views + 1 WHERE id = ?',
+            [newsId]
+        );
+
+        // 返回最新的新闻详情（包含已更新的浏览量）
+        const news = await db.query(
+            'SELECT * FROM news WHERE id = ?',
             [newsId]
         );
 

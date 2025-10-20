@@ -44,16 +44,18 @@
     </div>
 
     <!-- 招生信息列表 -->
-    <el-table :data="recruitment" v-loading="loading" empty-text="暂无招生信息">
-      <el-table-column prop="title" label="招生标题" min-width="200" />
+    <el-table :data="recruitment" v-loading="loading" @sort-change="handleSort" empty-text="暂无招生信息">
+      <el-table-column prop="id" label="ID" width="80" sortable="custom" />
 
-      <el-table-column prop="type" label="招生类型" width="120">
+      <el-table-column prop="title" label="招生标题" min-width="200" sortable="custom" />
+
+      <el-table-column prop="type" label="招生类型" width="120" sortable="custom">
         <template #default="{ row }">
-          <el-tag size="small">{{ row.type }}</el-tag>
+          <el-tag :type="getTypeTagType(row.type)" size="small">{{ getTypeText(row.type) }}</el-tag>
         </template>
       </el-table-column>
 
-      <el-table-column prop="deadline" label="截止日期" width="120">
+      <el-table-column prop="deadline" label="截止日期" width="120" sortable="custom">
         <template #default="{ row }">
           <span :class="{ 'deadline-warning': isDeadlineNear(row.deadline) }">
             {{ formatDate(row.deadline) }}
@@ -69,7 +71,7 @@
         </template>
       </el-table-column>
 
-      <el-table-column prop="status" label="状态" width="100">
+      <el-table-column prop="status" label="状态" width="100" sortable="custom">
         <template #default="{ row }">
           <el-tag :type="getStatusType(row.status)" size="small">
             {{ getStatusText(row.status) }}
@@ -77,7 +79,7 @@
         </template>
       </el-table-column>
 
-      <el-table-column prop="created_at" label="创建时间" width="120">
+      <el-table-column prop="created_at" label="创建时间" width="120" sortable="custom">
         <template #default="{ row }">
           {{ formatDate(row.created_at) }}
         </template>
@@ -236,6 +238,12 @@ const pagination = reactive({
   total: 0
 })
 
+// 排序数据
+const sort = reactive({
+  field: 'created_at',
+  order: 'DESC'
+})
+
 // 表单数据
 const form = reactive({
   title: '',
@@ -278,6 +286,8 @@ const loadRecruitment = async () => {
     const params = {
       page: pagination.page,
       limit: pagination.limit,
+      sort: sort.field,
+      order: sort.order,
       ...searchForm
     }
 
@@ -300,6 +310,19 @@ const loadRecruitment = async () => {
 // 搜索
 const handleSearch = () => {
   pagination.page = 1
+  loadRecruitment()
+}
+
+// 排序处理
+const handleSort = ({ prop, order }) => {
+  if (prop) {
+    sort.field = prop
+    sort.order = order === 'ascending' ? 'ASC' : 'DESC'
+  } else {
+    // 取消排序，恢复默认
+    sort.field = 'created_at'
+    sort.order = 'DESC'
+  }
   loadRecruitment()
 }
 
@@ -422,6 +445,28 @@ const resetForm = () => {
       form[key] = ''
     }
   })
+}
+
+// 获取招生类型标签颜色
+const getTypeTagType = (type) => {
+  const typeMap = {
+    master: 'primary',    // 蓝色 - 硕士研究生
+    phd: 'danger',        // 红色 - 博士研究生
+    postdoc: 'warning',   // 橙色 - 博士后
+    visiting: 'success'   // 绿色 - 访问学者
+  }
+  return typeMap[type] || ''
+}
+
+// 获取招生类型文本
+const getTypeText = (type) => {
+  const typeMap = {
+    master: '硕士研究生',
+    phd: '博士研究生',
+    postdoc: '博士后',
+    visiting: '访问学者'
+  }
+  return typeMap[type] || type
 }
 
 // 获取状态类型

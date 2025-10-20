@@ -137,10 +137,13 @@
                 </template>
 
                 <el-table ref="messagesTableRef" v-loading="loading" :data="messages"
-                    @selection-change="handleSelectionChange" empty-text="暂无留言数据" style="width: 100%">
+                    @selection-change="handleSelectionChange" @sort-change="handleSort" empty-text="暂无留言数据"
+                    style="width: 100%">
                     <el-table-column type="selection" width="50" />
 
-                    <el-table-column label="状态" width="80">
+                    <el-table-column prop="id" label="ID" width="80" sortable="custom" />
+
+                    <el-table-column prop="status" label="状态" width="100" sortable="custom">
                         <template #default="{ row }">
                             <el-tag :type="getStatusType(row.status)" size="small">
                                 {{ getStatusText(row.status) }}
@@ -148,7 +151,7 @@
                         </template>
                     </el-table-column>
 
-                    <el-table-column label="联系人" width="150">
+                    <el-table-column prop="name" label="联系人" width="150" sortable="custom">
                         <template #default="{ row }">
                             <div class="contact-info">
                                 <div class="name">{{ row.name }}</div>
@@ -158,9 +161,10 @@
                         </template>
                     </el-table-column>
 
-                    <el-table-column label="主题" width="100">
+                    <el-table-column prop="subject" label="主题" width="120" sortable="custom">
                         <template #default="{ row }">
-                            <el-tag size="small">{{ getSubjectText(row.subject) }}</el-tag>
+                            <el-tag :type="getSubjectTagType(row.subject)" size="small">{{ getSubjectText(row.subject)
+                                }}</el-tag>
                         </template>
                     </el-table-column>
 
@@ -176,44 +180,55 @@
                         </template>
                     </el-table-column>
 
-                    <el-table-column label="提交时间" width="160">
+                    <el-table-column prop="created_at" label="提交时间" width="160" sortable="custom">
                         <template #default="{ row }">
                             {{ formatDateTime(row.created_at) }}
                         </template>
                     </el-table-column>
 
-                    <el-table-column label="操作" width="200" fixed="right">
+                    <el-table-column label="操作" width="180" fixed="right">
                         <template #default="{ row }">
-                            <el-button-group size="small">
-                                <el-button @click="viewMessage(row)">
-                                    <el-icon>
-                                        <View />
-                                    </el-icon>
-                                    查看
-                                </el-button>
-                                <el-button v-if="row.status === 'unread'" type="primary" @click="markAsRead(row)">
-                                    <el-icon>
-                                        <Check />
-                                    </el-icon>
-                                    已读
-                                </el-button>
-                                <el-button @click="replyMessage(row)">
-                                    <el-icon>
-                                        <ChatDotRound />
-                                    </el-icon>
-                                    回复
-                                </el-button>
+                            <div class="action-buttons">
+                                <el-tooltip content="查看详情" placement="top">
+                                    <el-button size="small" @click="viewMessage(row)" circle>
+                                        <el-icon>
+                                            <View />
+                                        </el-icon>
+                                    </el-button>
+                                </el-tooltip>
+                                <el-tooltip v-if="row.status === 'unread'" content="标记已读" placement="top">
+                                    <el-button size="small" type="primary" @click="markAsRead(row)" circle>
+                                        <el-icon>
+                                            <Check />
+                                        </el-icon>
+                                    </el-button>
+                                </el-tooltip>
+                                <el-tooltip v-else content="标记未读" placement="top">
+                                    <el-button size="small" type="warning" @click="markAsUnread(row)" circle>
+                                        <el-icon>
+                                            <Bell />
+                                        </el-icon>
+                                    </el-button>
+                                </el-tooltip>
+                                <el-tooltip content="回复留言" placement="top">
+                                    <el-button size="small" type="success" @click="replyMessage(row)" circle>
+                                        <el-icon>
+                                            <ChatDotRound />
+                                        </el-icon>
+                                    </el-button>
+                                </el-tooltip>
                                 <el-popconfirm title="确定要删除这条留言吗？" @confirm="deleteMessage(row.id)">
                                     <template #reference>
-                                        <el-button type="danger">
-                                            <el-icon>
-                                                <Delete />
-                                            </el-icon>
-                                            删除
-                                        </el-button>
+                                        <el-tooltip content="删除留言" placement="top">
+                                            <el-button size="small" type="danger" circle>
+                                                <el-icon>
+                                                    <Delete />
+                                                </el-icon>
+                                            </el-button>
+                                        </el-tooltip>
                                     </template>
                                 </el-popconfirm>
-                            </el-button-group>
+                            </div>
                         </template>
                     </el-table-column>
                 </el-table>
@@ -350,6 +365,12 @@ const pagination = reactive({
     total: 0
 })
 
+// 排序
+const sort = reactive({
+    field: 'created_at',
+    order: 'DESC'
+})
+
 // 筛选表单
 const filterForm = reactive({
     status: '',
@@ -396,6 +417,8 @@ const loadMessages = async () => {
         const params = {
             page: pagination.page,
             limit: pagination.limit,
+            sort: sort.field,
+            order: sort.order,
             ...filterForm
         }
 
@@ -442,6 +465,19 @@ const handleSelectionChange = (selection) => {
     selectedMessages.value = selection
 }
 
+// 排序处理
+const handleSort = ({ prop, order }) => {
+    if (prop) {
+        sort.field = prop
+        sort.order = order === 'ascending' ? 'ASC' : 'DESC'
+    } else {
+        // 取消排序，恢复默认
+        sort.field = 'created_at'
+        sort.order = 'DESC'
+    }
+    loadMessages()
+}
+
 // 查看留言详情
 const viewMessage = (message) => {
     currentMessage.value = message
@@ -473,6 +509,21 @@ const markAsRead = async (message, showMessage = true) => {
     } catch (error) {
         console.error('标记已读失败:', error)
         ElMessage.error('标记已读失败')
+    }
+}
+
+// 标记为未读
+const markAsUnread = async (message) => {
+    try {
+        await api.put(`/contact/messages/${message.id}/unread`)
+
+        // 更新本地状态
+        message.status = 'unread'
+
+        ElMessage.success('已标记为未读')
+    } catch (error) {
+        console.error('标记未读失败:', error)
+        ElMessage.error('标记未读失败')
     }
 }
 
@@ -600,6 +651,17 @@ const getStatusText = (status) => {
         'replied': '已回复'
     }
     return textMap[status] || status
+}
+
+const getSubjectTagType = (subject) => {
+    const typeMap = {
+        'academic': 'primary',    // 蓝色 - 学术合作
+        'project': 'success',     // 绿色 - 项目咨询
+        'admission': 'warning',   // 橙色 - 招生咨询
+        'equipment': 'danger',    // 红色 - 设备使用
+        'other': 'info'           // 灰色 - 其他咨询
+    }
+    return typeMap[subject] || ''
 }
 
 const getSubjectText = (subject) => {
@@ -745,6 +807,13 @@ onMounted(() => {
 }
 
 /* 表格样式 */
+.action-buttons {
+    display: flex;
+    gap: 8px;
+    justify-content: center;
+    align-items: center;
+}
+
 .contact-info {
     line-height: 1.4;
 }

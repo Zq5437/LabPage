@@ -393,6 +393,15 @@ router.get('/admin/list', [
         const offset = (page - 1) * limit;
         const category = req.query.category;
         const status = req.query.status;
+        const sortParam = (req.query.sort || 'created_at');
+        const orderParam = (req.query.order || 'DESC').toUpperCase();
+
+        // 允许的排序字段白名单，防止SQL注入
+        const allowedSortFields = [
+            'id', 'title', 'category', 'principal_investigator', 'funding_amount', 'status', 'start_date', 'end_date', 'created_at', 'updated_at'
+        ];
+        const sortField = allowedSortFields.includes(sortParam) ? sortParam : 'created_at';
+        const sortOrder = orderParam === 'ASC' ? 'ASC' : 'DESC';
 
         let whereClause = '';
         let params = [];
@@ -418,10 +427,10 @@ router.get('/admin/list', [
         );
         const total = countResult[0].total;
 
-        // 获取项目列表
+        // 获取项目列表（支持排序）
         const projects = await db.query(
             `SELECT * FROM projects ${whereClause} 
-       ORDER BY created_at DESC 
+       ORDER BY ${sortField} ${sortOrder}, id DESC 
        LIMIT ${parseInt(limit)} OFFSET ${parseInt(offset)}`,
             [...params]
         );
@@ -436,87 +445,6 @@ router.get('/admin/list', [
                 }
             }
         });
-
-        res.json({
-            success: true,
-            data: {
-                projects,
-                pagination: {
-                    page,
-                    limit,
-                    total,
-                    totalPages: Math.ceil(total / limit)
-                }
-            }
-        });
-
-    } catch (error) {
-        console.error('获取管理员项目列表错误:', error);
-        res.status(500).json({
-            success: false,
-            message: '服务器内部错误'
-        });
-    }
-});
-
-// 获取项目列表（管理员接口）
-router.get('/admin/list', [
-    authenticateToken,
-    requireAdmin,
-    query('page').optional().isInt({ min: 1 }).withMessage('页码必须是正整数'),
-    query('limit').optional().isInt({ min: 1, max: 100 }).withMessage('每页数量必须在1-100之间'),
-    query('category').optional().isIn(['national', 'provincial', 'institutional', 'enterprise', 'international']).withMessage('分类参数无效'),
-    query('status').optional().isIn(['ongoing', 'completed', 'suspended']).withMessage('状态参数无效')
-], async (req, res) => {
-    try {
-        const errors = validationResult(req);
-        if (!errors.isEmpty()) {
-            return res.status(400).json({
-                success: false,
-                message: '参数验证失败',
-                errors: errors.array()
-            });
-        }
-
-        const page = parseInt(req.query.page) || 1;
-        const limit = parseInt(req.query.limit) || 20;
-        const offset = (page - 1) * limit;
-        const category = req.query.category;
-        const status = req.query.status;
-        const search = req.query.search;
-        const sort = req.query.sort || 'created_at';
-        const order = req.query.order || 'DESC';
-
-        let whereClause = 'WHERE 1=1';
-        let params = [];
-
-        if (category) {
-            whereClause += ' AND category = ?';
-            params.push(category);
-        }
-        if (status) {
-            whereClause += ' AND status = ?';
-            params.push(status);
-        }
-        if (search) {
-            whereClause += ' AND (title LIKE ? OR title_en LIKE ? OR description LIKE ?)';
-            params.push(`%${search}%`, `%${search}%`, `%${search}%`);
-        }
-
-        // 获取总数
-        const countResult = await db.query(
-            `SELECT COUNT(*) as total FROM projects ${whereClause}`,
-            params
-        );
-        const total = countResult[0].total;
-
-        // 获取项目列表
-        const projects = await db.query(
-            `SELECT * FROM projects ${whereClause} 
-       ORDER BY ${sort} ${order}
-       LIMIT ${parseInt(limit)} OFFSET ${parseInt(offset)}`,
-            [...params]
-        );
 
         res.json({
             success: true,

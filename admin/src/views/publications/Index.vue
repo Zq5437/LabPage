@@ -130,11 +130,13 @@
 
     <!-- 论文表格 -->
     <el-card class="table-card">
-      <el-table :data="tableData" v-loading="loading" @selection-change="handleSelectionChange" stripe
-        style="width: 100%">
+      <el-table :data="tableData" v-loading="loading" @selection-change="handleSelectionChange"
+        @sort-change="handleSort" stripe style="width: 100%">
         <el-table-column type="selection" width="55" />
 
-        <el-table-column prop="title" label="论文标题" min-width="300">
+        <el-table-column prop="id" label="ID" width="80" sortable="custom" />
+
+        <el-table-column prop="title" label="论文标题" min-width="300" sortable="custom">
           <template #default="{ row }">
             <div class="paper-title">
               <span>{{ row.title }}</span>
@@ -145,13 +147,13 @@
           </template>
         </el-table-column>
 
-        <el-table-column prop="authors" label="作者" width="200" show-overflow-tooltip />
+        <el-table-column prop="authors" label="作者" width="200" show-overflow-tooltip sortable="custom" />
 
-        <el-table-column prop="journal" label="期刊/会议" width="180" show-overflow-tooltip />
+        <el-table-column prop="journal" label="期刊/会议" width="180" show-overflow-tooltip sortable="custom" />
 
-        <el-table-column prop="year" label="年份" width="80" align="center" />
+        <el-table-column prop="year" label="年份" width="80" align="center" sortable="custom" />
 
-        <el-table-column prop="type" label="类型" width="100">
+        <el-table-column prop="type" label="类型" width="100" sortable="custom">
           <template #default="{ row }">
             <el-tag :type="getTypeColor(row.type)" size="small">
               {{ getTypeLabel(row.type) }}
@@ -159,13 +161,13 @@
           </template>
         </el-table-column>
 
-        <el-table-column prop="impact_factor" label="影响因子" width="100" align="center">
+        <el-table-column prop="impact_factor" label="影响因子" width="120" align="center" sortable="custom">
           <template #default="{ row }">
             {{ row.impact_factor || '-' }}
           </template>
         </el-table-column>
 
-        <el-table-column prop="citations" label="引用数" width="80" align="center" />
+        <el-table-column prop="citations" label="引用数" width="100" align="center" sortable="custom" />
 
         <el-table-column label="PDF" width="80" align="center">
           <template #default="{ row }">
@@ -176,7 +178,7 @@
           </template>
         </el-table-column>
 
-        <el-table-column prop="created_at" label="创建时间" width="120">
+        <el-table-column prop="created_at" label="创建时间" width="120" sortable="custom">
           <template #default="{ row }">
             {{ formatDate(row.created_at) }}
           </template>
@@ -291,6 +293,12 @@ const pagination = reactive({
   total: 0
 })
 
+// 排序信息
+const sort = reactive({
+  field: 'created_at',
+  order: 'DESC'
+})
+
 // 搜索防抖
 let searchTimeout = null
 
@@ -311,6 +319,8 @@ const loadData = async () => {
     const params = {
       page: pagination.page,
       limit: pagination.limit,
+      sort: sort.field,
+      order: sort.order,
       ...filters
     }
 
@@ -365,6 +375,19 @@ const resetFilters = () => {
 // 选择变化处理
 const handleSelectionChange = (selection) => {
   selectedIds.value = selection.map(item => item.id)
+}
+
+// 排序处理
+const handleSort = ({ prop, order }) => {
+  if (prop) {
+    sort.field = prop
+    sort.order = order === 'ascending' ? 'ASC' : 'DESC'
+  } else {
+    // 取消排序，恢复默认
+    sort.field = 'created_at'
+    sort.order = 'DESC'
+  }
+  loadData()
 }
 
 // 添加论文

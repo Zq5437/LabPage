@@ -200,6 +200,11 @@ router.get('/admin/list', verifyToken, verifyAdmin, async (req, res) => {
             params.push(searchTerm, searchTerm, searchTerm);
         }
 
+        // 排序字段白名单验证
+        const allowedSortFields = ['id', 'name', 'category', 'manufacturer', 'location', 'purchase_date', 'status', 'created_at', 'updated_at'];
+        const sortField = allowedSortFields.includes(sort) ? sort : 'created_at';
+        const sortOrder = order.toUpperCase() === 'ASC' ? 'ASC' : 'DESC';
+
         // 获取总数
         const countResult = await db.query(
             `SELECT COUNT(*) as total FROM equipment ${whereClause}`,
@@ -211,7 +216,7 @@ router.get('/admin/list', verifyToken, verifyAdmin, async (req, res) => {
         // 获取设备列表
         const equipment = await db.query(
             `SELECT * FROM equipment ${whereClause} 
-             ORDER BY ${sort} ${order} 
+             ORDER BY ${sortField} ${sortOrder} 
              LIMIT ${parseInt(limit)} OFFSET ${parseInt(offset)}`,
             [...params]
         );

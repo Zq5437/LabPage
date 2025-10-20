@@ -273,7 +273,7 @@ router.get('/admin/list', authenticateToken, async (req, res) => {
         }
 
         // 构建排序
-        const validSorts = ['year', 'citations', 'impact_factor', 'created_at', 'updated_at'];
+        const validSorts = ['id', 'title', 'authors', 'journal', 'year', 'type', 'impact_factor', 'citations', 'created_at', 'updated_at'];
         const validOrders = ['ASC', 'DESC'];
         const sortField = validSorts.includes(sort) ? sort : 'created_at';
         const sortOrder = validOrders.includes(order.toUpperCase()) ? order.toUpperCase() : 'DESC';

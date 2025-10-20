@@ -21,17 +21,49 @@
           <h1>学术成果</h1>
           <p>探索实验室前沿研究与学术贡献</p>
           <div class="header-stats">
-            <div class="header-stat-item" v-if="!loading">
-              <span class="stat-value">{{ pagination.total }}</span>
-              <span class="stat-label">发表论文</span>
+            <div class="header-stat-item stat-item-1" v-if="!loading">
+              <div class="stat-icon">
+                <el-icon>
+                  <Document />
+                </el-icon>
+              </div>
+              <div class="stat-content">
+                <span class="stat-value">{{ pagination.total }}</span>
+                <span class="stat-label">发表论文</span>
+              </div>
             </div>
-            <div class="header-stat-item" v-if="!loading">
-              <span class="stat-value">{{ totalCitations }}</span>
-              <span class="stat-label">总引用</span>
+            <div class="header-stat-item stat-item-2" v-if="!loading">
+              <div class="stat-icon">
+                <el-icon>
+                  <Star />
+                </el-icon>
+              </div>
+              <div class="stat-content">
+                <span class="stat-value">{{ totalCitations }}</span>
+                <span class="stat-label">总引用</span>
+              </div>
             </div>
-            <div class="header-stat-item" v-if="!loading">
-              <span class="stat-value">{{ uniqueJournals }}</span>
-              <span class="stat-label">期刊数</span>
+            <div class="header-stat-item stat-item-3" v-if="!loading">
+              <div class="stat-icon">
+                <el-icon>
+                  <Reading />
+                </el-icon>
+              </div>
+              <div class="stat-content">
+                <span class="stat-value">{{ journalCount }}</span>
+                <span class="stat-label">期刊论文</span>
+              </div>
+            </div>
+            <div class="header-stat-item stat-item-4" v-if="!loading">
+              <div class="stat-icon">
+                <el-icon>
+                  <Opportunity />
+                </el-icon>
+              </div>
+              <div class="stat-content">
+                <span class="stat-value">{{ conferenceCount }}</span>
+                <span class="stat-label">会议论文</span>
+              </div>
             </div>
           </div>
         </div>
@@ -222,7 +254,7 @@ import { ref, reactive, computed, onMounted } from 'vue'
 import { ElMessage } from 'element-plus'
 import api from '@/utils/api'
 import {
-  Search, Star, Document, Link
+  Search, Star, Document, Link, Reading, Opportunity
 } from '@element-plus/icons-vue'
 
 // 响应式数据
@@ -257,9 +289,14 @@ const totalCitations = computed(() => {
   return publications.value.reduce((sum, pub) => sum + (pub.citation_count || 0), 0)
 })
 
-const uniqueJournals = computed(() => {
-  const journals = new Set(publications.value.map(pub => pub.journal))
-  return journals.size
+// 计算期刊论文数量
+const journalCount = computed(() => {
+  return publications.value.filter(pub => pub.type === 'journal').length
+})
+
+// 计算会议论文数量
+const conferenceCount = computed(() => {
+  return publications.value.filter(pub => pub.type === 'conference').length
 })
 
 // 加载论文列表
@@ -451,26 +488,122 @@ onMounted(() => {
 }
 
 .header-stats {
-  display: flex;
-  justify-content: center;
-  gap: 60px;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 20px;
   margin-top: 40px;
+  max-width: 1200px;
+  margin-left: auto;
+  margin-right: auto;
 }
 
 .header-stat-item {
-  text-align: center;
+  background: rgba(255, 255, 255, 0.15);
+  backdrop-filter: blur(10px);
+  padding: 24px 20px;
+  border-radius: 16px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  overflow: hidden;
+}
+
+.header-stat-item::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.stat-item-1::before {
+  background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+}
+
+.stat-item-2::before {
+  background: linear-gradient(90deg, #f093fb 0%, #f5576c 100%);
+}
+
+.stat-item-3::before {
+  background: linear-gradient(90deg, #4facfe 0%, #00f2fe 100%);
+}
+
+.stat-item-4::before {
+  background: linear-gradient(90deg, #43e97b 0%, #38f9d7 100%);
+}
+
+.header-stat-item:hover {
+  transform: translateY(-4px);
+  background: rgba(255, 255, 255, 0.25);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+}
+
+.header-stat-item:hover::before {
+  opacity: 1;
+}
+
+.stat-icon {
+  width: 48px;
+  height: 48px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 24px;
+  flex-shrink: 0;
+  transition: all 0.3s ease;
+}
+
+.stat-item-1 .stat-icon {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+}
+
+.stat-item-2 .stat-icon {
+  background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+  color: white;
+}
+
+.stat-item-3 .stat-icon {
+  background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+  color: white;
+}
+
+.stat-item-4 .stat-icon {
+  background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
+  color: white;
+}
+
+.header-stat-item:hover .stat-icon {
+  transform: scale(1.1) rotate(5deg);
+}
+
+.stat-content {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  flex: 1;
 }
 
 .stat-value {
-  display: block;
-  font-size: 2.5rem;
+  font-size: 2.2rem;
   font-weight: 700;
-  margin-bottom: 5px;
+  line-height: 1;
+  margin-bottom: 6px;
+  color: white;
 }
 
 .stat-label {
-  font-size: 0.95rem;
-  opacity: 0.9;
+  font-size: 0.875rem;
+  opacity: 0.95;
+  color: rgba(255, 255, 255, 0.9);
+  font-weight: 500;
 }
 
 .container {
@@ -929,11 +1062,18 @@ onMounted(() => {
   }
 
   .header-stats {
-    gap: 30px;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 16px;
   }
 
   .stat-value {
-    font-size: 2rem;
+    font-size: 1.8rem;
+  }
+
+  .stat-icon {
+    width: 40px;
+    height: 40px;
+    font-size: 20px;
   }
 
   .filter-toolbar {
@@ -973,8 +1113,12 @@ onMounted(() => {
 
 @media (max-width: 480px) {
   .header-stats {
-    flex-direction: column;
-    gap: 20px;
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+
+  .header-stat-item {
+    padding: 20px 16px;
   }
 
   .filter-controls {

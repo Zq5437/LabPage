@@ -399,6 +399,15 @@ router.get('/admin/list', [
         const offset = (page - 1) * limit;
         const category = req.query.category;
         const status = req.query.status;
+        const sortParam = (req.query.sort || 'sort_order');
+        const orderParam = (req.query.order || 'DESC').toUpperCase();
+
+        // 允许排序的字段白名单，防止SQL注入
+        const allowedSortFields = [
+            'id', 'name', 'name_en', 'title', 'category', 'email', 'status', 'sort_order', 'created_at', 'updated_at'
+        ];
+        const sortField = allowedSortFields.includes(sortParam) ? sortParam : 'sort_order';
+        const sortOrder = orderParam === 'ASC' ? 'ASC' : 'DESC';
 
         let whereClause = '';
         let params = [];
@@ -427,7 +436,7 @@ router.get('/admin/list', [
         // 获取成员列表
         const members = await db.query(
             `SELECT * FROM members ${whereClause} 
-       ORDER BY sort_order DESC, created_at DESC 
+       ORDER BY ${sortField} ${sortOrder}, id DESC 
        LIMIT ${parseInt(limit)} OFFSET ${parseInt(offset)}`,
             [...params]
         );

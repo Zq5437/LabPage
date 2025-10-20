@@ -44,7 +44,7 @@
 
       <!-- 数据表格 -->
       <el-table :data="newsList" v-loading="loading" style="width: 100%" @sort-change="handleSort">
-        <el-table-column prop="id" label="ID" width="60" sortable="custom" />
+        <el-table-column prop="id" label="ID" width="80" sortable="custom" />
 
         <el-table-column prop="title" label="标题" min-width="200" sortable="custom">
           <template #default="{ row }">
@@ -73,7 +73,7 @@
           </template>
         </el-table-column>
 
-        <el-table-column prop="views" label="浏览量" width="80" sortable="custom" />
+        <el-table-column prop="views" label="浏览量" width="100" sortable="custom" />
 
         <el-table-column prop="status" label="状态" width="80">
           <template #default="{ row }">

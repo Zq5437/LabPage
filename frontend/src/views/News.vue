@@ -67,7 +67,8 @@
             :style="{ animationDelay: `${index * 0.1}s` }" @click="viewNewsDetail(news)">
             <div class="news-image-wrapper">
               <div class="news-image">
-                <img v-if="news.cover_image" :src="getCoverImageUrl(news.cover_image)" :alt="news.title" @error="handleImageError" />
+                <img v-if="news.cover_image" :src="getCoverImageUrl(news.cover_image)" :alt="news.title"
+                  @error="handleImageError" />
                 <div v-else class="default-image">
                   <svg class="default-icon" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
                     <defs>
@@ -147,7 +148,8 @@
             :style="{ animationDelay: `${index * 0.05}s` }" @click="viewNewsDetail(news)">
             <div class="news-image-wrapper">
               <div class="news-image">
-                <img v-if="news.cover_image" :src="getCoverImageUrl(news.cover_image)" :alt="news.title" @error="handleImageError" />
+                <img v-if="news.cover_image" :src="getCoverImageUrl(news.cover_image)" :alt="news.title"
+                  @error="handleImageError" />
                 <div v-else class="default-image">
                   <svg class="default-icon" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
                     <defs>
@@ -616,14 +618,15 @@ onMounted(() => {
 /* 新闻卡片样式 */
 .news-card {
   background: white;
-  border-radius: 20px;
+  border-radius: 16px;
   overflow: hidden;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
-  transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   cursor: pointer;
   position: relative;
   opacity: 0;
   transform: translateY(30px);
+  border: 1px solid rgba(0, 0, 0, 0.06);
 }
 
 .animate-slide-up {
@@ -638,17 +641,50 @@ onMounted(() => {
 }
 
 .news-card:hover {
-  transform: translateY(-10px);
-  box-shadow: 0 15px 50px rgba(0, 0, 0, 0.15);
+  transform: translateY(-8px);
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.12);
+  border-color: rgba(102, 126, 234, 0.2);
 }
 
 .top-news-card {
-  border-top: 5px solid #f39c12;
-  background: linear-gradient(to bottom, #fffbf0 0%, white 30%);
+  background: linear-gradient(to bottom, #fffef9 0%, white 100%);
+  position: relative;
+}
+
+.top-news-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: linear-gradient(90deg, #f39c12 0%, #e67e22 100%);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.top-news-card:hover::before {
+  opacity: 1;
 }
 
 .regular-news-card {
-  border-top: 5px solid #3498db;
+  position: relative;
+}
+
+.regular-news-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.regular-news-card:hover::before {
+  opacity: 1;
 }
 
 .news-image-wrapper {
@@ -658,20 +694,21 @@ onMounted(() => {
 
 .news-image {
   width: 100%;
-  height: 220px;
+  height: 200px;
   position: relative;
   overflow: hidden;
+  background: #f5f7fa;
 }
 
 .news-image img {
   width: 100%;
   height: 100%;
   object-fit: cover;
-  transition: transform 0.5s ease;
+  transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .news-card:hover .news-image img {
-  transform: scale(1.1);
+  transform: scale(1.08);
 }
 
 .default-image {
@@ -691,7 +728,7 @@ onMounted(() => {
   left: 0;
   right: 0;
   bottom: 0;
-  background: linear-gradient(to bottom, transparent 0%, rgba(0, 0, 0, 0.3) 100%);
+  background: linear-gradient(to bottom, transparent 0%, rgba(0, 0, 0, 0.2) 100%);
   opacity: 0;
   transition: opacity 0.3s ease;
   pointer-events: none;
@@ -703,49 +740,50 @@ onMounted(() => {
 
 .top-badge {
   position: absolute;
-  top: 15px;
-  right: 15px;
-  background: linear-gradient(135deg, #f39c12 0%, #e67e22 100%);
+  top: 12px;
+  right: 12px;
+  background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%);
   color: white;
-  padding: 8px 16px;
-  border-radius: 20px;
-  font-size: 0.85rem;
-  font-weight: 600;
+  padding: 6px 14px;
+  border-radius: 24px;
+  font-size: 0.8125rem;
+  font-weight: 500;
   display: flex;
   align-items: center;
-  gap: 5px;
-  box-shadow: 0 4px 15px rgba(243, 156, 18, 0.4);
+  gap: 4px;
+  box-shadow: 0 2px 8px rgba(251, 191, 36, 0.4);
   backdrop-filter: blur(10px);
   z-index: 2;
+  letter-spacing: 0.3px;
 }
 
 .news-content {
-  padding: 28px;
+  padding: 24px;
 }
 
 .news-meta {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 18px;
+  margin-bottom: 16px;
   gap: 12px;
 }
 
 .news-date {
-  color: #7f8c8d;
-  font-size: 0.9rem;
+  color: #8492a6;
+  font-size: 0.875rem;
   display: flex;
   align-items: center;
-  gap: 6px;
-  font-weight: 500;
+  gap: 5px;
+  font-weight: 400;
 }
 
 .news-title {
-  font-size: 1.4rem;
-  font-weight: 700;
-  color: #2c3e50;
-  margin: 0 0 18px 0;
-  line-height: 1.5;
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: #1f2937;
+  margin: 0 0 12px 0;
+  line-height: 1.6;
   display: -webkit-box;
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
@@ -758,10 +796,10 @@ onMounted(() => {
 }
 
 .news-summary {
-  color: #666;
+  color: #6b7280;
   line-height: 1.7;
-  margin: 0 0 22px 0;
-  font-size: 0.98rem;
+  margin: 0 0 20px 0;
+  font-size: 0.9375rem;
   display: -webkit-box;
   -webkit-line-clamp: 3;
   -webkit-box-orient: vertical;
@@ -772,8 +810,8 @@ onMounted(() => {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding-top: 18px;
-  border-top: 2px solid #f0f2f5;
+  padding-top: 16px;
+  border-top: 1px solid #e5e7eb;
 }
 
 .news-author {

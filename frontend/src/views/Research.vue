@@ -68,8 +68,8 @@
             </el-icon>
           </div>
           <div class="stats-content">
-            <span class="stats-number">{{ activeAreas }}</span>
-            <span class="stats-label">活跃领域</span>
+            <span class="stats-number">{{ projectCount }}</span>
+            <span class="stats-label">相关项目</span>
           </div>
           <div class="stats-decoration"></div>
         </div>
@@ -423,6 +423,7 @@ const researchAreas = ref([])
 const searchQuery = ref('')
 const detailVisible = ref(false)
 const selectedArea = ref(null)
+const projectCount = ref(0)
 
 // 搜索防抖
 let searchTimeout = null
@@ -453,11 +454,6 @@ const totalKeywords = computed(() => {
   return new Set(allKeywords).size
 })
 
-const activeAreas = computed(() => {
-  // 由于API已经过滤了active状态，所以所有返回的数据都是活跃的
-  return researchAreas.value.length
-})
-
 // 加载研究方向列表
 const loadResearchAreas = async () => {
   try {
@@ -480,6 +476,27 @@ const loadResearchAreas = async () => {
     ElMessage.error('加载研究方向失败')
   } finally {
     loading.value = false
+  }
+}
+
+// 加载项目数量
+const loadProjectCount = async () => {
+  try {
+    const response = await api.get('/projects', {
+      params: {
+        page: 1,
+        limit: 1
+      }
+    })
+
+    if (response && response.data) {
+      // 从分页信息中获取总数
+      projectCount.value = response.data.pagination?.total || response.data.total || 0
+    }
+  } catch (error) {
+    console.error('加载项目数量失败:', error)
+    // 失败时不显示错误信息，只是默认为0
+    projectCount.value = 0
   }
 }
 
@@ -541,6 +558,7 @@ const getRandomTagType = () => {
 // 初始化
 onMounted(() => {
   loadResearchAreas()
+  loadProjectCount()
 })
 </script>
 

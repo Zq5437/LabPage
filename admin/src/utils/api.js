@@ -468,6 +468,9 @@ export const contactApi = {
     // 标记留言为已读
     markAsRead: (id) => api.put(`/contact/messages/${id}/read`),
 
+    // 标记留言为未读
+    markAsUnread: (id) => api.put(`/contact/messages/${id}/unread`),
+
     // 批量标记已读
     batchMarkRead: (ids) => api.put('/contact/messages/batch-read', { ids }),
 

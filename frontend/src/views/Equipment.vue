@@ -38,17 +38,41 @@
 
       <!-- 统计信息 -->
       <div class="stats-section" v-if="!loading">
-        <div class="stats-item">
-          <span class="stats-number">{{ pagination.total }}</span>
-          <span class="stats-label">台设备</span>
+        <div class="stats-item stats-item-1">
+          <div class="stats-icon">
+            <el-icon>
+              <Monitor />
+            </el-icon>
+          </div>
+          <div class="stats-content">
+            <span class="stats-number">{{ pagination.total }}</span>
+            <span class="stats-label">设备总数</span>
+          </div>
+          <div class="stats-decoration"></div>
         </div>
-        <div class="stats-item">
-          <span class="stats-number">{{ uniqueCategories }}</span>
-          <span class="stats-label">个分类</span>
+        <div class="stats-item stats-item-2">
+          <div class="stats-icon">
+            <el-icon>
+              <Grid />
+            </el-icon>
+          </div>
+          <div class="stats-content">
+            <span class="stats-number">{{ uniqueCategories }}</span>
+            <span class="stats-label">设备分类</span>
+          </div>
+          <div class="stats-decoration"></div>
         </div>
-        <div class="stats-item">
-          <span class="stats-number">{{ uniqueManufacturers }}</span>
-          <span class="stats-label">个厂商</span>
+        <div class="stats-item stats-item-3">
+          <div class="stats-icon">
+            <el-icon>
+              <TrendCharts />
+            </el-icon>
+          </div>
+          <div class="stats-content">
+            <span class="stats-number">{{ uniqueManufacturers }}</span>
+            <span class="stats-label">合作厂商</span>
+          </div>
+          <div class="stats-decoration"></div>
         </div>
       </div>
 
@@ -236,7 +260,7 @@ import { ref, reactive, computed, onMounted } from 'vue'
 import { ElMessage } from 'element-plus'
 import api from '@/utils/api'
 import {
-  Search, Monitor, Location, Calendar, User
+  Search, Monitor, Location, Calendar, User, Grid, TrendCharts
 } from '@element-plus/icons-vue'
 
 // 响应式数据
@@ -439,29 +463,128 @@ onMounted(() => {
 }
 
 .stats-section {
-  display: flex;
-  gap: 40px;
-  margin: 30px 0;
-  padding: 20px;
-  background: white;
-  border-radius: 8px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 24px;
+  margin: 40px 0 60px;
 }
 
 .stats-item {
-  text-align: center;
+  background: white;
+  padding: 32px 28px;
+  border-radius: 16px;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
+  border: 1px solid rgba(0, 0, 0, 0.06);
+  position: relative;
+  overflow: hidden;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  display: flex;
+  align-items: center;
+  gap: 18px;
+}
+
+.stats-item:hover {
+  transform: translateY(-8px);
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.12);
+  border-color: rgba(67, 160, 71, 0.2);
+}
+
+.stats-decoration {
+  position: absolute;
+  right: -20px;
+  bottom: -20px;
+  width: 100px;
+  height: 100px;
+  border-radius: 50%;
+  opacity: 0.08;
+  transition: all 0.4s ease;
+}
+
+.stats-item-1 .stats-decoration {
+  background: linear-gradient(135deg, #43a047 0%, #66bb6a 100%);
+}
+
+.stats-item-2 .stats-decoration {
+  background: linear-gradient(135deg, #00897b 0%, #26a69a 100%);
+}
+
+.stats-item-3 .stats-decoration {
+  background: linear-gradient(135deg, #1e88e5 0%, #42a5f5 100%);
+}
+
+.stats-item:hover .stats-decoration {
+  transform: scale(1.5);
+  opacity: 0.12;
+}
+
+.stats-icon {
+  width: 64px;
+  height: 64px;
+  border-radius: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.8rem;
+  color: white;
+  flex-shrink: 0;
+  transition: all 0.3s ease;
+}
+
+.stats-item-1 .stats-icon {
+  background: linear-gradient(135deg, #43a047 0%, #66bb6a 100%);
+}
+
+.stats-item-2 .stats-icon {
+  background: linear-gradient(135deg, #00897b 0%, #26a69a 100%);
+}
+
+.stats-item-3 .stats-icon {
+  background: linear-gradient(135deg, #1e88e5 0%, #42a5f5 100%);
+}
+
+.stats-item:hover .stats-icon {
+  transform: scale(1.08) rotate(3deg);
+}
+
+.stats-content {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  flex: 1;
 }
 
 .stats-number {
-  display: block;
-  font-size: 2rem;
+  font-size: 2.2rem;
   font-weight: 700;
-  color: #43a047;
+  line-height: 1;
+  margin-bottom: 6px;
+}
+
+.stats-item-1 .stats-number {
+  background: linear-gradient(135deg, #43a047 0%, #66bb6a 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.stats-item-2 .stats-number {
+  background: linear-gradient(135deg, #00897b 0%, #26a69a 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.stats-item-3 .stats-number {
+  background: linear-gradient(135deg, #1e88e5 0%, #42a5f5 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
 }
 
 .stats-label {
-  font-size: 0.9rem;
-  color: #666;
+  font-size: 0.95rem;
+  color: #6b7280;
+  font-weight: 500;
 }
 
 .equipment-list {
@@ -767,9 +890,12 @@ onMounted(() => {
   }
 
   .stats-section {
-    flex-direction: column;
+    grid-template-columns: 1fr;
     gap: 20px;
-    text-align: center;
+  }
+
+  .stats-item {
+    padding: 28px 24px;
   }
 
   .equipment-grid {

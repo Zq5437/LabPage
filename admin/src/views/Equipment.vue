@@ -45,8 +45,10 @@
     </div>
 
     <!-- 设备列表 -->
-    <el-table :data="equipment" v-loading="loading" empty-text="暂无设备数据">
-      <el-table-column prop="name" label="设备名称" min-width="150">
+    <el-table :data="equipment" v-loading="loading" @sort-change="handleSort" empty-text="暂无设备数据">
+      <el-table-column prop="id" label="ID" width="80" sortable="custom" />
+
+      <el-table-column prop="name" label="设备名称" min-width="150" sortable="custom">
         <template #default="{ row }">
           <div class="equipment-cell">
             <img v-if="row.image_url" :src="row.image_url" class="equipment-image" @error="handleImageError" />
@@ -58,23 +60,23 @@
         </template>
       </el-table-column>
 
-      <el-table-column prop="category" label="分类" width="120">
+      <el-table-column prop="category" label="分类" width="120" sortable="custom">
         <template #default="{ row }">
-          <el-tag size="small">{{ row.category }}</el-tag>
+          <el-tag :type="getCategoryTagType(row.category)" size="small">{{ row.category }}</el-tag>
         </template>
       </el-table-column>
 
-      <el-table-column prop="manufacturer" label="厂商" width="150" />
+      <el-table-column prop="manufacturer" label="厂商" width="150" sortable="custom" />
 
-      <el-table-column prop="location" label="位置" width="120" />
+      <el-table-column prop="location" label="位置" width="120" sortable="custom" />
 
-      <el-table-column prop="purchase_date" label="购买日期" width="120">
+      <el-table-column prop="purchase_date" label="购买日期" width="120" sortable="custom">
         <template #default="{ row }">
           {{ formatDate(row.purchase_date) }}
         </template>
       </el-table-column>
 
-      <el-table-column prop="status" label="状态" width="100">
+      <el-table-column prop="status" label="状态" width="100" sortable="custom">
         <template #default="{ row }">
           <el-tag :type="getStatusType(row.status)" size="small">
             {{ getStatusText(row.status) }}
@@ -257,6 +259,12 @@ const pagination = reactive({
   total: 0
 })
 
+// 排序数据
+const sort = reactive({
+  field: 'created_at',
+  order: 'DESC'
+})
+
 // 表单数据
 const form = reactive({
   name: '',
@@ -297,6 +305,8 @@ const loadEquipment = async () => {
     const params = {
       page: pagination.page,
       limit: pagination.limit,
+      sort: sort.field,
+      order: sort.order,
       ...searchForm
     }
 
@@ -319,6 +329,19 @@ const loadEquipment = async () => {
 // 搜索
 const handleSearch = () => {
   pagination.page = 1
+  loadEquipment()
+}
+
+// 排序处理
+const handleSort = ({ prop, order }) => {
+  if (prop) {
+    sort.field = prop
+    sort.order = order === 'ascending' ? 'ASC' : 'DESC'
+  } else {
+    // 取消排序，恢复默认
+    sort.field = 'created_at'
+    sort.order = 'DESC'
+  }
   loadEquipment()
 }
 
@@ -449,7 +472,19 @@ const resetForm = () => {
   })
 }
 
+// 获取分类标签颜色
+const getCategoryTagType = (category) => {
+  const categoryColorMap = {
+    '计算设备': 'primary',   // 蓝色
+    '测试仪器': 'success',   // 绿色
+    '实验器材': 'warning',   // 橙色
+    '办公设备': 'info'       // 灰色
+  }
+  return categoryColorMap[category] || ''
+}
+
 // 获取状态类型
+
 const getStatusType = (status) => {
   const statusMap = {
     active: 'success',

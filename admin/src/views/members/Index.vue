@@ -46,7 +46,7 @@
 
       <!-- 数据表格 -->
       <el-table :data="members" v-loading="loading" style="width: 100%" @sort-change="handleSort">
-        <el-table-column prop="id" label="ID" width="60" sortable="custom" />
+        <el-table-column prop="id" label="ID" width="80" sortable="custom" />
 
         <el-table-column label="头像" width="80">
           <template #default="{ row }">
