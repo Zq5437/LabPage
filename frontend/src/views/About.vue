@@ -9,13 +9,13 @@
       </div>
       <div class="container">
         <div class="hero-content">
-          <div class="hero-badge">探索 · 创新 · 卓越</div>
-          <h1 class="hero-title">关于我们</h1>
-          <p class="hero-subtitle">以研究为本，用技术创造价值</p>
-          <p class="hero-description">
+          <div class="hero-badge" data-aos="fade-down">探索 · 创新 · 卓越</div>
+          <h1 class="hero-title" data-aos="fade-up" data-aos-delay="100">关于我们</h1>
+          <p class="hero-subtitle" data-aos="fade-up" data-aos-delay="200">以研究为本，用技术创造价值</p>
+          <p class="hero-description" data-aos="fade-up" data-aos-delay="300">
             致力于前沿科技研究，培养创新人才，推动科技进步与产业发展
           </p>
-          <div class="hero-actions">
+          <div class="hero-actions" data-aos="fade-up" data-aos-delay="400">
             <router-link to="/research">
               <el-button type="primary" size="large" class="hero-btn primary-btn">
                 <el-icon>
@@ -39,15 +39,15 @@
 
     <div class="container">
       <!-- 实验室简介 - 重新设计 -->
-      <section class="lab-intro reveal-on-scroll" v-loading="loading">
-        <div class="section-header">
+      <section class="lab-intro" v-loading="loading">
+        <div class="section-header" data-aos="fade-up">
           <div class="section-badge">INTRODUCTION</div>
           <h2>实验室简介</h2>
           <div class="section-divider"></div>
         </div>
 
         <div class="intro-content">
-          <div class="intro-text">
+          <div class="intro-text" data-aos="fade-right">
             <div class="description" v-if="labInfo.description">
               {{ labInfo.description }}
             </div>
@@ -58,7 +58,8 @@
             </div>
 
             <div class="key-stats">
-              <div class="stat-item reveal-on-scroll" v-for="(stat, index) in statsDisplay" :key="index">
+              <div class="stat-item" v-for="(stat, index) in statsDisplay" :key="index" data-aos="fade-up"
+                :data-aos-delay="index * 100">
                 <div class="stat-icon" :style="{ background: stat.color }">
                   <el-icon>
                     <component :is="stat.icon" />
@@ -72,7 +73,7 @@
             </div>
           </div>
 
-          <div class="intro-image reveal-on-scroll">
+          <div class="intro-image" data-aos="fade-left" data-aos-delay="200">
             <div class="image-wrapper">
               <img v-if="labInfo.banner_url || labInfo.banner" :src="labInfo.banner_url || labInfo.banner" alt="实验室"
                 @error="handleImageError" />
@@ -91,17 +92,18 @@
       </section>
 
       <!-- 发展历程 - 增强版（带图片） -->
-      <section class="timeline-section section-with-bg reveal-on-scroll">
-        <div class="section-header">
+      <section class="timeline-section section-with-bg">
+        <div class="section-header" data-aos="fade-up">
           <div class="section-badge">MILESTONES</div>
           <h2>发展历程</h2>
           <div class="section-divider"></div>
           <p class="section-description">见证我们的成长足迹，每一步都是突破与创新</p>
         </div>
         <div class="timeline">
-          <div v-for="(milestone, index) in milestones" :key="index" class="timeline-item reveal-on-scroll"
+          <div v-for="(milestone, index) in milestones" :key="index" class="timeline-item"
             :class="{ 'timeline-item-left': index % 2 === 0, 'timeline-item-right': index % 2 === 1 }"
-            :style="{ '--item-index': index }">
+            :style="{ '--item-index': index }" :data-aos="index % 2 === 0 ? 'fade-right' : 'fade-left'"
+            :data-aos-delay="index * 100">
             <!-- 空白侧的装饰年份 -->
             <div class="timeline-year-decoration">
               <span class="decoration-year">{{ milestone.year }}</span>
@@ -110,7 +112,7 @@
 
             <div class="timeline-content">
               <!-- 图片区域 -->
-              <div class="timeline-image">
+              <div class="timeline-image" data-aos="zoom-in" :data-aos-delay="index * 100 + 200">
                 <img v-if="milestone.image" :src="milestone.image" :alt="milestone.title" />
                 <div v-else class="timeline-image-placeholder">
                   <div class="placeholder-overlay">
@@ -123,7 +125,7 @@
               </div>
 
               <!-- 内容区域 -->
-              <div class="timeline-info">
+              <div class="timeline-info" data-aos="fade-up" :data-aos-delay="index * 100 + 300">
                 <div class="timeline-year-badge">
                   <span class="year-text">{{ milestone.year }}</span>
                 </div>
@@ -133,7 +135,7 @@
               </div>
             </div>
 
-            <div class="timeline-marker">
+            <div class="timeline-marker" data-aos="zoom-in" :data-aos-delay="index * 100 + 400">
               <div class="marker-ring"></div>
               <div class="marker-dot"></div>
             </div>
@@ -142,30 +144,31 @@
       </section>
 
       <!-- 研究领域 - 重新设计 -->
-      <section class="research-areas-section reveal-on-scroll" v-if="researchAreas.length > 0">
-        <div class="section-header">
+      <section class="research-areas-section" v-if="researchAreas.length > 0">
+        <div class="section-header" data-aos="fade-up">
           <div class="section-badge">RESEARCH</div>
           <h2>主要研究领域</h2>
           <div class="section-divider"></div>
         </div>
         <div class="areas-grid">
-          <div v-for="(area, index) in (researchAreas || []).slice(0, 6)" :key="area.id"
-            class="area-card reveal-on-scroll" :style="{ '--card-index': index }">
+          <div v-for="(area, index) in (researchAreas || []).slice(0, 6)" :key="area.id" class="area-card"
+            :style="{ '--card-index': index }" data-aos="fade-up" :data-aos-delay="index * 100">
             <div class="area-number">{{ String(index + 1).padStart(2, '0') }}</div>
-            <div class="area-icon">
+            <div class="area-icon" data-aos="zoom-in" :data-aos-delay="index * 100 + 200">
               <el-icon>
                 <TrendCharts />
               </el-icon>
             </div>
-            <h3>{{ area.title }}</h3>
-            <p>{{ (area.description || '').substring(0, 100) }}{{ (area.description || '').length > 100 ? '...' : '' }}
+            <h3 data-aos="fade-up" :data-aos-delay="index * 100 + 300">{{ area.title }}</h3>
+            <p data-aos="fade-up" :data-aos-delay="index * 100 + 400">
+              {{ (area.description || '').substring(0, 100) }}{{ (area.description || '').length > 100 ? '...' : '' }}
             </p>
-            <div class="area-footer">
+            <div class="area-footer" data-aos="fade-up" :data-aos-delay="index * 100 + 500">
               <span class="learn-more">了解更多 →</span>
             </div>
           </div>
         </div>
-        <div class="more-areas">
+        <div class="more-areas" data-aos="fade-up" data-aos-delay="600">
           <router-link to="/research">
             <el-button type="primary" size="large" class="modern-btn">
               <span>查看全部研究方向</span>
@@ -178,61 +181,65 @@
       </section>
 
       <!-- 实验室文化 - 重新设计 -->
-      <section class="culture-section section-with-bg reveal-on-scroll">
-        <div class="section-header">
+      <section class="culture-section section-with-bg">
+        <div class="section-header" data-aos="fade-up">
           <div class="section-badge">CULTURE</div>
           <h2>实验室文化</h2>
           <div class="section-divider"></div>
         </div>
         <div class="culture-grid">
-          <div class="culture-item reveal-on-scroll" v-for="(item, index) in cultureItems" :key="index"
-            :style="{ '--item-index': index }">
+          <div class="culture-item" v-for="(item, index) in cultureItems" :key="index"
+            :style="{ '--item-index': index }" data-aos="fade-up" :data-aos-delay="index * 100">
             <div class="culture-decoration"></div>
-            <div class="culture-icon" :style="{ background: item.color }">
+            <div class="culture-icon" :style="{ background: item.color }" data-aos="zoom-in"
+              :data-aos-delay="index * 100 + 200">
               <el-icon>
                 <component :is="item.icon" />
               </el-icon>
             </div>
-            <h3>{{ item.title }}</h3>
-            <p>{{ item.description }}</p>
+            <h3 data-aos="fade-up" :data-aos-delay="index * 100 + 300">{{ item.title }}</h3>
+            <p data-aos="fade-up" :data-aos-delay="index * 100 + 400">{{ item.description }}</p>
           </div>
         </div>
       </section>
 
       <!-- 实验室设施 - 重新设计 -->
-      <section class="facilities-section reveal-on-scroll">
-        <div class="section-header">
+      <section class="facilities-section">
+        <div class="section-header" data-aos="fade-up">
           <div class="section-badge">FACILITIES</div>
           <h2>实验室设施</h2>
           <div class="section-divider"></div>
         </div>
         <div class="facilities-content">
           <div class="facilities-grid">
-            <div class="facility-card reveal-on-scroll" v-for="(facility, index) in facilities" :key="index"
-              :style="{ '--item-index': index }">
-              <div class="facility-icon" :style="{ background: facility.color }">
+            <div class="facility-card" v-for="(facility, index) in facilities" :key="index"
+              :style="{ '--item-index': index }" data-aos="fade-up" :data-aos-delay="index * 100">
+              <div class="facility-icon" :style="{ background: facility.color }" data-aos="zoom-in"
+                :data-aos-delay="index * 100 + 200">
                 <el-icon>
                   <component :is="facility.icon" />
                 </el-icon>
               </div>
               <div class="facility-body">
-                <h3>{{ facility.title }}</h3>
-                <p>{{ facility.description }}</p>
+                <h3 data-aos="fade-up" :data-aos-delay="index * 100 + 300">{{ facility.title }}</h3>
+                <p data-aos="fade-up" :data-aos-delay="index * 100 + 400">{{ facility.description }}</p>
               </div>
             </div>
           </div>
 
           <div class="facilities-stats">
-            <div class="stats-card reveal-on-scroll" v-for="(stat, index) in facilityStats" :key="index"
-              :style="{ '--item-index': index }">
-              <div class="stats-icon" :style="{ background: stat.color }">
+            <div class="stats-card" v-for="(stat, index) in facilityStats" :key="index"
+              :style="{ '--item-index': index }" data-aos="fade-up" :data-aos-delay="index * 100 + 500">
+              <div class="stats-icon" :style="{ background: stat.color }" data-aos="zoom-in"
+                :data-aos-delay="index * 100 + 600">
                 <el-icon>
                   <component :is="stat.icon" />
                 </el-icon>
               </div>
               <div class="stats-content">
-                <span class="stats-number">{{ stat.value }}</span>
-                <span class="stats-label">{{ stat.label }}</span>
+                <span class="stats-number" data-aos="fade-up" :data-aos-delay="index * 100 + 700">{{ stat.value
+                  }}</span>
+                <span class="stats-label" data-aos="fade-up" :data-aos-delay="index * 100 + 800">{{ stat.label }}</span>
               </div>
             </div>
           </div>
@@ -240,30 +247,32 @@
       </section>
 
       <!-- 合作伙伴 - 重新设计 -->
-      <section class="partners-section section-with-bg reveal-on-scroll">
-        <div class="section-header">
+      <section class="partners-section section-with-bg">
+        <div class="section-header" data-aos="fade-up">
           <div class="section-badge">PARTNERS</div>
           <h2>合作伙伴</h2>
           <div class="section-divider"></div>
         </div>
         <div class="partners-content">
-          <p class="partners-intro reveal-on-scroll">
+          <p class="partners-intro" data-aos="fade-up" data-aos-delay="100">
             我们与国内外知名高校、科研院所和企业建立了良好的合作关系，
             共同推进科技创新和人才培养。
           </p>
           <div class="partners-grid">
-            <div class="partner-category reveal-on-scroll" v-for="(category, index) in partnerCategories" :key="index"
-              :style="{ '--item-index': index }">
+            <div class="partner-category" v-for="(category, index) in partnerCategories" :key="index"
+              :style="{ '--item-index': index }" data-aos="fade-up" :data-aos-delay="index * 100 + 200">
               <div class="category-header">
-                <div class="category-icon" :style="{ background: category.color }">
+                <div class="category-icon" :style="{ background: category.color }" data-aos="zoom-in"
+                  :data-aos-delay="index * 100 + 300">
                   <el-icon>
                     <component :is="category.icon" />
                   </el-icon>
                 </div>
-                <h3>{{ category.title }}</h3>
+                <h3 data-aos="fade-up" :data-aos-delay="index * 100 + 400">{{ category.title }}</h3>
               </div>
               <div class="category-body">
-                <div class="partner-logo-placeholder" v-for="(partner, idx) in category.partners" :key="idx">
+                <div class="partner-logo-placeholder" v-for="(partner, idx) in category.partners" :key="idx"
+                  data-aos="fade-up" :data-aos-delay="index * 100 + idx * 50 + 500">
                   <span class="partner-name">{{ partner }}</span>
                 </div>
               </div>
@@ -273,28 +282,29 @@
       </section>
 
       <!-- 联系信息 - 重新设计 -->
-      <section class="contact-section reveal-on-scroll">
-        <div class="section-header">
+      <section class="contact-section">
+        <div class="section-header" data-aos="fade-up">
           <div class="section-badge">CONTACT</div>
           <h2>联系我们</h2>
           <div class="section-divider"></div>
         </div>
         <div class="contact-container">
           <div class="contact-grid">
-            <div class="contact-item reveal-on-scroll" v-for="(item, index) in contactItems" :key="index"
-              :style="{ '--item-index': index }">
-              <div class="contact-icon" :style="{ background: item.color }">
+            <div class="contact-item" v-for="(item, index) in contactItems" :key="index"
+              :style="{ '--item-index': index }" data-aos="fade-up" :data-aos-delay="index * 100">
+              <div class="contact-icon" :style="{ background: item.color }" data-aos="zoom-in"
+                :data-aos-delay="index * 100 + 200">
                 <el-icon>
                   <component :is="item.icon" />
                 </el-icon>
               </div>
               <div class="contact-info">
-                <h3>{{ item.title }}</h3>
-                <p>{{ item.value }}</p>
+                <h3 data-aos="fade-up" :data-aos-delay="index * 100 + 300">{{ item.title }}</h3>
+                <p data-aos="fade-up" :data-aos-delay="index * 100 + 400">{{ item.value }}</p>
               </div>
             </div>
           </div>
-          <div class="contact-action">
+          <div class="contact-action" data-aos="fade-up" data-aos-delay="500">
             <router-link to="/contact">
               <el-button type="primary" size="large" class="modern-btn">
                 <span>查看详细联系方式</span>
@@ -615,83 +625,7 @@ onMounted(() => {
   loadLabInfo()
   loadResearchAreas()
   loadStats()
-  initScrollReveal()
 })
-
-// 滚动显隐动画（IntersectionObserver + MutationObserver，支持动态内容）
-const initScrollReveal = () => {
-  if (typeof window === 'undefined') return
-
-  const preferReducedMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches
-  if (preferReducedMotion) {
-    document.querySelectorAll('.reveal-on-scroll').forEach((el) => el.classList.add('is-visible'))
-    return
-  }
-
-  let intersectionObserver
-  let mutationObserver
-
-  const ensureVisibleIfInViewport = (el, ratio = 0.12) => {
-    const rect = el.getBoundingClientRect()
-    const vh = window.innerHeight || document.documentElement.clientHeight
-    const visibleHeight = Math.min(rect.bottom, vh) - Math.max(rect.top, 0)
-    const elHeight = Math.max(rect.height, 1)
-    return visibleHeight / elHeight >= ratio
-  }
-
-  const bindElement = (el) => {
-    if (!el || el.dataset.revealBound === '1') return
-    el.dataset.revealBound = '1'
-    if (ensureVisibleIfInViewport(el)) {
-      el.classList.add('is-visible')
-      return
-    }
-    intersectionObserver.observe(el)
-  }
-
-  const bindAll = () => {
-    document.querySelectorAll('.reveal-on-scroll').forEach(bindElement)
-  }
-
-  if ('IntersectionObserver' in window) {
-    intersectionObserver = new IntersectionObserver((entries) => {
-      entries.forEach((entry) => {
-        if (entry.isIntersecting) {
-          entry.target.classList.add('is-visible')
-          intersectionObserver.unobserve(entry.target)
-        }
-      })
-    }, { threshold: 0.12, rootMargin: '0px 0px -10% 0px' })
-  } else {
-    // 退化处理：直接显示
-    document.querySelectorAll('.reveal-on-scroll').forEach((el) => el.classList.add('is-visible'))
-    return
-  }
-
-  // 首次绑定
-  bindAll()
-
-  // 监听后续动态插入节点（如异步加载的研究领域卡片）
-  mutationObserver = new MutationObserver((mutations) => {
-    for (const mutation of mutations) {
-      if (mutation.type === 'childList') {
-        mutation.addedNodes.forEach((node) => {
-          if (!(node instanceof HTMLElement)) return
-          if (node.classList && node.classList.contains('reveal-on-scroll')) bindElement(node)
-          node.querySelectorAll && node.querySelectorAll('.reveal-on-scroll').forEach(bindElement)
-        })
-      }
-    }
-  })
-
-  const root = document.querySelector('.about-page') || document.body
-  mutationObserver.observe(root, { childList: true, subtree: true })
-
-  onUnmounted(() => {
-    try { intersectionObserver && intersectionObserver.disconnect() } catch (_) { }
-    try { mutationObserver && mutationObserver.disconnect() } catch (_) { }
-  })
-}
 </script>
 
 <style scoped>
@@ -1399,8 +1333,8 @@ section:not(.section-with-bg)+section:not(.section-with-bg)::before {
 /* 时间轴标记 */
 .timeline-marker {
   position: absolute;
-  left: 50%;
-  top: 50%;
+  left: calc(50% - 14px);
+  top: calc(50% - 14px);
   width: 28px;
   height: 28px;
   transform: translate(-50%, -50%);
@@ -1957,22 +1891,9 @@ section:not(.section-with-bg)+section:not(.section-with-bg)::before {
   margin-top: 20px;
 }
 
-/* ========== Scroll Reveal Animation ========== */
-.reveal-on-scroll {
-  opacity: 0;
-  transform: translateY(20px);
-  transition: opacity 0.6s ease-out, transform 0.6s ease-out;
-}
-
-.reveal-on-scroll.is-visible {
-  opacity: 1;
-  transform: translateY(0);
-}
-
 /* 动效偏好：用户偏好减少动画时，禁用过渡 */
 @media (prefers-reduced-motion: reduce) {
 
-  .reveal-on-scroll,
   .area-card,
   .culture-item,
   .facility-card,
@@ -1984,6 +1905,12 @@ section:not(.section-with-bg)+section:not(.section-with-bg)::before {
     transition: none !important;
     transform: none !important;
     animation: none !important;
+  }
+
+  [data-aos] {
+    opacity: 1 !important;
+    transform: none !important;
+    transition: none !important;
   }
 }
 

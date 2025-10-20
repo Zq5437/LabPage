@@ -3,15 +3,14 @@
     <!-- 页面头部 -->
     <div class="contact-header">
       <div class="header-background">
-        <div class="floating-shapes">
-          <div class="shape shape-1"></div>
-          <div class="shape shape-2"></div>
-          <div class="shape shape-3"></div>
-        </div>
+        <div class="gradient-orb orb-1"></div>
+        <div class="gradient-orb orb-2"></div>
+        <div class="gradient-orb orb-3"></div>
       </div>
       <div class="container">
-        <h1>联系我们</h1>
-        <p>欢迎与我们取得联系，我们期待与您的交流合作</p>
+        <div class="hero-badge" data-aos="fade-down">保持联系 · 共同进步</div>
+        <h1 data-aos="fade-up" data-aos-delay="100">联系我们</h1>
+        <p data-aos="fade-up" data-aos-delay="200">欢迎与我们取得联系，我们期待与您的交流合作</p>
       </div>
     </div>
 
@@ -19,15 +18,16 @@
       <!-- 联系信息卡片 -->
       <section class="contact-info-section" v-loading="loading">
         <div class="contact-cards">
-          <div class="contact-card" v-for="(item, index) in contactItems" :key="index">
-            <div class="contact-icon">
+          <div class="contact-card" v-for="(item, index) in contactItems" :key="index" data-aos="fade-up"
+            :data-aos-delay="index * 100">
+            <div class="contact-icon" data-aos="zoom-in" :data-aos-delay="index * 100 + 200">
               <el-icon>
                 <component :is="item.icon" />
               </el-icon>
             </div>
             <div class="contact-content">
-              <h3>{{ item.title }}</h3>
-              <p>{{ item.value }}</p>
+              <h3 data-aos="fade-up" :data-aos-delay="index * 100 + 300">{{ item.title }}</h3>
+              <p data-aos="fade-up" :data-aos-delay="index * 100 + 400">{{ item.value }}</p>
             </div>
             <div class="card-glow"></div>
           </div>
@@ -37,24 +37,26 @@
       <!-- 实验室信息 -->
       <section class="lab-overview" v-if="labInfo.name">
         <div class="overview-content">
-          <div class="overview-text">
-            <h2>{{ labInfo.name }}</h2>
-            <h3 v-if="labInfo.name_en" class="english-name">{{ labInfo.name_en }}</h3>
-            <div class="description">
+          <div class="overview-text" data-aos="fade-right">
+            <h2 data-aos="fade-up">{{ labInfo.name }}</h2>
+            <h3 v-if="labInfo.name_en" class="english-name" data-aos="fade-up" data-aos-delay="100">{{ labInfo.name_en
+              }}</h3>
+            <div class="description" data-aos="fade-up" data-aos-delay="200">
               {{ labInfo.description || '暂无实验室描述信息' }}
             </div>
             <div class="lab-details">
-              <div class="detail-item" v-if="labInfo.director">
+              <div class="detail-item" v-if="labInfo.director" data-aos="fade-up" data-aos-delay="300">
                 <span class="detail-label">实验室主任：</span>
                 <span class="detail-value">{{ labInfo.director }}</span>
               </div>
-              <div class="detail-item" v-if="labInfo.established_year">
+              <div class="detail-item" v-if="labInfo.established_year" data-aos="fade-up" data-aos-delay="400">
                 <span class="detail-label">成立时间：</span>
                 <span class="detail-value">{{ labInfo.established_year }}年</span>
               </div>
             </div>
           </div>
-          <div class="overview-image" v-if="labInfo.banner || labInfo.banner_url">
+          <div class="overview-image" v-if="labInfo.banner || labInfo.banner_url" data-aos="fade-left"
+            data-aos-delay="200">
             <img :src="labInfo.banner || labInfo.banner_url" alt="实验室" @error="handleImageError" />
             <div class="image-overlay"></div>
           </div>
@@ -63,11 +65,11 @@
 
       <!-- 联系表单 -->
       <section class="contact-form-section">
-        <div class="form-header">
+        <div class="form-header" data-aos="fade-up">
           <h2>在线留言</h2>
           <p>请填写以下信息，我们将尽快回复您</p>
         </div>
-        <div class="form-container">
+        <div class="form-container" data-aos="fade-up" data-aos-delay="200">
           <el-form ref="contactFormRef" :model="contactForm" :rules="contactFormRules" label-position="top" size="large"
             class="beautiful-form">
             <div class="form-row">
@@ -114,16 +116,17 @@
 
       <!-- 快速链接 -->
       <section class="quick-links">
-        <h2>快速链接</h2>
+        <h2 data-aos="fade-up">快速链接</h2>
         <div class="links-grid">
-          <router-link v-for="(link, index) in quickLinks" :key="index" :to="link.path" class="link-card">
-            <div class="link-icon">
+          <router-link v-for="(link, index) in quickLinks" :key="index" :to="link.path" class="link-card"
+            data-aos="fade-up" :data-aos-delay="index * 100">
+            <div class="link-icon" data-aos="zoom-in" :data-aos-delay="index * 100 + 200">
               <el-icon>
                 <component :is="link.icon" />
               </el-icon>
             </div>
-            <h3>{{ link.title }}</h3>
-            <p>{{ link.description }}</p>
+            <h3 data-aos="fade-up" :data-aos-delay="index * 100 + 300">{{ link.title }}</h3>
+            <p data-aos="fade-up" :data-aos-delay="index * 100 + 400">{{ link.description }}</p>
             <div class="link-arrow">
               <el-icon>
                 <ArrowRight />
@@ -346,8 +349,9 @@ onMounted(() => {
 <style scoped>
 .contact-page {
   min-height: 100vh;
-  background: linear-gradient(135deg, #f8fbff 0%, #eef2ff 100%);
+  background: linear-gradient(180deg, #f8fafb 0%, #ffffff 100%);
   position: relative;
+  overflow-x: hidden;
 }
 
 /* 页面头部 */
@@ -367,104 +371,89 @@ onMounted(() => {
   right: 0;
   bottom: 0;
   overflow: hidden;
+  opacity: 0.15;
 }
 
-.floating-shapes {
+.gradient-orb {
   position: absolute;
-  width: 100%;
-  height: 100%;
-}
-
-.shape {
-  position: absolute;
-  opacity: 0.1;
-  animation: float 6s ease-in-out infinite;
-}
-
-.shape-1 {
-  top: 20%;
-  left: 10%;
-  width: 80px;
-  height: 80px;
-  background: white;
   border-radius: 50%;
+  filter: blur(60px);
+  animation: float 20s infinite ease-in-out;
+}
+
+.orb-1 {
+  width: 400px;
+  height: 400px;
+  background: #fff;
+  top: -200px;
+  left: -100px;
   animation-delay: 0s;
 }
 
-.shape-2 {
+.orb-2 {
+  width: 300px;
+  height: 300px;
+  background: #4facfe;
   top: 50%;
-  right: 15%;
-  width: 60px;
-  height: 60px;
-  background: white;
-  border-radius: 30% 70% 70% 30% / 30% 30% 70% 70%;
-  animation-delay: 2s;
+  right: -150px;
+  animation-delay: 7s;
 }
 
-.shape-3 {
-  bottom: 30%;
-  left: 20%;
-  width: 100px;
-  height: 100px;
-  background: white;
-  border-radius: 20px;
-  transform: rotate(45deg);
-  animation-delay: 4s;
+.orb-3 {
+  width: 350px;
+  height: 350px;
+  background: #f093fb;
+  bottom: -150px;
+  left: 50%;
+  animation-delay: 14s;
 }
 
 @keyframes float {
 
   0%,
   100% {
-    transform: translateY(0px) rotate(0deg);
+    transform: translate(0, 0) scale(1);
   }
 
-  50% {
-    transform: translateY(-20px) rotate(180deg);
+  33% {
+    transform: translate(30px, -50px) scale(1.1);
+  }
+
+  66% {
+    transform: translate(-20px, 20px) scale(0.9);
   }
 }
 
-.contact-header h1 {
-  font-size: 4rem;
-  margin: 0 0 25px 0;
-  font-weight: 900;
-  text-shadow: 2px 2px 8px rgba(0, 0, 0, 0.3);
-  animation: slideInDown 1s ease-out;
+.hero-badge {
+  display: inline-block;
+  padding: 8px 24px;
+  background: rgba(255, 255, 255, 0.2);
+  backdrop-filter: blur(10px);
+  border-radius: 50px;
+  font-size: 0.9rem;
+  font-weight: 500;
+  letter-spacing: 2px;
+  margin-bottom: 24px;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+}
+
+.contact-header .container {
   position: relative;
-  z-index: 2;
+  z-index: 1;
+}
+
+.contact-header h1 {
+  font-size: 3.5rem;
+  margin: 0 0 16px 0;
+  font-weight: 800;
+  letter-spacing: -1px;
 }
 
 .contact-header p {
   font-size: 1.5rem;
   margin: 0;
   opacity: 0.95;
-  animation: slideInUp 1s ease-out 0.3s both;
-  position: relative;
-  z-index: 2;
-}
-
-@keyframes slideInDown {
-  from {
-    opacity: 0;
-    transform: translateY(-50px);
-  }
-
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-@keyframes slideInUp {
-  from {
-    opacity: 0;
-    transform: translateY(50px);
-  }
-
-  to {
-    opacity: 0.95;
-    transform: translateY(0);
-  }
+  font-weight: 300;
 }
 
 .container {
@@ -491,52 +480,37 @@ section h2 {
 
 /* 联系信息卡片 */
 .contact-info-section {
-  margin-top: -60px;
+  margin-top: -80px;
   position: relative;
   z-index: 10;
 }
 
 .contact-cards {
   display: grid;
-  /* 桌面四列，平板两列，手机一列 */
   grid-template-columns: repeat(4, 1fr);
   gap: 24px;
-  animation: fadeInUp 1s ease-out 0.6s both;
 }
 
 @media (max-width: 1200px) {
-  .contact-cards {
-    grid-template-columns: repeat(3, 1fr);
-  }
-}
-
-@media (max-width: 992px) {
   .contact-cards {
     grid-template-columns: repeat(2, 1fr);
   }
 }
 
-@keyframes fadeInUp {
-  from {
-    opacity: 0;
-    transform: translateY(80px);
-  }
-
-  to {
-    opacity: 1;
-    transform: translateY(0);
+@media (max-width: 768px) {
+  .contact-cards {
+    grid-template-columns: 1fr;
   }
 }
 
 .contact-card {
-  background: rgba(255, 255, 255, 0.98);
-  backdrop-filter: blur(16px);
-  padding: 32px 24px;
-  border-radius: 16px;
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+  background: #fff;
+  padding: 40px 30px;
+  border-radius: 20px;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.08);
   text-align: center;
-  transition: transform 0.2s ease-out, box-shadow 0.2s ease-out, border-color 0.2s ease-out;
-  border: 1px solid rgba(229, 231, 235, 0.9);
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  border: 1px solid transparent;
   position: relative;
   overflow: hidden;
 }
@@ -545,83 +519,54 @@ section h2 {
   content: '';
   position: absolute;
   top: 0;
-  left: -100%;
-  width: 100%;
-  height: 100%;
-  background: linear-gradient(90deg, transparent, rgba(102, 126, 234, 0.2), transparent);
-  transition: none;
-  display: none;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 0.4s ease;
+}
+
+.contact-card:hover::before {
+  transform: scaleX(1);
 }
 
 .contact-card:hover {
-  transform: translateY(-6px) scale(1.01);
-  box-shadow: 0 14px 28px rgba(102, 126, 234, 0.18);
+  transform: translateY(-10px);
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.12);
+  border-color: #e2e8f0;
 }
-
-
 
 .card-glow {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  width: 88px;
-  height: 88px;
-  background: radial-gradient(circle, rgba(102, 126, 234, 0.12) 0%, transparent 70%);
-  border-radius: 50%;
-  transform: translate(-50%, -50%);
-  opacity: 0;
-  transition: opacity 0.4s ease;
-}
-
-.contact-card:hover .card-glow {
-  opacity: 0.35;
+  display: none;
 }
 
 .contact-icon {
-  width: 72px;
-  height: 72px;
+  width: 80px;
+  height: 80px;
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   color: white;
-  border-radius: 50%;
+  border-radius: 16px;
   display: flex;
   align-items: center;
   justify-content: center;
-  margin: 0 auto 20px;
-  font-size: 1.6rem;
-  box-shadow: 0 8px 22px rgba(102, 126, 234, 0.35);
+  margin: 0 auto 24px;
+  font-size: 2rem;
   transition: all 0.3s ease;
   position: relative;
 }
 
-.contact-icon::after {
-  content: '';
-  position: absolute;
-  top: -5px;
-  left: -5px;
-  right: -5px;
-  bottom: -5px;
-  background: linear-gradient(135deg, #667eea, #764ba2);
-  border-radius: 50%;
-  z-index: -1;
-  opacity: 0;
-  transition: opacity 0.4s ease;
-}
-
 .contact-card:hover .contact-icon {
-  transform: scale(1.06);
-  box-shadow: 0 12px 32px rgba(102, 126, 234, 0.38);
-}
-
-.contact-card:hover .contact-icon::after {
-  opacity: 0.4;
+  transform: scale(1.1) rotate(5deg);
 }
 
 .contact-content h3 {
-  color: #2c3e50;
-  margin: 0 0 6px 0;
-  font-size: 1.1rem;
-  font-weight: 700;
-  transition: color 0.2s ease;
+  color: #1a202c;
+  margin: 0 0 12px 0;
+  font-size: 1.2rem;
+  font-weight: 600;
+  transition: color 0.3s ease;
 }
 
 .contact-card:hover .contact-content h3 {
@@ -629,40 +574,20 @@ section h2 {
 }
 
 .contact-content p {
-  color: #606266;
+  color: #718096;
   margin: 0;
   font-size: 0.95rem;
-  line-height: 1.7;
-  transition: color 0.2s ease;
-}
-
-.contact-card:hover .contact-content p {
-  color: #555;
+  line-height: 1.6;
 }
 
 /* 实验室概览 */
 .lab-overview {
-  background: rgba(255, 255, 255, 0.98);
-  backdrop-filter: blur(16px);
+  background: #fff;
   border-radius: 24px;
-  padding: 48px;
-  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.08);
-  border: 1px solid rgba(229, 231, 235, 0.9);
-  animation: fadeInUp 1s ease-out 0.9s both;
+  padding: 60px;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.06);
   position: relative;
   overflow: hidden;
-}
-
-.lab-overview::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  right: 0;
-  width: 300px;
-  height: 300px;
-  background: radial-gradient(circle, rgba(118, 75, 162, 0.1) 0%, transparent 70%);
-  border-radius: 50%;
-  transform: translate(50%, -50%);
 }
 
 .overview-content {
@@ -673,14 +598,15 @@ section h2 {
 }
 
 .overview-text h2 {
-  font-size: 2.4rem;
+  font-size: 2.5rem;
   margin: 0 0 12px 0;
   text-align: left;
-  font-weight: 800;
+  font-weight: 700;
+  color: #1a202c;
 }
 
 .english-name {
-  color: #666;
+  color: #718096;
   font-size: 1.1rem;
   font-weight: 400;
   margin: 0 0 24px 0;
@@ -688,10 +614,10 @@ section h2 {
 }
 
 .description {
-  color: #555;
+  color: #4a5568;
   line-height: 1.9;
-  font-size: 1.05rem;
-  margin-bottom: 24px;
+  font-size: 1.1rem;
+  margin-bottom: 30px;
 }
 
 .lab-details {
@@ -703,25 +629,30 @@ section h2 {
 .detail-item {
   display: flex;
   align-items: center;
+  padding: 12px 16px;
+  background: linear-gradient(135deg, #f8fafb 0%, #ffffff 100%);
+  border-radius: 12px;
+  border: 1px solid #e2e8f0;
 }
 
 .detail-label {
-  font-weight: 700;
-  color: #2c3e50;
+  font-weight: 600;
+  color: #1a202c;
   margin-right: 12px;
 }
 
 .detail-value {
-  color: #666;
+  color: #718096;
 }
 
 .overview-image {
   width: 100%;
-  height: 300px;
-  border-radius: 16px;
+  height: 350px;
+  border-radius: 20px;
   overflow: hidden;
   background: #f5f5f5;
   position: relative;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
 }
 
 .overview-image img {
@@ -732,7 +663,7 @@ section h2 {
 }
 
 .overview-image:hover img {
-  transform: scale(1.05);
+  transform: scale(1.08);
 }
 
 .image-overlay {
@@ -741,121 +672,36 @@ section h2 {
   left: 0;
   right: 0;
   bottom: 0;
-  background: linear-gradient(45deg, rgba(102, 126, 234, 0.1), rgba(118, 75, 162, 0.1));
-  opacity: 0;
-  transition: opacity 0.3s ease;
+  background: linear-gradient(135deg, rgba(102, 126, 234, 0.1) 0%, rgba(118, 75, 162, 0.1) 100%);
+  pointer-events: none;
 }
 
-.overview-image:hover .image-overlay {
-  opacity: 1;
-}
-
-/* 更新联系表单板块背景为更干净的白-浅蓝渐变 */
+/* 联系表单 */
 .contact-form-section {
-  background: linear-gradient(180deg, rgba(255, 255, 255, 1) 0%, rgba(242, 246, 255, 0.92) 100%);
-  backdrop-filter: blur(12px);
+  background: #fff;
   border-radius: 24px;
-  padding: 48px;
-  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.08);
-  border: 1px solid rgba(229, 231, 235, 0.8);
-  animation: fadeInUp 1s ease-out 1.2s both;
+  padding: 60px;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.06);
   position: relative;
   overflow: hidden;
 }
 
-.contact-form-section::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 300px;
-  height: 300px;
-  background: radial-gradient(circle, rgba(102, 126, 234, 0.1) 0%, transparent 70%);
-  border-radius: 50%;
-  transform: translate(-50%, -50%);
-}
-
 .form-header {
   text-align: center;
-  margin-bottom: 60px;
+  margin-bottom: 50px;
   position: relative;
-}
-
-.form-header::before {
-  content: '';
-  position: absolute;
-  top: -20px;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 80px;
-  height: 4px;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  border-radius: 2px;
 }
 
 .form-header h2 {
-  margin-bottom: 20px;
-  font-size: 2.8rem;
-  font-weight: 900;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-  text-shadow: none;
-  position: relative;
+  color: #1a202c;
+  font-size: 2.5rem;
+  margin: 0 0 16px 0;
+  font-weight: 700;
 }
 
-.form-header h2::after {
-  content: '✉️';
-  position: absolute;
-  top: -10px;
-  right: -40px;
-  font-size: 1.5rem;
-  animation: bounce 2s infinite;
-}
-
-@keyframes bounce {
-
-  0%,
-  20%,
-  50%,
-  80%,
-  100% {
-    transform: translateY(0);
-  }
-
-  40% {
-    transform: translateY(-10px);
-  }
-
-  60% {
-    transform: translateY(-5px);
-  }
-}
-
-.form-header p {
-  color: #555;
-  font-size: 1.2rem;
-  margin: 0;
-  font-weight: 500;
-  line-height: 1.6;
-  max-width: 600px;
-  margin: 0 auto;
-  background: rgba(102, 126, 234, 0.05);
-  padding: 15px 25px;
-  border-radius: 25px;
-  border: 1px solid rgba(102, 126, 234, 0.1);
-}
-
-/* 轻化容器边框与阴影以配合细边风格 */
 .form-container {
-  max-width: 820px;
+  max-width: 800px;
   margin: 0 auto;
-  background: #ffffff;
-  border-radius: 16px;
-  padding: 32px;
-  border: 1px solid #e5e7eb;
-  box-shadow: 0 8px 22px rgba(0, 0, 0, 0.06);
 }
 
 .form-row {
@@ -868,228 +714,152 @@ section h2 {
   width: 100%;
 }
 
-/* 确保表单项可见 */
 :deep(.el-form-item) {
   margin-bottom: 24px;
 }
 
-:deep(.el-form-item__content) {
-  position: relative;
-  min-height: 48px;
-}
-
 :deep(.el-form-item__label) {
-  font-weight: 800;
-  color: #2c3e50;
-  font-size: 1.1rem;
-  margin-bottom: 12px;
+  font-weight: 600;
+  color: #1a202c;
+  font-size: 1rem;
+  margin-bottom: 8px;
 }
 
-/* 统一输入框（含选择框外层）的边框为细边，弱化 hover，统一 focus 外发光 */
-::deep(.el-input__wrapper) {
-  border-radius: 10px;
-  border: 1px solid #d7dde5 !important;
-  background: #ffffff !important;
-  min-height: 44px;
-  position: relative;
-  display: flex;
-  align-items: center;
-  box-shadow: none !important;
-}
-
-::deep(.el-input__wrapper:hover) {
-  border-color: #bfc8d8 !important;
-}
-
-::deep(.el-input__wrapper.is-focus) {
-  border-color: #667eea !important;
-  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.15) !important;
-}
-
-/* 文本域与输入框风格保持一致 */
-::deep(.el-textarea__inner) {
+:deep(.el-input__wrapper) {
   border-radius: 12px;
-  box-shadow: none !important;
-  border: 1px solid #d7dde5 !important;
-  transition: border-color 0.2s ease, box-shadow 0.2s ease;
-  background: #ffffff !important;
-  min-height: 120px;
+  transition: all 0.3s ease;
 }
 
-::deep(.el-textarea__inner:hover) {
-  border-color: #bfc8d8 !important;
+:deep(.el-input__wrapper:hover) {
+  border-color: #c0c4cc;
 }
 
-::deep(.el-textarea__inner:focus) {
+:deep(.el-input__wrapper.is-focus) {
   border-color: #667eea !important;
-  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.15) !important;
-}
-
-/* 选择框外层与输入框同款细边与高度 */
-::deep(.el-select .el-input__wrapper) {
-  border-radius: 10px;
-  border: 1px solid #d7dde5 !important;
-  background: #ffffff !important;
-  min-height: 44px;
-}
-
-/* 确保输入框内文字可见 */
-:deep(.el-input__inner) {
-  background: #ffffff !important;
-  color: #333333 !important;
-  border: none !important;
+  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1) !important;
 }
 
 :deep(.el-textarea__inner) {
-  color: #333333 !important;
+  border-radius: 12px;
+  transition: all 0.3s ease;
 }
 
-:deep(.el-input input) {
-  background: #ffffff !important;
-  color: #333333 !important;
-}
-
-:deep(.el-select input) {
-  background: #ffffff !important;
-  color: #333333 !important;
+:deep(.el-textarea__inner:focus) {
+  border-color: #667eea !important;
+  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1) !important;
+  border: none !important;
 }
 
 .submit-form-item {
   text-align: center;
   margin-top: 40px;
-  position: relative;
-}
-
-.submit-form-item::before {
-  content: '';
-  position: absolute;
-  top: -20px;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 100px;
-  height: 2px;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  border-radius: 1px;
-  opacity: 0.5;
 }
 
 .submit-button {
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   border: none;
-  border-radius: 30px;
-  padding: 18px 50px;
-  font-size: 1.2rem;
-  font-weight: 800;
-  min-width: 220px;
-  box-shadow: 0 12px 35px rgba(102, 126, 234, 0.4);
-  transition: all 0.4s ease;
-  position: relative;
-  overflow: hidden;
-}
-
-.submit-button::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: -100%;
-  width: 100%;
-  height: 100%;
-  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
-  transition: left 0.6s ease;
-}
-
-.submit-button:hover::before {
-  left: 100%;
+  border-radius: 50px;
+  padding: 14px 48px;
+  font-size: 1.1rem;
+  font-weight: 600;
+  min-width: 200px;
+  transition: all 0.3s ease;
 }
 
 .submit-button:hover {
-  transform: translateY(-4px) scale(1.05);
-  box-shadow: 0 18px 50px rgba(102, 126, 234, 0.6);
-  background: linear-gradient(135deg, #5a67d8 0%, #6b46c1 100%);
-}
-
-.submit-button:active {
-  transform: translateY(-2px) scale(1.02);
-}
-
-.submit-button .el-icon {
-  width: 16px !important;
-  height: 16px !important;
-  font-size: 16px !important;
-}
-
-.submit-button .el-icon svg {
-  width: 16px !important;
-  height: 16px !important;
+  transform: translateY(-2px);
+  box-shadow: 0 10px 30px rgba(102, 126, 234, 0.3);
 }
 
 /* 快速链接 */
+.quick-links h2 {
+  text-align: center;
+  font-size: 2.5rem;
+  color: #1a202c;
+  margin: 0 0 50px 0;
+  font-weight: 700;
+}
+
 .links-grid {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
   gap: 24px;
-  animation: fadeInUp 1s ease-out 1.5s both;
 }
 
 @media (max-width: 1200px) {
-  .links-grid {
-    grid-template-columns: repeat(3, 1fr);
-  }
-}
-
-@media (max-width: 992px) {
   .links-grid {
     grid-template-columns: repeat(2, 1fr);
   }
 }
 
+@media (max-width: 768px) {
+  .links-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
 .link-card {
-  background: rgba(255, 255, 255, 0.98);
-  backdrop-filter: blur(16px);
-  padding: 28px 22px;
-  border-radius: 16px;
-  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.08);
+  background: #fff;
+  padding: 35px 25px;
+  border-radius: 20px;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.06);
   text-align: center;
   text-decoration: none;
   color: inherit;
-  transition: all 0.3s ease;
-  border: 1px solid rgba(229, 231, 235, 0.9);
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  border: 1px solid transparent;
   position: relative;
   overflow: hidden;
 }
 
+.link-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 0.4s ease;
+}
+
+.link-card:hover::before {
+  transform: scaleX(1);
+}
+
 .link-card:hover {
-  transform: translateY(-8px) scale(1.02);
-  box-shadow: 0 20px 50px rgba(102, 126, 234, 0.25);
+  transform: translateY(-10px);
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.12);
+  border-color: #e2e8f0;
   text-decoration: none;
-  color: inherit;
 }
 
 .link-icon {
-  width: 64px;
-  height: 64px;
+  width: 70px;
+  height: 70px;
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   color: white;
-  border-radius: 50%;
+  border-radius: 16px;
   display: flex;
   align-items: center;
   justify-content: center;
-  margin: 0 auto 16px;
-  font-size: 1.4rem;
+  margin: 0 auto 20px;
+  font-size: 1.8rem;
   transition: all 0.3s ease;
 }
 
 .link-card:hover .link-icon {
-  transform: scale(1.1) rotate(-5deg);
-  box-shadow: 0 10px 25px rgba(102, 126, 234, 0.4);
+  transform: scale(1.1) rotate(5deg);
 }
 
 .link-card h3 {
-  color: #2c3e50;
-  margin: 0 0 8px 0;
-  font-size: 1.05rem;
-  font-weight: 700;
-  transition: color 0.2s ease;
+  color: #1a202c;
+  margin: 0 0 12px 0;
+  font-size: 1.2rem;
+  font-weight: 600;
+  transition: color 0.3s ease;
 }
 
 .link-card:hover h3 {
@@ -1097,8 +867,8 @@ section h2 {
 }
 
 .link-card p {
-  color: #666;
-  margin: 0 0 12px 0;
+  color: #718096;
+  margin: 0 0 16px 0;
   font-size: 0.95rem;
   line-height: 1.6;
 }
@@ -1115,79 +885,49 @@ section h2 {
 
 /* 响应式设计 */
 @media (max-width: 768px) {
+  .hero-badge {
+    font-size: 0.75rem;
+    padding: 6px 18px;
+  }
+
   .contact-header h1 {
-    font-size: 2.5rem;
+    font-size: 2rem;
   }
 
   .contact-header p {
     font-size: 1.2rem;
   }
 
-  .contact-cards {
-    grid-template-columns: 1fr;
-    gap: 16px;
-  }
-
-  .overview-content {
-    grid-template-columns: 1fr;
-    gap: 24px;
-  }
-
-  .overview-text h2 {
-    font-size: 2.2rem;
-    text-align: center;
-  }
-
-  .overview-image {
-    height: 220px;
-  }
-
-  .form-row {
-    grid-template-columns: 1fr;
-    gap: 16px;
-  }
-
-  .links-grid {
-    grid-template-columns: 1fr;
-    gap: 16px;
+  .contact-info-section {
+    margin-top: -40px;
   }
 
   .lab-overview,
   .contact-form-section {
-    padding: 28px 22px;
+    padding: 40px 30px;
   }
 
-  .form-container {
-    padding: 22px 16px;
+  .overview-content {
+    grid-template-columns: 1fr;
+    gap: 30px;
   }
 
-  .form-header h2 {
+  .overview-text h2 {
+    font-size: 2rem;
+    text-align: center;
+  }
+
+  .overview-image {
+    height: 250px;
+  }
+
+  .form-row {
+    grid-template-columns: 1fr;
+  }
+
+  .form-header h2,
+  .quick-links h2 {
     font-size: 2rem;
   }
-
-  .form-header h2::after {
-    right: -25px;
-    font-size: 1.2rem;
-  }
-
-  .form-header p {
-    font-size: 1.1rem;
-    padding: 12px 20px;
-  }
-
-  .submit-button {
-    min-width: 160px;
-    padding: 14px 28px;
-    font-size: 1rem;
-  }
-
-  section h2 {
-    font-size: 1.8rem;
-  }
-}
-
-/* 底部留白修复：最后一个 section 下方增加内边距并与背景渐变过渡协调 */
-.contact-page {
-  padding-bottom: 40px;
 }
 </style>

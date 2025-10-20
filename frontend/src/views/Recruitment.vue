@@ -151,7 +151,7 @@
             </div>
             <div class="row-right">
               <el-tag :type="getStatusColor(recruitment.status)" effect="dark">{{ getStatusText(recruitment.status)
-                }}</el-tag>
+              }}</el-tag>
               <el-button type="primary" size="small" :disabled="!isApplyEnabled(recruitment)"
                 @click="applyPosition(recruitment)">申请</el-button>
               <el-button size="small" @click="viewDetails(recruitment)">详情</el-button>
