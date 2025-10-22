@@ -14,10 +14,32 @@ export default defineConfig({
             dts: true
         }),
         Components({
-            resolvers: [ElementPlusResolver()],
+            resolvers: [ElementPlusResolver({ importStyle: false })],
             dts: true
         })
     ],
+    optimizeDeps: {
+        include: [
+            'vue',
+            'vue-router',
+            'pinia',
+            'axios',
+            'dayjs',
+            'element-plus/es',
+            'element-plus/es/locale/lang/zh-cn',
+            '@element-plus/icons-vue',
+            'echarts',
+            'vue-echarts'
+        ]
+    },
+    css: {
+        preprocessorOptions: {
+            scss: {
+                api: 'modern-compiler',
+                silenceDeprecations: ['legacy-js-api']
+            }
+        }
+    },
     resolve: {
         alias: {
             '@': path.resolve(__dirname, 'src')

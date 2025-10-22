@@ -4,6 +4,28 @@ import path from 'path'
 
 export default defineConfig({
     plugins: [vue()],
+    optimizeDeps: {
+        include: [
+            'vue',
+            'vue-router',
+            'pinia',
+            'axios',
+            'dayjs',
+            'element-plus',
+            '@element-plus/icons-vue',
+            'marked',
+            'aos',
+            'swiper'
+        ]
+    },
+    css: {
+        preprocessorOptions: {
+            scss: {
+                api: 'modern-compiler',
+                silenceDeprecations: ['legacy-js-api']
+            }
+        }
+    },
     resolve: {
         alias: {
             '@': path.resolve(__dirname, 'src')

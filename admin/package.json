@@ -3,7 +3,7 @@
     "version": "1.0.0",
     "description": "实验室网站管理后台",
     "scripts": {
-        "dev": "vite",
+        "dev": "NODE_OPTIONS='--no-deprecation' vite",
         "build": "vite build",
         "preview": "vite preview"
     },
@@ -23,6 +23,7 @@
     "devDependencies": {
         "@vitejs/plugin-vue": "^4.3.4",
         "sass": "^1.66.1",
+        "terser": "^5.44.0",
         "unplugin-auto-import": "^0.16.6",
         "unplugin-vue-components": "^0.25.1",
         "vite": "^4.4.9"

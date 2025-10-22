@@ -82,12 +82,12 @@ sleep 3
 
 # 启动前端服务
 echo "🖥️  启动前端服务 (端口: 5173)..."
-(cd frontend && npm run dev) &
+(cd frontend && NODE_OPTIONS='--no-deprecation' npm run dev) &
 FRONTEND_PID=$!
 
 # 启动管理端服务
 echo "⚙️  启动管理端服务 (端口: 5174)..."
-(cd admin && npm run dev) &
+(cd admin && NODE_OPTIONS='--no-deprecation' npm run dev) &
 ADMIN_PID=$!
 
 # 等待服务启动

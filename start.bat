@@ -87,13 +87,13 @@ timeout /t 3 /nobreak >nul
 :: 启动前端服务
 echo 🖥️  启动前端服务 (端口: 5173)...
 cd frontend
-start "前端服务" cmd /k "npm run dev"
+start "前端服务" cmd /k "set NODE_OPTIONS=--no-deprecation && npm run dev"
 cd ..
 
 :: 启动管理端服务
 echo ⚙️  启动管理端服务 (端口: 5174)...
 cd admin
-start "管理端服务" cmd /k "npm run dev"
+start "管理端服务" cmd /k "set NODE_OPTIONS=--no-deprecation && npm run dev"
 cd ..
 
 :: 等待服务启动
