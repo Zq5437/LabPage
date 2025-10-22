@@ -23,19 +23,22 @@ const publicRoutes = require('./routes/public');
 
 const app = express();
 
-// 安全中间件
-app.use(helmet());
+// 信任反向代理（Nginx）
+app.set('trust proxy', true);
 
-// 跨域配置
+// 安全中间件 - 配置 Helmet 以支持反向代理
+app.use(helmet({
+    contentSecurityPolicy: false, // 禁用 CSP，避免与代理冲突
+    crossOriginEmbedderPolicy: false, // 允许跨域资源
+    crossOriginResourcePolicy: { policy: "cross-origin" } // 允许跨域
+}));
+
+// 跨域配置 - 允许所有来源（因为通过 Nginx 反向代理）
 app.use(cors({
-    origin: (origin, callback) => {
-        // 允许本地开发端口 3000-3005，无 Origin（如 curl/postman）也放行
-        if (!origin) return callback(null, true);
-        const allowed = /^http:\/\/localhost:(300[0-5])$/.test(origin);
-        if (allowed) return callback(null, true);
-        callback(null, true); // 放宽限制，避免本地端口漂移导致问题
-    },
-    credentials: true
+    origin: true, // 允许所有来源
+    credentials: true, // 允许携带凭证
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With']
 }));
 
 // 请求限制 - 针对管理后台调整为更宽松的限制

@@ -42,8 +42,6 @@ export default {
         onMounted(async () => {
             // 初始化站点数据
             await siteStore.initSiteData()
-            // 记录页面访问
-            logVisit()
             // 初始化AOS动画
             AOS.init({
                 duration: 1000,
@@ -52,25 +50,6 @@ export default {
                 offset: 50
             })
         })
-
-        const logVisit = () => {
-            // 简单的访问统计
-            const visitData = {
-                page_url: window.location.href,
-                referer: document.referrer
-            }
-
-            // 发送访问记录（不阻塞页面加载）
-            fetch('/api/public/visit-log', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify(visitData)
-            }).catch(() => {
-                // 忽略错误，不影响用户体验
-            })
-        }
 
         return {}
     }

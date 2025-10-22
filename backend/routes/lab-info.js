@@ -95,11 +95,26 @@ router.put('/admin/update', verifyToken, verifyAdmin, upload.fields([
         const established_year = req.body.established_year || req.body.founded_year || null;
         const introduction = req.body.introduction || null;
 
-        // 确保 introduction 字段存在（若数据库已添加会抛出重复字段错误，忽略即可）
+        // 确保 introduction 字段存在
         try {
-            await db.query('ALTER TABLE lab_info ADD COLUMN introduction TEXT NULL');
+            // 检查字段是否存在
+            const columns = await db.query(`
+                SELECT COLUMN_NAME 
+                FROM INFORMATION_SCHEMA.COLUMNS 
+                WHERE TABLE_SCHEMA = DATABASE() 
+                AND TABLE_NAME = 'lab_info' 
+                AND COLUMN_NAME = 'introduction'
+            `);
+
+            // 如果字段不存在，则添加
+            if (!columns || columns.length === 0) {
+                await db.query('ALTER TABLE lab_info ADD COLUMN introduction TEXT NULL');
+            }
         } catch (e) {
-            // ER_DUP_FIELDNAME 重复字段，说明已存在，忽略
+            // 忽略可能的错误
+            if (e.code !== 'ER_DUP_FIELDNAME') {
+                console.warn('检查/添加 introduction 字段时出错:', e.message);
+            }
         }
 
         // 验证必填字段

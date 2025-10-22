@@ -229,7 +229,13 @@ router.post('/visit-log', [
         }
 
         const { page_url, referer } = req.body;
-        const visitor_ip = req.ip || req.connection.remoteAddress;
+
+        // 获取真实IP（支持反向代理）
+        const visitor_ip = req.headers['x-forwarded-for']?.split(',')[0]?.trim()
+            || req.headers['x-real-ip']
+            || req.ip
+            || req.connection.remoteAddress;
+
         const user_agent = req.get('User-Agent');
 
         await db.query(
