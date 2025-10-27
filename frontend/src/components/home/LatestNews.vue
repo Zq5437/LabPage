@@ -9,7 +9,8 @@
       <div class="news-list" v-loading="loading">
         <div v-for="item in news" :key="item.id" class="news-item" @click="goDetail(item)">
           <div class="news-media">
-            <img v-if="item.cover_image" :src="getCoverImageUrl(item.cover_image)" :alt="item.title" class="news-image" />
+            <img v-if="item.cover_image" :src="getCoverImageUrl(item.cover_image)" :alt="item.title"
+              class="news-image" />
             <div v-else class="default-image">📰</div>
             <div class="badge" v-if="item.is_top === 1">置顶</div>
           </div>
@@ -57,7 +58,8 @@ export default {
     }
 
     const goDetail = (item) => {
-      window.location.href = `/news/${item.id}`
+      // 使用 Vue Router 进行导航，会自动处理 base 路径
+      window.location.href = `${import.meta.env.BASE_URL}news/${item.id}`
     }
 
     const getCategoryText = (category) => ({

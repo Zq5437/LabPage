@@ -434,7 +434,7 @@ const updateGroupedMembers = () => {
 
 // 查看成员详情 - 跳转到详情页
 const viewMemberDetail = (member) => {
-  window.location.href = `/members/${member.id}`
+  window.location.href = `${import.meta.env.BASE_URL}members/${member.id}`
 }
 
 // 获取研究兴趣数组

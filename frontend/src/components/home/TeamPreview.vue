@@ -69,7 +69,7 @@ export default {
     }
 
     const getInitials = (name) => (name || 'U').slice(0, 1).toUpperCase()
-    const goDetail = (m) => { window.location.href = `/members/${m.id}` }
+    const goDetail = (m) => { window.location.href = `${import.meta.env.BASE_URL}members/${m.id}` }
 
     onMounted(load)
 
