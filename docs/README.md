@@ -3,29 +3,29 @@
 这是从动态网站导出的静态版本，可以直接部署到 GitHub Pages 或其他静态托管服务。
 
 **构建信息：**
-- 基础路径：`/labPageTest/`
-- 构建时间：2025/10/27 16:33:43
+- 基础路径：`/LabPage/`
+- 构建时间：2025/10/27 16:46:44
 - 部署类型：项目网站
 
 ## 部署到 GitHub Pages (项目网站)
 
-**重要：此构建版本适用于项目网站，基础路径为 `/labPageTest/`**
+**重要：此构建版本适用于项目网站，基础路径为 `/LabPage/`**
 
-1. 在 GitHub 上创建一个新仓库（名称必须是：`labPageTest`）
+1. 在 GitHub 上创建一个新仓库（名称必须是：`LabPage`）
 2. 将此目录的内容推送到该仓库：
    ```bash
    git init
    git add .
    git commit -m "Initial commit"
    git branch -M main
-   git remote add origin https://github.com/your-username/labPageTest.git
+   git remote add origin https://github.com/your-username/LabPage.git
    git push -u origin main
    ```
 3. 在仓库设置中启用 GitHub Pages：
    - Source: 选择 "Deploy from a branch"
    - Branch: 选择 "main"
    - Folder: 选择 "/docs"
-4. 访问 `https://your-username.github.io/labPageTest/` 查看你的网站
+4. 访问 `https://your-username.github.io/LabPage/` 查看你的网站
 
 ## 部署到其他平台
 
@@ -47,4 +47,4 @@
 
 ---
 
-导出时间: 2025/10/27 16:33:43
+导出时间: 2025/10/27 16:46:44
