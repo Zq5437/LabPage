@@ -1,0 +1,12 @@
+{
+  "success": true,
+  "data": {
+    "site_title": "人机情感计算与交互实验室",
+    "site_description": "专注于人工智能与机器学习研究",
+    "contact_email": "neu5437@163.com",
+    "contact_phone": "010-12345678",
+    "show_visitor_count": true,
+    "max_news_per_page": 5,
+    "front_site_url": "https://744da2f8.r20.vip.cpolar.cn"
+  }
+}

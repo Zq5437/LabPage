@@ -1,0 +1,20 @@
+{
+  "success": true,
+  "data": {
+    "id": 1,
+    "name": "人机情感计算与交互实验室",
+    "name_en": "Human-Centered Affective Computing and Interaction",
+    "description": "我们主要关注“情感+”的研究主题，并运用深度学习方法。不同于传统的研究方法，我们结合认知科学、心理学、机器人技术和人工智能相关技术，从理论层面到实际应用层面进行探索。我们尤其注重利用深度学习模型评估语音信息、视觉信息、文本信息等多模态数据，以分析人类情绪、理解行为并生成情感表达。此外，我们还尝试结合心理学和认知科学，优化交互策略。",
+    "director": "傅昌锃",
+    "address": "河北省秦皇岛经济技术开发区泰山路143号",
+    "phone": "13858813915",
+    "email": "neu5437@163.com",
+    "website": "https://cz26.github.io/CZ-HP/lab/",
+    "logo": "/uploads/lab/logo-1759236561241-901713719.jpg",
+    "banner": "/uploads/lab/banner-1761128775493-740467729.jpg",
+    "established_year": 2020,
+    "created_at": "2025-09-24T04:10:54.000Z",
+    "updated_at": "2025-10-22T10:26:15.000Z",
+    "introduction": "The Goal\r\n\r\nThe human-agent symbiotic society is coming! We can expect to see more emotionally intelligent agents that can interact with humans in a more natural and empathetic way. These agents will be able to interpret and respond to human emotions, making them more useful in a variety of contexts, such as healthcare, education, and rapport building. As for the goal, we are going to:\r\n\r\nImprove Human-Computer Interaction:\r\n\r\nAffective computing can improve the interaction between humans and machines by making the experience more natural and intuitive. Emotionally intelligent machines can detect and respond to a user’s emotional state, making the interaction more personalized and engaging.\r\n\r\nEnhance Mental Health:\r\n\r\nAffective computing can help healthcare professionals to monitor the emotional state of patients and develop personalized treatment plans. It can also help individuals with mental health disorders to manage their condition by providing real-time feedback and support."
+  }
+}

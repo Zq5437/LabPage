@@ -1,0 +1,21 @@
+{
+  "success": true,
+  "data": {
+    "id": 6,
+    "title": "1",
+    "title_en": "111",
+    "description": "111。 ",
+    "category": "national",
+    "funding_agency": "11",
+    "funding_amount": "0.00",
+    "principal_investigator": "111",
+    "participants": "11",
+    "start_date": "2025-08-29T16:00:00.000Z",
+    "end_date": "2025-09-07T16:00:00.000Z",
+    "status": "completed",
+    "cover_image": "/uploads/projects/project-1759075100339-861181815.jpeg",
+    "attachments": null,
+    "created_at": "2025-09-28T15:48:21.000Z",
+    "updated_at": "2025-10-20T07:20:17.000Z"
+  }
+}

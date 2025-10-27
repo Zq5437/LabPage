@@ -1,0 +1,21 @@
+{
+  "success": true,
+  "data": {
+    "id": 2,
+    "title": "智能机器人导航算法研究",
+    "title_en": "Intelligent Robot Navigation Algorithm Research",
+    "description": "研究在复杂环境下机器人的自主导航算法，提高机器人在未知环境中的适应能力。",
+    "category": "provincial",
+    "funding_agency": "省科技厅",
+    "funding_amount": "300000.00",
+    "principal_investigator": "李副教授",
+    "participants": "李副教授, 陈博士, 杨硕士",
+    "start_date": "2022-05-31T16:00:00.000Z",
+    "end_date": "2024-06-29T16:00:00.000Z",
+    "status": "ongoing",
+    "cover_image": null,
+    "attachments": null,
+    "created_at": "2025-09-28T15:11:26.000Z",
+    "updated_at": "2025-09-28T15:11:26.000Z"
+  }
+}

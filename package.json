@@ -6,7 +6,11 @@
     "scripts": {
         "install-all": "cd backend && npm install && cd ../frontend && npm install && cd ../admin && npm install",
         "dev": "concurrently \"cd backend && npm run dev\" \"cd frontend && npm run dev\" \"cd admin && npm run dev\"",
-        "build": "cd frontend && npm run build && cd ../admin && npm run build"
+        "build": "cd frontend && npm run build && cd ../admin && npm run build",
+        "export-data": "node backend/export-static.js",
+        "build:static": "node build-static.js",
+        "build:static:user": "node build-static.js --base /",
+        "build:static:project": "node build-static.js --base"
     },
     "keywords": [
         "lab",

@@ -87,8 +87,8 @@
 
           <div class="filter-controls">
             <el-select v-model="filters.category" placeholder="所有分类" clearable class="filter-select">
-              <el-option v-for="category in categories" :key="category.category" :label="category.category"
-                :value="category.category" />
+              <el-option v-for="category in categories" :key="category.type" :label="category.type"
+                :value="category.type" />
             </el-select>
 
             <el-select v-model="filters.year" placeholder="所有年份" clearable class="filter-select">
@@ -336,6 +336,7 @@ const loadPublications = async () => {
     }
 
     const resp = await api.get('/publications/list', { params })
+    // 响应拦截器已经返回了 data，所以 resp = { success, data: [...], pagination: {...} }
     publications.value = resp.data || []
     if (resp.pagination) {
       pagination.total = resp.pagination.total

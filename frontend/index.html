@@ -8,6 +8,21 @@
     <meta name="description" content="智能计算实验室 - 专注于人工智能与机器学习研究" />
     <meta name="keywords" content="实验室,人工智能,机器学习,深度学习,计算机视觉,自然语言处理" />
     <title>智能计算实验室</title>
+
+    <!-- GitHub Pages SPA 路由支持 -->
+    <script>
+        // 处理从 404.html 来的重定向
+        (function (l) {
+            if (l.search[1] === '/') {
+                var decoded = l.search.slice(1).split('&').map(function (s) {
+                    return s.replace(/~and~/g, '&')
+                }).join('?');
+                window.history.replaceState(null, null,
+                    l.pathname.slice(0, -1) + decoded + l.hash
+                );
+            }
+        }(window.location))
+    </script>
 </head>
 
 <body>

@@ -3,6 +3,12 @@ import vue from '@vitejs/plugin-vue'
 import path from 'path'
 
 export default defineConfig({
+    // GitHub Pages 部署配置
+    // 环境变量 VITE_BASE_PATH 用于设置基础路径
+    // 用户网站: VITE_BASE_PATH='/' (默认)
+    // 项目网站: VITE_BASE_PATH='/仓库名/'
+    base: process.env.VITE_BASE_PATH || '/',
+
     plugins: [vue()],
     optimizeDeps: {
         include: [

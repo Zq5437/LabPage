@@ -158,7 +158,7 @@ router.get('/list', async (req, res) => {
 router.get('/stats/categories', async (req, res) => {
     try {
         const query = `
-      SELECT type as category, COUNT(*) as count 
+      SELECT type, COUNT(*) as count 
       FROM publications 
       GROUP BY type 
       ORDER BY count DESC

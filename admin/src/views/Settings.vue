@@ -43,6 +43,31 @@
               <el-input-number v-model="form.max_news_per_page" :min="5" :max="50" />
             </el-form-item>
           </el-tab-pane>
+
+          <el-tab-pane label="静态导出" name="export">
+            <el-alert title="导出静态网站" type="info" :closable="false" style="margin-bottom: 20px;">
+              <template #default>
+                <p>点击下方按钮可将当前网站数据导出为静态版本，用于部署到 GitHub Pages 等静态托管服务。</p>
+                <p style="margin-top: 10px;">导出内容包括：</p>
+                <ul style="margin-left: 20px; margin-top: 5px;">
+                  <li>所有已发布的内容（新闻、成员、项目、论文等）</li>
+                  <li>实验室信息和网站配置</li>
+                  <li>上传的图片和文件</li>
+                </ul>
+                <p style="margin-top: 10px; color: #E6A23C;">
+                  <strong>注意：</strong>导出后的文件位于项目根目录的 <code>docs/</code> 文件夹中
+                </p>
+              </template>
+            </el-alert>
+
+            <el-button type="success" size="large" :loading="exporting" :disabled="exporting"
+              @click="handleExportStatic">
+              <el-icon v-if="!exporting">
+                <Download />
+              </el-icon>
+              {{ exporting ? '正在导出...' : '导出静态网站' }}
+            </el-button>
+          </el-tab-pane>
         </el-tabs>
       </el-form>
     </el-card>
@@ -52,11 +77,13 @@
 
 <script setup>
 import { ref, reactive, onMounted } from 'vue'
-import { ElMessage } from 'element-plus'
+import { ElMessage, ElMessageBox } from 'element-plus'
+import { Download } from '@element-plus/icons-vue'
 import { publicApi } from '@/utils/api'
 
 const loading = ref(false)
 const saving = ref(false)
+const exporting = ref(false)
 const activeTab = ref('basic')
 const formRef = ref()
 
@@ -132,6 +159,39 @@ const handleSave = async () => {
     // 已由拦截器提示或本地校验提示
   } finally {
     saving.value = false
+  }
+}
+
+const handleExportStatic = async () => {
+  try {
+    await ElMessageBox.confirm(
+      '确定要导出静态网站吗？这将把当前所有已发布的内容导出为静态文件。',
+      '确认导出',
+      {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning'
+      }
+    )
+
+    exporting.value = true
+    ElMessage.info('开始导出，请稍候...')
+
+    const result = await publicApi.exportStatic()
+
+    ElMessage.success({
+      message: '静态网站导出成功！文件已保存到 docs/ 目录',
+      duration: 5000,
+      showClose: true
+    })
+
+    console.log('导出结果:', result)
+  } catch (e) {
+    if (e !== 'cancel') {
+      ElMessage.error('导出失败: ' + (e.message || '未知错误'))
+    }
+  } finally {
+    exporting.value = false
   }
 }
 

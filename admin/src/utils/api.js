@@ -391,7 +391,10 @@ export const publicApi = {
     getRecruitment: () => api.get('/public/recruitment'),
 
     // 获取设备列表
-    getEquipment: (params) => api.get('/public/equipment', { params })
+    getEquipment: (params) => api.get('/public/equipment', { params }),
+
+    // 导出静态网站
+    exportStatic: () => api.post('/public/admin/export-static')
 }
 
 // 文件上传API

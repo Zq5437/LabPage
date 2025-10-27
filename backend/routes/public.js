@@ -3,6 +3,7 @@ const { body, validationResult } = require('express-validator');
 
 const db = require('../database/connection');
 const { authenticateToken, requireAdmin } = require('../middleware/auth');
+const { exportStaticWebsite } = require('../export-static');
 
 const router = express.Router();
 
@@ -460,6 +461,26 @@ router.put('/admin/site-config', [
         res.status(500).json({
             success: false,
             message: '服务器内部错误'
+        });
+    }
+});
+
+// 导出静态网站（管理员接口）
+router.post('/admin/export-static', [authenticateToken, requireAdmin], async (req, res) => {
+    try {
+        console.log('开始导出静态网站...');
+        const result = await exportStaticWebsite();
+
+        res.json({
+            success: true,
+            message: '静态网站导出成功',
+            data: result
+        });
+    } catch (error) {
+        console.error('导出静态网站错误:', error);
+        res.status(500).json({
+            success: false,
+            message: '导出失败: ' + error.message
         });
     }
 });

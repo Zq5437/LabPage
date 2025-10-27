@@ -1,0 +1,70 @@
+{
+  "success": true,
+  "data": [
+    {
+      "id": 4,
+      "name": "自然语言处理",
+      "name_en": "Natural Language Processing",
+      "description": "文本分析、语言理解、机器翻译等",
+      "keywords": "自然语言处理,nlp",
+      "icon": null,
+      "cover_image": "/uploads/research/image-1759243769495-927258888.png",
+      "sort_order": 4,
+      "status": "active",
+      "created_at": "2025-09-24T04:10:54.000Z",
+      "updated_at": "2025-10-02T09:46:34.000Z"
+    },
+    {
+      "id": 3,
+      "name": "计算机视觉",
+      "name_en": "Computer Vision",
+      "description": "图像处理、目标检测、图像识别等技术研究",
+      "keywords": "人工智能,计算机视觉",
+      "icon": null,
+      "cover_image": "/uploads/research/image-1759244007023-803376309.png",
+      "sort_order": 3,
+      "status": "active",
+      "created_at": "2025-09-24T04:10:54.000Z",
+      "updated_at": "2025-10-02T09:46:40.000Z"
+    },
+    {
+      "id": 2,
+      "name": "深度学习",
+      "name_en": "Deep Learning",
+      "description": "专注于神经网络和深度学习技术",
+      "keywords": "深度学习",
+      "icon": null,
+      "cover_image": "/uploads/research/image-1759244108956-82432534.jpg",
+      "sort_order": 2,
+      "status": "active",
+      "created_at": "2025-09-24T04:10:54.000Z",
+      "updated_at": "2025-10-02T09:46:08.000Z"
+    },
+    {
+      "id": 1,
+      "name": "机器学习",
+      "name_en": "Machine Learning",
+      "description": "研究各种机器学习算法及其应用",
+      "keywords": "机器学习",
+      "icon": null,
+      "cover_image": "/uploads/research/image-1759244263054-848771202.jpg",
+      "sort_order": 1,
+      "status": "active",
+      "created_at": "2025-09-24T04:10:54.000Z",
+      "updated_at": "2025-10-02T09:46:00.000Z"
+    },
+    {
+      "id": 16,
+      "name": "test1",
+      "name_en": null,
+      "description": "test1",
+      "keywords": "测试",
+      "icon": null,
+      "cover_image": null,
+      "sort_order": 1,
+      "status": "active",
+      "created_at": "2025-10-20T10:30:27.000Z",
+      "updated_at": "2025-10-20T10:30:44.000Z"
+    }
+  ]
+}

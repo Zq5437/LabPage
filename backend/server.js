@@ -23,8 +23,8 @@ const publicRoutes = require('./routes/public');
 
 const app = express();
 
-// 信任反向代理（Nginx）
-app.set('trust proxy', true);
+// 信任反向代理（仅在生产环境）
+app.set('trust proxy', process.env.NODE_ENV === 'production' ? 1 : false);
 
 // 安全中间件 - 配置 Helmet 以支持反向代理
 app.use(helmet({
@@ -105,7 +105,7 @@ app.use('*', (req, res) => {
 });
 
 // 启动服务器
-const PORT = config.server.port || 8000;
+const PORT = config.server.port || 5080;
 
 app.listen(PORT, () => {
     console.log(`🚀 服务器启动成功！`);

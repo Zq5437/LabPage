@@ -1,0 +1,73 @@
+{
+  "success": true,
+  "data": {
+    "news": [
+      {
+        "id": 1,
+        "title": "实验室在国际顶级会议发表重要论文",
+        "summary": "我实验室张明教授团队在人工智能领域取得重大突破，相关研究成果发表在国际顶级会议上。",
+        "author": "张明教授",
+        "cover_image": "/uploads/news/news-1760943450855-390729511.jpeg",
+        "category": "achievement",
+        "is_top": 1,
+        "views": 78,
+        "publish_time": "2025-09-28T12:36:19.000Z",
+        "created_at": "2025-09-28T12:36:19.000Z"
+      },
+      {
+        "id": 3,
+        "title": "实验室获得国家自然科学基金重点项目资助",
+        "summary": "我实验室申报的\"面向复杂场景的智能视觉理解关键技术研究\"项目获得国家自然科学基金重点项目资助。",
+        "author": "实验室办公室",
+        "cover_image": null,
+        "category": "news",
+        "is_top": 1,
+        "views": 49,
+        "publish_time": "2025-09-28T12:36:19.000Z",
+        "created_at": "2025-09-28T12:36:19.000Z"
+      },
+      {
+        "id": 8,
+        "title": "final-test0",
+        "summary": "final-test1",
+        "author": "final-test1",
+        "cover_image": "/uploads/news/news-1760942885966-302776504.jpg",
+        "category": "news",
+        "is_top": 0,
+        "views": 24,
+        "publish_time": "2025-10-20T06:27:52.000Z",
+        "created_at": "2025-10-20T06:27:51.000Z"
+      },
+      {
+        "id": 2,
+        "title": "实验室成功举办第五届人工智能研讨会",
+        "summary": "来自全国各地的50余位专家学者齐聚我校，共同探讨人工智能技术的前沿发展。",
+        "author": "李华副教授",
+        "cover_image": null,
+        "category": "activity",
+        "is_top": 0,
+        "views": 17,
+        "publish_time": "2025-09-28T12:36:19.000Z",
+        "created_at": "2025-09-28T12:36:19.000Z"
+      },
+      {
+        "id": 4,
+        "title": "欢迎新同学加入实验室大家庭",
+        "summary": "2025年秋季学期，实验室迎来了5名新的研究生同学，为团队注入了新的活力。",
+        "author": "实验室办公室",
+        "cover_image": null,
+        "category": "announcement",
+        "is_top": 0,
+        "views": 26,
+        "publish_time": "2025-09-28T12:36:19.000Z",
+        "created_at": "2025-09-28T12:36:19.000Z"
+      }
+    ],
+    "pagination": {
+      "page": 1,
+      "limit": 5,
+      "total": 5,
+      "totalPages": 1
+    }
+  }
+}
