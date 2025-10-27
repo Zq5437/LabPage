@@ -1,0 +1,1 @@
+import{_ as n,o,a,b as s}from"./index-8a711214.js";const t={class:"notfound-page"};const e=n({name:"NotFound"},[["render",function(n,e,d,u,r,c){return o(),a("div",t,[...e[0]||(e[0]=[s("div",{class:"container"},[s("h1",null,"NotFound"),s("p",null,"NotFound页面开发中...")],-1)])])}],["__scopeId","data-v-e84eb223"]]);export{e as default};
