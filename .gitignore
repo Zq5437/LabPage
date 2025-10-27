@@ -103,11 +103,11 @@ backup/
 *.db
 
 # ==================== 上传文件 ====================
-# 用户上传的文件
+# 用户上传的文件（仅忽略 backend/uploads）
 backend/uploads/*
 !backend/uploads/.gitkeep
 
-# 图片和媒体文件
+# 图片和媒体文件（不包括 docs/ 目录）
 *.jpg
 *.jpeg
 *.png
@@ -117,10 +117,12 @@ backend/uploads/*
 *.mp4
 *.mp3
 *.pdf
-# 但保留示例文件
+# 但保留以下文件
 !**/example.*
 !**/demo.*
 !**/sample.*
+# 允许 docs/uploads/ 目录下的所有文件
+!docs/uploads/**
 
 # ==================== 日志文件 ====================
 # 应用日志
