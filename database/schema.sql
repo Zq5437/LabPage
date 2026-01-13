@@ -245,7 +245,7 @@ CREATE TABLE IF NOT EXISTS contact_messages (
 
 -- 插入默认管理员账户 (用户名: admin, 密码: admin123)
 INSERT INTO admins (username, password, email, name, role) VALUES 
-('admin', '$2a$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'admin@lab.com', '系统管理员', 'super_admin');
+('admin', '$2a$10$BEBw6YNCxedvXHLEtse7auuhbQ/zC2CMCZed3JypSQaYjLQfF.nji', 'admin@lab.com', '系统管理员', 'super_admin');
 
 -- 插入默认实验室信息
 INSERT INTO lab_info (name, name_en, description, director, address, email, established_year) VALUES 

@@ -1,6 +1,3 @@
-// ⚠️ 此文件已弃用，请使用 .env 文件进行配置
-// 请复制 .env.example 为 .env 并修改相应的配置
-
 require('dotenv').config();
 
 module.exports = {
