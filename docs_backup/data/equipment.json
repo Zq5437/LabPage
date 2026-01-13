@@ -1,0 +1,95 @@
+{
+  "success": true,
+  "data": [
+    {
+      "id": 4,
+      "name": "1",
+      "model": "1",
+      "manufacturer": null,
+      "description": "1",
+      "specifications": "1",
+      "location": "1",
+      "status": "active",
+      "image_url": "/uploads/equipment/image-1759138130227-167526777.jpg",
+      "images": [
+        "/uploads/equipment/image-1759138130227-167526777.jpg"
+      ]
+    },
+    {
+      "id": 9,
+      "name": "1",
+      "model": "1",
+      "manufacturer": null,
+      "description": "1",
+      "specifications": "1",
+      "location": "111",
+      "status": "active",
+      "image_url": "/uploads/equipment/image-1759202225851-247711845.jpg",
+      "images": [
+        "/uploads/equipment/image-1759202225851-247711845.jpg"
+      ]
+    },
+    {
+      "id": 3,
+      "name": "3D打印机",
+      "model": "Ultimaker S5",
+      "manufacturer": "Ultimaker",
+      "description": "高精度3D打印机，用于快速原型制作",
+      "specifications": "打印尺寸: 330×240×300mm\n层高: 0.06-0.6mm\n材料: PLA, ABS, PETG等",
+      "location": "制造间",
+      "status": "active",
+      "image_url": null,
+      "images": []
+    },
+    {
+      "id": 10,
+      "name": "final-test1",
+      "model": null,
+      "manufacturer": null,
+      "description": null,
+      "specifications": null,
+      "location": null,
+      "status": "active",
+      "image_url": "/uploads/equipment/image-1760947204090-695608448.png",
+      "images": [
+        "/uploads/equipment/image-1760947204090-695608448.png"
+      ]
+    },
+    {
+      "id": 11,
+      "name": "final-test2",
+      "model": null,
+      "manufacturer": null,
+      "description": null,
+      "specifications": null,
+      "location": null,
+      "status": "active",
+      "image_url": null,
+      "images": []
+    },
+    {
+      "id": 2,
+      "name": "显微镜系统",
+      "model": "BX53M",
+      "manufacturer": "Olympus",
+      "description": "高精度光学显微镜，用于材料分析和生物观察",
+      "specifications": "放大倍数: 50x-1000x\n分辨率: 0.2μm\n照明: LED光源\n相机: 500万像素",
+      "location": "实验室B区",
+      "status": "active",
+      "image_url": null,
+      "images": []
+    },
+    {
+      "id": 1,
+      "name": "高性能工作站",
+      "model": "Precision 7000",
+      "manufacturer": "Dell",
+      "description": "用于深度学习训练和科学计算的高性能工作站",
+      "specifications": "CPU: Intel Xeon W-3175X\nGPU: NVIDIA RTX 4090 x2\n内存: 128GB DDR4\n存储: 2TB NVMe SSD",
+      "location": "实验室A区",
+      "status": "active",
+      "image_url": null,
+      "images": []
+    }
+  ]
+}

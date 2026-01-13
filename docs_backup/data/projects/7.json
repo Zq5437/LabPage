@@ -1,0 +1,21 @@
+{
+  "success": true,
+  "data": {
+    "id": 7,
+    "title": "final-test1",
+    "title_en": null,
+    "description": "final-test1",
+    "category": "national",
+    "funding_agency": null,
+    "funding_amount": "0.00",
+    "principal_investigator": "final-test1",
+    "participants": null,
+    "start_date": null,
+    "end_date": null,
+    "status": "ongoing",
+    "cover_image": "/uploads/projects/project-1760946638780-166626067.jpg",
+    "attachments": null,
+    "created_at": "2025-10-20T07:20:35.000Z",
+    "updated_at": "2025-10-20T07:50:40.000Z"
+  }
+}

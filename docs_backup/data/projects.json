@@ -1,0 +1,118 @@
+{
+  "success": true,
+  "data": {
+    "projects": [
+      {
+        "id": 6,
+        "title": "1",
+        "title_en": "111",
+        "description": "111。 ",
+        "category": "national",
+        "funding_agency": "11",
+        "funding_amount": "0.00",
+        "principal_investigator": "111",
+        "participants": "11",
+        "start_date": "2025-08-29T16:00:00.000Z",
+        "end_date": "2025-09-07T16:00:00.000Z",
+        "status": "completed",
+        "cover_image": "/uploads/projects/project-1759075100339-861181815.jpeg"
+      },
+      {
+        "id": 5,
+        "title": "国际合作AI算法优化项目",
+        "title_en": "International Cooperation AI Algorithm Optimization Project",
+        "description": "与国外知名大学合作，共同研究人工智能算法的优化方法。",
+        "category": "international",
+        "funding_agency": "国际合作基金",
+        "funding_amount": "400000.00",
+        "principal_investigator": "陈博士",
+        "participants": "陈博士, 外籍专家, 本地团队",
+        "start_date": "2023-06-30T16:00:00.000Z",
+        "end_date": "2025-06-30T16:00:00.000Z",
+        "status": "ongoing",
+        "cover_image": null
+      },
+      {
+        "id": 3,
+        "title": "云计算环境下的数据安全技术",
+        "title_en": "Data Security Technology in Cloud Computing Environment",
+        "description": "针对云计算环境下的数据安全问题，研究新型加密算法和安全协议。",
+        "category": "institutional",
+        "funding_agency": "校科研基金",
+        "funding_amount": "150000.00",
+        "principal_investigator": "王研究员",
+        "participants": "王研究员, 周博士",
+        "start_date": "2023-02-28T16:00:00.000Z",
+        "end_date": "2024-02-29T16:00:00.000Z",
+        "status": "ongoing",
+        "cover_image": null
+      },
+      {
+        "id": 1,
+        "title": "基于深度学习的图像识别系统",
+        "title_en": "Deep Learning-based Image Recognition System",
+        "description": "本项目旨在开发一套基于深度学习的高精度图像识别系统，可应用于医疗诊断、工业检测等领域。",
+        "category": "national",
+        "funding_agency": "国家自然科学基金委员会",
+        "funding_amount": "500000.00",
+        "principal_investigator": "张教授",
+        "participants": "张教授, 李副教授, 王研究员, 刘博士",
+        "start_date": "2022-12-28T16:00:00.000Z",
+        "end_date": "2025-12-27T16:00:00.000Z",
+        "status": "ongoing",
+        "cover_image": "/uploads/projects/test-image.jpg"
+      },
+      {
+        "id": 4,
+        "title": "企业级软件系统开发",
+        "title_en": "Enterprise Software System Development",
+        "description": "与企业合作开发大型企业管理软件系统，提升企业信息化水平。",
+        "category": "enterprise",
+        "funding_agency": "ABC科技公司",
+        "funding_amount": "800000.00",
+        "principal_investigator": "刘博士",
+        "participants": "刘博士, 徐工程师, 孙硕士",
+        "start_date": "2022-08-31T16:00:00.000Z",
+        "end_date": "2023-12-30T16:00:00.000Z",
+        "status": "completed",
+        "cover_image": null
+      },
+      {
+        "id": 2,
+        "title": "智能机器人导航算法研究",
+        "title_en": "Intelligent Robot Navigation Algorithm Research",
+        "description": "研究在复杂环境下机器人的自主导航算法，提高机器人在未知环境中的适应能力。",
+        "category": "provincial",
+        "funding_agency": "省科技厅",
+        "funding_amount": "300000.00",
+        "principal_investigator": "李副教授",
+        "participants": "李副教授, 陈博士, 杨硕士",
+        "start_date": "2022-05-31T16:00:00.000Z",
+        "end_date": "2024-06-29T16:00:00.000Z",
+        "status": "ongoing",
+        "cover_image": null
+      },
+      {
+        "id": 7,
+        "title": "final-test1",
+        "title_en": null,
+        "description": "final-test1",
+        "category": "national",
+        "funding_agency": null,
+        "funding_amount": "0.00",
+        "principal_investigator": "final-test1",
+        "participants": null,
+        "start_date": null,
+        "end_date": null,
+        "status": "ongoing",
+        "cover_image": "/uploads/projects/project-1760946638780-166626067.jpg"
+      }
+    ],
+    "pagination": {
+      "page": 1,
+      "limit": 7,
+      "total": 7,
+      "totalPages": 1
+    }
+  }
+}

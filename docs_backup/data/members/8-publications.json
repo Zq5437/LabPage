@@ -1,0 +1,57 @@
+{
+  "success": true,
+  "data": [
+    {
+      "id": 22,
+      "title": "test2",
+      "authors": "Fu, C., Zhang, Q., ..., Qiu, Z., Lu, N., & Shi, W. (2025).",
+      "member_ids": [
+        1,
+        8
+      ],
+      "journal": null,
+      "volume": null,
+      "issue": null,
+      "pages": null,
+      "year": 2026,
+      "doi": null,
+      "url": null,
+      "pdf_path": null,
+      "cover_image": null,
+      "abstract": null,
+      "keywords": null,
+      "type": "journal",
+      "impact_factor": null,
+      "citations": 0,
+      "is_featured": 0,
+      "created_at": "2025-10-03T13:15:03.000Z",
+      "updated_at": "2025-10-03T13:31:00.000Z"
+    },
+    {
+      "id": 20,
+      "title": "Tensor-to-JPEG FibFormer: A privacy-constrained speech emotion recognition framework using transformers and Fibonacci position embedding",
+      "authors": "Changzeng Fu, Qi Zhang, Zelin Fu, Fengkui Qian, Zirui Qiu, Ning Lu, Wenbo Shi",
+      "member_ids": [
+        1,
+        8
+      ],
+      "journal": "Expert Systems with Applications",
+      "volume": "1",
+      "issue": "1",
+      "pages": "1-10",
+      "year": 2025,
+      "doi": "11",
+      "url": "https://www.zhangqi.online",
+      "pdf_path": "/Users/zhangqi/Desktop/实验室建站/2框架测试/LabPage/backend/uploads/publications/publication-1759489885024-718020385.pdf",
+      "cover_image": "/Users/zhangqi/Desktop/实验室建站/2框架测试/LabPage/backend/uploads/publications/cover-1760967787835-232480852.jpg",
+      "abstract": "Current speech emotion recognition models rely on high-fidelity speech content and its features to infer emotions. However, high-fidelity speech data often contains comprehensive privacy information. Despite numerous encryption methods designed to secure privacy during transmission, data can still reveal privacy information, especially when restored before model input cloud server side. To mitigate this risk, this paper introduces a method that transcodes feature tensors into JPEG images, effectively converting speech features into irrecoverable image data. Additionally, considering the capabilities of existing generative models, which can reconstruct JPEGs into tensors given sufficient data, we have designed a Transformer-based model with Fibonacci position embedding (FibFormer). This model splits the complete JPEG data into multiple dispersed tokens and encodes each token’s position using the Fibonacci sequence. This approach ensures the necessary positional encoding for the Transformer while concealing the true location of each token, preventing data reconstruction. Experiments conducted on the IEMOCAP and MELD datasets demonstrate that the Tensor-to-JPEG FibFormer maintains efficiency and competitive performance in speech emotion recognition while ensuring privacy constraints in speech data.",
+      "keywords": "1,1,1,1",
+      "type": "journal",
+      "impact_factor": "11.000",
+      "citations": 1,
+      "is_featured": 0,
+      "created_at": "2025-10-03T11:11:25.000Z",
+      "updated_at": "2025-10-20T14:00:29.000Z"
+    }
+  ]
+}

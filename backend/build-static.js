@@ -41,11 +41,19 @@ try {
 // 2. 构建前端
 console.log('步骤 2: 构建前端...');
 try {
-    process.chdir('frontend');
+    // 获取项目根目录
+    const projectRoot = path.resolve(__dirname, '..');
+    const frontendDir = path.join(projectRoot, 'frontend');
+
     // 设置环境变量 VITE_BASE_PATH
     const buildEnv = { ...process.env, VITE_BASE_PATH: basePath };
-    execSync('npm run build', { stdio: 'inherit', env: buildEnv });
-    process.chdir('..');
+
+    // 在 frontend 目录执行构建命令
+    execSync('npm run build', {
+        stdio: 'inherit',
+        env: buildEnv,
+        cwd: frontendDir  // 指定工作目录
+    });
     console.log('✓ 前端构建完成\n');
 } catch (error) {
     console.error('✗ 前端构建失败:', error.message);
@@ -55,8 +63,8 @@ try {
 // 3. 复制构建产物到 docs 目录
 console.log('步骤 3: 复制构建产物...');
 try {
-    const distDir = path.join(__dirname, 'frontend/dist');
-    const targetDir = path.join(__dirname, 'docs');
+    const distDir = path.join(__dirname, '../frontend/dist');
+    const targetDir = path.join(__dirname, '../docs');
 
     // 复制 dist 目录的内容到 docs
     copyDirectory(distDir, targetDir);
@@ -70,8 +78,8 @@ try {
 // 3.5. 复制 404.html 用于 SPA 路由支持
 console.log('步骤 3.5: 配置 SPA 路由支持...');
 try {
-    const source404 = path.join(__dirname, 'static-404.html');
-    const target404 = path.join(__dirname, 'docs/404.html');
+    const source404 = path.join(__dirname, '../static-404.html');
+    const target404 = path.join(__dirname, '../docs/404.html');
 
     if (fs.existsSync(source404)) {
         fs.copyFileSync(source404, target404);
@@ -169,7 +177,7 @@ ${deploymentInstructions}
 `;
 
     fs.writeFileSync(
-        path.join(__dirname, 'docs/README.md'),
+        path.join(__dirname, '../docs/README.md'),
         readmeContent
     );
 
